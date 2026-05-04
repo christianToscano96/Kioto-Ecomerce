@@ -1,0 +1,54 @@
+import { Routes, Route } from 'react-router-dom';
+import { LoginPage } from '@/pages/LoginPage';
+import { RegisterPage } from '@/pages/RegisterPage';
+import { DashboardLayout } from '@/pages/admin/DashboardLayout';
+import { ProductsList } from '@/pages/admin/ProductsList';
+import { ProductForm } from '@/pages/admin/ProductForm';
+import { OrdersList } from '@/pages/admin/OrdersList';
+import { PublicHeader } from '@/components/layout/PublicHeader';
+import { HomePage } from '@/pages/public/HomePage';
+import { ProductsListPage } from '@/pages/public/ProductsListPage';
+import { ProductDetailPage } from '@/pages/public/ProductDetailPage';
+import { CartPage } from '@/pages/public/CartPage';
+import { CheckoutPage } from '@/pages/public/CheckoutPage';
+import { CheckoutSuccessPage } from '@/pages/public/CheckoutSuccessPage';
+import { CheckoutCancelPage } from '@/pages/public/CheckoutCancelPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
+function App() {
+  return (
+    <div className="min-h-screen bg-crema-50">
+      <ErrorBoundary>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/products" element={<ProductsListPage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+          <Route path="/checkout/cancel" element={<CheckoutCancelPage />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<DashboardLayout />}>
+            <Route index element={<div className="p-8">Dashboard Overview - Coming Soon</div>} />
+            <Route path="products" element={<ProductsList />} />
+            <Route path="products/new" element={<ProductForm />} />
+            <Route path="products/:id/edit" element={<ProductForm />} />
+            <Route path="orders" element={<OrdersList />} />
+          </Route>
+
+          {/* Auth Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          
+          {/* 404 Route */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </ErrorBoundary>
+    </div>
+  );
+}
+
+export default App;

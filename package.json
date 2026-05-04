@@ -1,0 +1,18 @@
+{
+  "name": "admin-ecommerce-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "build": "npm run build --workspace=backend && npm run build --workspace=frontend",
+    "install:all": "npm install && npm run install --workspace=backend && npm run install --workspace=frontend && npm run install --workspace=shared"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

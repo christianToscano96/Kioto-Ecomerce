@@ -1,0 +1,49 @@
+{
+  "name": "admin-ecommerce-mvp-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/**/*.tsx src/**/*.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "dependencies": {
+    "@shared/index": "file:../shared",
+    "@stripe/stripe-js": "^3.5.0",
+    "@tanstack/react-query": "^5.100.8",
+    "axios": "^1.6.8",
+    "clsx": "^2.1.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^6.23.1",
+    "tailwind-merge": "^3.5.0",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
+    "@axe-core/react": "^4.11.3",
+    "@playwright/test": "^1.59.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "@vitest/coverage-v8": "^4.1.5",
+    "autoprefixer": "^10.4.19",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.35.0",
+    "jsdom": "^29.1.1",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.2",
+    "vite": "^5.2.11",
+    "vitest": "^4.1.5"
+  }
+}

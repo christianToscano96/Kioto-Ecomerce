@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Earthbound Curator Design System Base Styles */
+body {
+  @apply bg-crema-50 text-chocolate-900 font-sans antialiased;
+}
+
+/* Custom utility classes */
+.btn-primary {
+  @apply bg-verde-bosque-600 hover:bg-verde-bosque-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-terracota-100 hover:bg-terracota-200 text-terracota-800 font-medium py-2 px-4 rounded-lg transition-colors;
+}
