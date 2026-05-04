@@ -6,6 +6,40 @@ import { createProductSchema, updateProductSchema } from '../schemas/product';
 
 const router = Router();
 
+// Public endpoint for testing (remove in production)
+// GET /api/products/public - List all products
+router.get('/public', async (req: Request, res: Response) => {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+// Public endpoint for testing (remove in production)
+// POST /api/products/public - Create product (no auth)
+router.post('/public', async (req: Request, res: Response) => {
+  try {
+    const { name, price, images, description, stock, published } = req.body;
+    
+    const product = await Product.create({
+      name,
+      price,
+      images: images || [],
+      description,
+      stock: stock ?? 0,
+      published: published ?? false,
+    });
+    
+    res.status(201).json(product);
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ error: 'Failed to create product' });
+  }
+});
+
 // Apply authentication and admin role to all routes
 router.use(authenticate, adminOnly);
 
