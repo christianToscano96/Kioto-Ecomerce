@@ -18,8 +18,8 @@ router.get('/', async (req: Request, res: Response) => {
     const sessionId = getSessionId(req);
     const cart = await getOrCreateCart(sessionId);
 
-    // Populate product details for cart items
-    const populatedCart = await cart.populate('items.productId', 'name price images');
+    // Populate product details for cart items (include description)
+    const populatedCart = await cart.populate('items.productId', 'name price images description');
 
     const total = calculateCartTotal(cart.items);
 
@@ -40,7 +40,7 @@ router.get('/', async (req: Request, res: Response) => {
 router.post('/items', validate(addToCartSchema), async (req: Request, res: Response) => {
   try {
     const sessionId = getSessionId(req);
-    const { productId, quantity } = req.body;
+    const { productId, quantity, size } = req.body;
 
     // Verify product exists and is published
     const product = await Product.findOne({
@@ -63,7 +63,8 @@ router.post('/items', validate(addToCartSchema), async (req: Request, res: Respo
       sessionId,
       new Types.ObjectId(productId),
       quantity,
-      product.price
+      product.price,
+      size
     );
 
     // Set session ID cookie if not already set

@@ -22,13 +22,15 @@ export const addToCart = async (
   sessionId: string,
   productId: Types.ObjectId,
   quantity: number,
-  price: number
+  price: number,
+  size?: string
 ): Promise<ICart> => {
   const cart = await getOrCreateCart(sessionId);
 
-  // Check if item already exists in cart
+  // Check if item already exists in cart (same product + same size)
   const existingItemIndex = cart.items.findIndex(
-    item => item.productId.toString() === productId.toString()
+    item => item.productId.toString() === productId.toString() && 
+    (item as any).size === size
   );
 
   if (existingItemIndex >= 0) {
@@ -40,7 +42,8 @@ export const addToCart = async (
       productId,
       quantity,
       price,
-    } as ICartItem);
+      size,
+    } as any);
   }
 
   return cart.save();

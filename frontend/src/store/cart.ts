@@ -90,3 +90,7 @@ export const useCartTotal = () =>
 export const useCartItemCount = () =>
   useCartStore((state) => state.items.reduce((count, item) => count + item.quantity, 0));
 export const useCartSessionId = () => useCartStore((state) => state.sessionId);
+
+// Export placeholder hooks to avoid import errors - these are replaced by React Query hooks
+export const useCartQuery = () => ({ data: null, isLoading: false, error: null });
+export const useAddToCartQuery = () => ({ mutateAsync: async () => {}, isPending: false });

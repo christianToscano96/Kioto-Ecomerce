@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useProduct, useAddToCart, useProducts } from "@/lib/api";
+import { useProduct, useProducts } from "@/lib/api";
+import { useAddToCart } from "@/hooks/useCart";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";

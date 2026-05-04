@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useCartItemCount } from "@/hooks/useCart";
 
 const navItems = [
   { to: "/products", label: "Catálogo" },
@@ -8,6 +9,8 @@ const navItems = [
 ];
 
 export function Header() {
+  const cartItemCount = useCartItemCount();
+
   return (
     <nav className="fixed top-0 w-full z-50 bg-[#fdfae9]/80  backdrop-blur-xl shadow-[0_40px_40px_rgba(28,28,18,0.04)]">
       <div className="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
@@ -37,12 +40,17 @@ export function Header() {
           <button className="text-[#1c1c12] active:scale-[0.99] transition-transform">
             <span className="material-symbols-outlined" data-icon="search">search</span>
           </button>
-          <button className="text-[#1c1c12] active:scale-[0.99] transition-transform relative">
+          <NavLink 
+            to="/cart" 
+            className="text-[#1c1c12] active:scale-[0.99] transition-transform relative"
+          >
             <span className="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
-            <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-              2
-            </span>
-          </button>
+            {cartItemCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                {cartItemCount}
+              </span>
+            )}
+          </NavLink>
         </div>
       </div>
     </nav>
