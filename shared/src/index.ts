@@ -19,6 +19,8 @@ export interface Product {
   description: string;
   stock: number;
   published: boolean;
+  materials?: string;
+  sizes?: string[];
   createdAt: Date;
 }
 

@@ -39,16 +39,16 @@ export const authApi = {
 // Products API (public - for storefront)
 export const productsApi = {
   list: () =>
-    api.get<Product[]>('/public/products'),
+    api.get<{ products: Product[] }>('/public/products').then(res => res.data.products),
 
   get: (id: string) =>
-    api.get<Product>(`/public/products/${id}`),
+    api.get<{ product: Product }>(`/public/products/${id}`).then(res => res.data.product),
 
   getBySlug: (slug: string) =>
-    api.get<Product>(`/public/products/slug/${slug}`),
+    api.get<{ product: Product }>(`/public/products/slug/${slug}`).then(res => res.data.product),
 
   search: (query: string) =>
-    api.get<Product[]>('/public/products', { params: { q: query } }),
+    api.get<{ products: Product[] }>('/public/products', { params: { q: query } }).then(res => res.data.products),
 };
 
 // Admin Products API
@@ -73,7 +73,7 @@ export const adminProductsApi = {
 export const cartApi = {
   get: () => api.get<Cart>('/cart'),
 
-  addItem: (data: { productId: string; quantity: number }) =>
+  addItem: (data: { productId: string; quantity: number; size?: string }) =>
     api.post<Cart>('/cart/items', data),
 
   updateItem: (itemId: string, quantity: number) =>
@@ -103,14 +103,14 @@ export const useCurrentUser = () => {
 export const useProducts = () => {
   return useQuery({
     queryKey: ['products'],
-    queryFn: () => productsApi.list().then((res) => res.data),
+    queryFn: () => productsApi.list(),
   });
 };
 
 export const useProduct = (id: string) => {
   return useQuery({
     queryKey: ['products', id],
-    queryFn: () => productsApi.get(id).then((res) => res.data),
+    queryFn: () => productsApi.get(id),
     enabled: !!id,
   });
 };

@@ -1,46 +1,50 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 
 const navItems = [
-  { to: '/', label: 'Collections' },
-  { to: '/archive', label: 'Archive' },
-  { to: '/about', label: 'Our Story' },
+  { to: "/products", label: "Catálogo" },
+  { to: "/men", label: "Hombre" },
+  { to: "/women", label: "Mujer" },
+  { to: "/new", label: "Novedades" },
 ];
 
 export function Header() {
   return (
-    <header className="bg-background/80 dark:bg-on-surface/80 backdrop-blur-md sticky top-0 z-50 border-b border-dashed border-outline-variant/40">
-      <div className="flex justify-between items-center w-full px-8 py-6 max-w-screen-2xl mx-auto">
-        {/* Brand */}
-        <NavLink 
-          to="/" 
-          className="text-2xl font-serif uppercase tracking-[0.2em] text-on-surface dark:text-background"
-        >
-          KIOTO
-        </NavLink>
+    <nav className="fixed top-0 w-full z-50 bg-[#fdfae9]/80  backdrop-blur-xl shadow-[0_40px_40px_rgba(28,28,18,0.04)]">
+      <div className="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
+        {/* Left: Brand + Nav */}
+        <div className="flex items-center gap-12">
+          <NavLink
+            to="/"
+            className="text-2xl font-serif tracking-tight text-[#1c1c12] dark:text-[#1c1c12]"
+          >
+            KIOTO
+          </NavLink>
+          <div className="hidden md:flex gap-8">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className="text-[#1c1c12] border-b border-dashed border-transparent pb-1 text-xs uppercase tracking-[0.1em] font-body hover:border-[#99452c] hover:text-[#99452c] transition-all duration-300"
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        </div>
 
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center space-x-12 font-serif tracking-tight">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className="text-on-surface/60 dark:text-background/60 hover:text-primary transition-colors duration-300"
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* Actions */}
-        <div className="flex items-center space-x-6 text-primary">
-          <button className="hover:text-primary/80 transition-colors">
-            <span className="material-symbols-outlined">search</span>
+{/* Right: Actions */}
+        <div className="flex items-center gap-6">
+          <button className="text-[#1c1c12] active:scale-[0.99] transition-transform">
+            <span className="material-symbols-outlined" data-icon="search">search</span>
           </button>
-          <button className="hover:text-primary/80 transition-colors">
-            <span className="material-symbols-outlined">shopping_bag</span>
+          <button className="text-[#1c1c12] active:scale-[0.99] transition-transform relative">
+            <span className="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+            <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+              2
+            </span>
           </button>
         </div>
       </div>
-    </header>
+    </nav>
   );
 }
