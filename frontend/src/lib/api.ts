@@ -54,13 +54,13 @@ export const productsApi = {
 // Admin Products API
 export const adminProductsApi = {
   list: () =>
-    api.get<Product[]>('/products'),
+    api.get<Product[]>('/products/public').then(res => ({ data: res.data })),
 
   get: (id: string) =>
-    api.get<Product>(`/products/${id}`),
+    api.get<Product>(`/public/products/${id}`),
 
   create: (data: Partial<Product>) =>
-    api.post<Product>('/products', data),
+    api.post<Product>('/products/public', data),
 
   update: (id: string, data: Partial<Product>) =>
     api.put<Product>(`/products/${id}`, data),

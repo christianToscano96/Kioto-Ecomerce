@@ -18,10 +18,10 @@ export function Button({
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
 
   const variantClasses = {
-    primary: 'bg-verde-bosque-600 text-white hover:bg-verde-bosque-700 focus-visible:ring-verde-bosque-500',
+    primary: 'bg-primary text-on-primary hover:bg-primary/90 focus-visible:ring-primary',
     secondary: 'bg-terracota-100 text-terracota-800 hover:bg-terracota-200 focus-visible:ring-terracota-500',
-    ghost: 'text-verde-bosque-700 hover:bg-verde-bosque-100 focus-visible:ring-verde-bosque-500',
-    outline: 'border border-chocolate-300 bg-transparent text-chocolate-700 hover:bg-chocolate-50 focus-visible:ring-chocolate-500',
+    ghost: 'text-primary hover:bg-primary/10 focus-visible:ring-primary',
+    outline: 'border border-outline bg-transparent text-on-surface-variant hover:bg-surface-container focus-visible:ring-primary',
     destructive: 'bg-terracota-600 text-white hover:bg-terracota-700 focus-visible:ring-terracota-500',
   };
 

@@ -50,7 +50,7 @@ const orderSchema = new Schema<IOrder>(
     },
     status: {
       type: String,
-      enum: ['pending', 'paid', 'failed'],
+      enum: ['pending', 'paid', 'failed', 'processing', 'shipped', 'delivered', 'cancelled'],
       default: 'pending',
     },
     stripePaymentIntentId: {

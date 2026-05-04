@@ -55,7 +55,7 @@ export interface Cart {
 }
 
 // Order Types
-export type OrderStatus = 'pending' | 'paid' | 'failed';
+export type OrderStatus = 'pending' | 'paid' | 'failed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export interface OrderItem {
   productId: string;

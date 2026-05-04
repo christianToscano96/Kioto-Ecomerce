@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { MetricCard } from "@/components/ui/MetricCard";
 import { useAdminProducts, useDeleteProduct } from "@/lib/api";
 
 const LoaderIcon = () => (
@@ -99,6 +100,13 @@ export function ProductsList() {
     );
   }
 
+  // Calculate metrics
+  const totalItems = products?.length || 0;
+  const lowStock = products?.filter((p) => p.stock <= 5).length || 0;
+  const categories =
+    new Set(products?.map((p) => p.slug?.split("-")[0])).size || 0;
+  const activeSales = products?.filter((p) => p.published).length || 0;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -111,6 +119,45 @@ export function ProductsList() {
             New Product
           </Button>
         </Link>
+      </div>
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <MetricCard
+          label="Total Items"
+          value={totalItems}
+          icon={
+            <span className="material-symbols-outlined text-6xl text-primary/10">
+              inventory_2
+            </span>
+          }
+        />
+        <MetricCard
+          label="Low Stock"
+          value={lowStock}
+          icon={
+            <span className="material-symbols-outlined text-6xl text-terracota-600/10">
+              warning
+            </span>
+          }
+        />
+        <MetricCard
+          label="Categories"
+          value={categories}
+          icon={
+            <span className="material-symbols-outlined text-6xl text-verde-bosque-600/10">
+              category
+            </span>
+          }
+        />
+        <MetricCard
+          label="Active Sales"
+          value={activeSales}
+          icon={
+            <span className="material-symbols-outlined text-6xl text-primary/10">
+              storefront
+            </span>
+          }
+        />
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">

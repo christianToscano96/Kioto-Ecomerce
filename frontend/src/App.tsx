@@ -5,7 +5,6 @@ import { DashboardLayout } from '@/pages/admin/DashboardLayout';
 import { ProductsList } from '@/pages/admin/ProductsList';
 import { ProductForm } from '@/pages/admin/ProductForm';
 import { OrdersList } from '@/pages/admin/OrdersList';
-import { PublicHeader } from '@/components/layout/PublicHeader';
 import { HomePage } from '@/pages/public/HomePage';
 import { ProductsListPage } from '@/pages/public/ProductsListPage';
 import { ProductDetailPage } from '@/pages/public/ProductDetailPage';
@@ -14,11 +13,12 @@ import { CheckoutPage } from '@/pages/public/CheckoutPage';
 import { CheckoutSuccessPage } from '@/pages/public/CheckoutSuccessPage';
 import { CheckoutCancelPage } from '@/pages/public/CheckoutCancelPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { DashboardOverview } from '@/pages/admin/DashboardOverview';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 function App() {
   return (
-    <div className="min-h-screen bg-crema-50">
+    <div className="min-h-screen bg-background">
       <ErrorBoundary>
         <Routes>
           {/* Public Routes */}
@@ -32,7 +32,7 @@ function App() {
 
           {/* Admin Routes */}
           <Route path="/admin" element={<DashboardLayout />}>
-            <Route index element={<div className="p-8">Dashboard Overview - Coming Soon</div>} />
+            <Route index element={<DashboardOverview />} />
             <Route path="products" element={<ProductsList />} />
             <Route path="products/new" element={<ProductForm />} />
             <Route path="products/:id/edit" element={<ProductForm />} />

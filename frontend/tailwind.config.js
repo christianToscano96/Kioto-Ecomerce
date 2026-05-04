@@ -7,60 +7,74 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Earthbound Curator Color Palette
-        // Crema - warm cream/neutral
-        crema: {
-          50: '#fdfcf9',
-          100: '#faf5ed',
-          200: '#f2e8d9',
-          300: '#e8d5ba',
-          400: '#dbc197',
-          500: '#c9a973',
-          600: '#b48d54',
-          700: '#967145',
-          800: '#644f34',
-          900: '#423221',
-        },
-        // Arena - sandy beige
-        arena: {
-          50: '#faf8f5',
-          100: '#f2ede4',
-          200: '#e4d9c8',
-          300: '#d1bdaa',
-          400: '#bba185',
-          500: '#a38666',
-          600: '#876c4b',
-          700: '#675137',
-          800: '#443624',
-          900: '#281f15',
-        },
-        // Chocolate - rich brown
-        chocolate: {
-          50: '#faf5f2',
-          100: '#f0e5e0',
-          200: '#dbc4bb',
-          300: '#c2a294',
-          400: '#a67f6c',
-          500: '#885f4a',
-          600: '#684532',
-          700: '#4c3120',
-          800: '#2f1d13',
-          900: '#1a100a',
-        },
-        // Terracota - earthy clay
+        // Earthbound Curator Design System - Exact values from HTML spec
+        background: '#fdfae9',
+        surface: '#fdfae9',
+        'surface-container-low': '#f7f4e3',
+        'surface-container': '#f1eedd',
+        'surface-container-high': '#ebe9d8',
+        'surface-container-highest': '#e6e3d2',
+        'surface-variant': '#e6e3d2',
+        'surface-bright': '#fdfae9',
+        'surface-tint': '#99452c',
+        'surface-dim': '#dddaca',
+        
+        'on-surface': '#1c1c12',
+        'on-surface-variant': '#55433d',
+        'on-background': '#1c1c12',
+        
+        outline: '#88726c',
+        'outline-variant': '#dbc1ba',
+        
+        primary: '#99452c',
+        'on-primary': '#ffffff',
+        'primary-container': '#e27d60',
+        'on-primary-container': '#5d1904',
+        'primary-fixed': '#ffdbd1',
+        'primary-fixed-dim': '#ffb5a0',
+        'on-primary-fixed': '#3b0900',
+        'on-primary-fixed-variant': '#7b2e17',
+        
+        secondary: '#7f534b',
+        'secondary-container': '#fec4ba',
+        'on-secondary-container': '#7a4f47',
+        'secondary-fixed': '#ffdad4',
+        'secondary-fixed-dim': '#f2b9af',
+        'on-secondary-fixed': '#31120d',
+        'on-secondary-fixed-variant': '#643c35',
+        
+        tertiary: '#735a3a',
+        'tertiary-container': '#b29470',
+        'on-tertiary-container': '#412d12',
+        'tertiary-fixed': '#ffddb6',
+        'tertiary-fixed-dim': '#e2c19b',
+        'on-tertiary-fixed': '#291801',
+        'on-tertiary-fixed-variant': '#594325',
+        'on-tertiary': '#ffffff',
+        
+        error: '#ba1a1a',
+        'error-container': '#ffdad6',
+        'on-error': '#ffffff',
+        'on-error-container': '#93000a',
+        
+        'inverse-surface': '#313126',
+        'inverse-on-surface': '#f4f1e0',
+        'inverse-primary': '#ffb5a0',
+        
+        // Terracota (Terracota Orgánico - para botones)
         terracota: {
           50: '#fff8f5',
           100: '#ffeee8',
           200: '#ffd9cc',
           300: '#ffb899',
           400: '#ff8f66',
-          500: '#ff6633',
+          500: '#e27d60',
           600: '#cc5229',
           700: '#993d1f',
           800: '#662914',
           900: '#33140a',
         },
-        // Verde Bosque - forest green
+        // Verde Bosque (para acciones admin)
         'verde-bosque': {
           50: '#f0f5f0',
           100: '#d9e8d9',
@@ -73,12 +87,49 @@ export default {
           800: '#162416',
           900: '#0b120b',
         },
+        // Legacy aliases for compatibility
+        crema: {
+          50: '#fdfae9',
+          100: '#f7f4e3',
+          200: '#f1eedd',
+          300: '#e6e3d2',
+          400: '#dbc1ba',
+          500: '#e27d60',
+          600: '#99452c',
+          700: '#735a3a',
+          800: '#55433d',
+          900: '#1c1c12',
+        },
+        chocolate: {
+          50: '#fdfae9',
+          100: '#f1eedd',
+          200: '#e6e3d2',
+          300: '#dbc1ba',
+          400: '#c2a294',
+          500: '#a38666',
+          600: '#88726c',
+          700: '#684532',
+          800: '#4c3120',
+          900: '#1a100a',
+        },
+        terracota: {
+          50: '#fff8f5',
+          100: '#ffeee8',
+          200: '#ffd9cc',
+          300: '#ffb899',
+          400: '#ff8f66',
+          500: '#e27d60',
+          600: '#cc5229',
+          700: '#993d1f',
+          800: '#662914',
+          900: '#33140a',
+        },
       },
       fontFamily: {
-        // Noto Serif for headlines (serif)
-        serif: ['Noto Serif', 'Georgia', 'serif'],
-        // Manrope for body (sans)
-        sans: ['Manrope', 'system-ui', '-apple-system', 'sans-serif'],
+        headline: ['Noto Serif', 'Georgia', 'serif'],
+        display: ['Noto Serif', 'Georgia', 'serif'],
+        body: ['Manrope', 'system-ui', '-apple-system', 'sans-serif'],
+        label: ['Manrope', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },

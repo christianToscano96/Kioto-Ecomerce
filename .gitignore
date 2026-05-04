@@ -55,3 +55,10 @@ firebase-debug.log
 .cache/
 .temp/
 .tmp/
+
+# Coverage reports
+coverage/
+*.lcov
+
+# OpenSpec (SDD artifacts)
+openspec/
