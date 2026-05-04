@@ -59,8 +59,26 @@
 **Payments**: Stripe + Galio Pay
 **Architecture**: MERN stack (MongoDB, Express, React, Node.js)
 
+## Autoskills Integration
+
+Skills auto-detected by autoskills have been mapped to OpenCode equivalents:
+
+### Applied Patterns
+- **React 19**: Components use React Compiler - no manual memoization
+- **Tailwind 4**: `cn()` utility for className merging, theme() for variables
+- **Stripe**: Webhook verification, payment intent handling
+- **Zustand 5**: `persist` middleware for auth state
+- **Zod 4**: Schema validation with `issues` instead of `errors`
+
+### Reusable Components Created
+- `MetricCard` - Admin dashboard stats cards
+- `DataTable` - Admin data tables with status badges
+- `PageHeader` - Page headers with eyebrow labels
+- `StatusBadge` - Order status indicators
+
 ## Notes
 
-- Project is initialized in planning phase
-- No code exists yet - infrastructure to be set up
-- Testing infrastructure pending npm package installation
+- Admin dashboard with login/register ready
+- Backend running on port 5050
+- Frontend running on port 5173
+- MongoDB connection established

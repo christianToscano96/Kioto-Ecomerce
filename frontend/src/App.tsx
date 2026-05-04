@@ -14,6 +14,7 @@ import { CheckoutPage } from '@/pages/public/CheckoutPage';
 import { CheckoutSuccessPage } from '@/pages/public/CheckoutSuccessPage';
 import { CheckoutCancelPage } from '@/pages/public/CheckoutCancelPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { DashboardOverview } from '@/pages/admin/DashboardOverview';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 function App() {
@@ -32,7 +33,7 @@ function App() {
 
           {/* Admin Routes */}
           <Route path="/admin" element={<DashboardLayout />}>
-            <Route index element={<div className="p-8">Dashboard Overview - Coming Soon</div>} />
+            <Route index element={<DashboardOverview />} />
             <Route path="products" element={<ProductsList />} />
             <Route path="products/new" element={<ProductForm />} />
             <Route path="products/:id/edit" element={<ProductForm />} />
