@@ -1,38 +1,67 @@
-import { MetricCard } from '@/components/ui/MetricCard';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { DataTable, StatusBadge } from '@/components/ui/DataTable';
-import { formatPrice } from '@/lib/utils';
+import { MetricCard } from "@/components/ui/MetricCard";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { DataTable, StatusBadge } from "@/components/ui/DataTable";
+import { formatPrice } from "@/lib/utils";
 
 // Mock data - replace with real API calls
 const stats = [
   {
-    label: 'Total Sales',
+    label: "Total Sales",
     value: formatPrice(42920),
-    change: { value: 12.4, label: '+12.4% vs last month', type: 'increase' as const },
+    change: {
+      value: 12.4,
+      label: "+12.4% vs last month",
+      type: "increase" as const,
+    },
   },
   {
-    label: 'Orders',
-    value: '1,248',
-    change: { value: 8.2, label: '+8.2%', type: 'increase' as const },
+    label: "Orders",
+    value: "1,248",
+    change: { value: 8.2, label: "+8.2%", type: "increase" as const },
   },
   {
-    label: 'Avg. Order Value',
-    value: '$184.20',
-    change: { value: 0, label: 'Stable', type: 'stable' as const },
+    label: "Avg. Order Value",
+    value: "$184.20",
+    change: { value: 0, label: "Stable", type: "stable" as const },
   },
   {
-    label: 'New Members',
-    value: '342',
-    change: { value: 15.1, label: '+15.1%', type: 'increase' as const },
+    label: "New Members",
+    value: "342",
+    change: { value: 15.1, label: "+15.1%", type: "increase" as const },
   },
 ];
 
 const recentOrders = [
-  { customer: 'Julianne Laurent', status: 'shipped' as const, date: 'Oct 12, 2023', total: 492.0 },
-  { customer: 'Anders Muller', status: 'processing' as const, date: 'Oct 11, 2023', total: 1205.5 },
-  { customer: 'Sora Chen', status: 'shipped' as const, date: 'Oct 11, 2023', total: 320.0 },
-  { customer: 'Rafael Benitez', status: 'pending' as const, date: 'Oct 10, 2023', total: 89.0 },
-  { customer: 'Emma Davies', status: 'shipped' as const, date: 'Oct 10, 2023', total: 215.0 },
+  {
+    customer: "Julianne Laurent",
+    status: "shipped" as const,
+    date: "Oct 12, 2023",
+    total: 492.0,
+  },
+  {
+    customer: "Anders Muller",
+    status: "processing" as const,
+    date: "Oct 11, 2023",
+    total: 1205.5,
+  },
+  {
+    customer: "Sora Chen",
+    status: "shipped" as const,
+    date: "Oct 11, 2023",
+    total: 320.0,
+  },
+  {
+    customer: "Rafael Benitez",
+    status: "pending" as const,
+    date: "Oct 10, 2023",
+    total: 89.0,
+  },
+  {
+    customer: "Emma Davies",
+    status: "shipped" as const,
+    date: "Oct 10, 2023",
+    total: 215.0,
+  },
 ];
 
 export function DashboardOverview() {
@@ -61,7 +90,9 @@ export function DashboardOverview() {
         <div className="flex justify-between items-end mb-10">
           <div>
             <h3 className="font-serif text-2xl font-bold">Sales Over Time</h3>
-            <p className="text-sm text-on-surface-variant mt-1">Growth of the curated collection</p>
+            <p className="text-sm text-on-surface-variant mt-1">
+              Growth of the curated collection
+            </p>
           </div>
           <div className="flex gap-2">
             <button className="text-[10px] uppercase tracking-widest px-4 py-2 border border-outline-variant/40 rounded hover:bg-surface transition-colors">
@@ -101,18 +132,20 @@ export function DashboardOverview() {
 
         <DataTable
           columns={[
-            { key: 'customer', label: 'Customer' },
+            { key: "customer", label: "Customer" },
             {
-              key: 'status',
-              label: 'Status',
+              key: "status",
+              label: "Status",
               render: (value) => <StatusBadge status={value as any} />,
             },
-            { key: 'date', label: 'Date' },
+            { key: "date", label: "Date" },
             {
-              key: 'total',
-              label: 'Total',
+              key: "total",
+              label: "Total",
               render: (value) => (
-                <span className="font-serif font-bold text-primary">{formatPrice(Number(value))}</span>
+                <span className="font-serif font-bold text-primary">
+                  {formatPrice(Number(value))}
+                </span>
               ),
             },
           ]}

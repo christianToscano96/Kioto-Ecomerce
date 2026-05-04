@@ -5,7 +5,6 @@ import { DashboardLayout } from '@/pages/admin/DashboardLayout';
 import { ProductsList } from '@/pages/admin/ProductsList';
 import { ProductForm } from '@/pages/admin/ProductForm';
 import { OrdersList } from '@/pages/admin/OrdersList';
-import { PublicHeader } from '@/components/layout/PublicHeader';
 import { HomePage } from '@/pages/public/HomePage';
 import { ProductsListPage } from '@/pages/public/ProductsListPage';
 import { ProductDetailPage } from '@/pages/public/ProductDetailPage';
@@ -19,7 +18,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 function App() {
   return (
-    <div className="min-h-screen bg-crema-50">
+    <div className="min-h-screen bg-background">
       <ErrorBoundary>
         <Routes>
           {/* Public Routes */}

@@ -1,6 +1,6 @@
-import { Outlet, Navigate } from 'react-router-dom';
-import { AdminSidebar } from '@/components/layout/AdminSidebar';
-import { useIsAuthenticated } from '@/store/auth';
+import { Outlet, Navigate } from "react-router-dom";
+import { AdminSidebar } from "@/components/layout/AdminSidebar";
+import { useIsAuthenticated } from "@/store/auth";
 
 export function DashboardLayout() {
   const isAuthenticated = useIsAuthenticated();
