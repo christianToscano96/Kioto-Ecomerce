@@ -11,12 +11,12 @@ export function Badge({ variant = 'default', size = 'md', className, children, .
   const baseClasses = 'inline-flex items-center font-medium rounded-full';
 
   const variantClasses = {
-    default: 'bg-verde-bosque-100 text-verde-bosque-800',
-    secondary: 'bg-arena-100 text-arena-800',
+    default: 'bg-primary-container text-on-primary-container',
+    secondary: 'bg-secondary-container text-on-secondary-container',
     success: 'bg-verde-bosque-600 text-white',
     warning: 'bg-terracota-100 text-terracota-800',
     destructive: 'bg-terracota-600 text-white',
-    outline: 'border border-chocolate-300 text-chocolate-700 bg-transparent',
+    outline: 'border border-outline text-on-surface bg-transparent',
   };
 
   const sizeClasses = {

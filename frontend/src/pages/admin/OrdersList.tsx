@@ -1,15 +1,70 @@
+import { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui/Badge';
+import { DataTable } from '@/components/ui/DataTable';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Input } from '@/components/ui/Input';
+import { MetricCard } from '@/components/ui/MetricCard';
+import { Button } from '@/components/ui/Button';
 import { useAdminOrders } from '@/lib/api';
+import type { Order } from '../../../../shared/src';
 
 const LoaderIcon = () => (
-  <svg className="animate-spin h-8 w-8 text-verde-bosque-600" fill="none" viewBox="0 0 24 24">
+  <svg className="animate-spin h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24">
     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
   </svg>
 );
 
+// Status configuration with Earthbound Curator colors
+const ORDER_STATUS: Order['status'][] = ['pending', 'paid', 'failed', 'processing', 'shipped', 'delivered', 'cancelled'];
+const STATUS_LABELS: Record<Order['status'], string> = {
+  pending: 'Pending',
+  paid: 'Paid',
+  failed: 'Failed',
+  processing: 'Processing',
+  shipped: 'Shipped',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
+};
+
+// Items per page for pagination
+const ITEMS_PER_PAGE = 10;
+
 export function OrdersList() {
   const { data: orders, isLoading, error } = useAdminOrders();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<Order['status'] | 'all'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Filter orders based on search and status
+  const filteredOrders = useMemo(() => {
+    if (!orders) return [];
+
+    return orders.filter((order) => {
+      const matchesSearch = order._id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [orders, searchTerm, statusFilter]);
+
+  // Paginated orders
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredOrders.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredOrders, currentPage]);
+
+  const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+
+  // Reset to page 1 when filters change
+  const handleFilterChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusFilterChange = (value: Order['status'] | 'all') => {
+    setStatusFilter(value);
+    setCurrentPage(1);
+  };
 
   if (isLoading) {
     return (
@@ -28,65 +83,201 @@ export function OrdersList() {
   }
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-serif font-bold text-chocolate-900">Orders</h1>
+    <div className="space-y-6">
+      <PageHeader
+        title="Orders"
+        description="Manage and track customer orders"
+        eyebrow="Admin Panel"
+      />
+
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard
+          label="Processing"
+          value={orders?.filter(o => o.status === 'pending').length || 0}
+          icon={<span className="material-symbols-outlined text-6xl text-primary/10">pending_actions</span>}
+        />
+        <MetricCard
+          label="Awaiting Shipment"
+          value={orders?.filter(o => o.status === 'paid').length || 0}
+          icon={<span className="material-symbols-outlined text-6xl text-verde-bosque-600/10">local_shipping</span>}
+        />
+        <MetricCard
+          label="Total Revenue"
+          value={`$${orders?.reduce((sum, o) => sum + o.total, 0).toFixed(2) || '0.00'}`}
+          icon={<span className="material-symbols-outlined text-6xl text-primary/10">attach_money</span>}
+        />
+        <MetricCard
+          label="Returns"
+          value={orders?.filter(o => o.status === 'cancelled').length || 0}
+          icon={<span className="material-symbols-outlined text-6xl text-terracota-600/10">assignment_return</span>}
+        />
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-chocolate-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-chocolate-700 uppercase tracking-wider">
-                Order ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-chocolate-700 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-chocolate-700 uppercase tracking-wider">
-                Total
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-chocolate-700 uppercase tracking-wider">
-                Date
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-chocolate-100">
-            {orders?.map((order) => (
-              <tr key={order._id} className="hover:bg-chocolate-25">
-                <td className="px-6 py-4 text-chocolate-900">
-                  #{order._id.slice(-8)}
-                </td>
-                <td className="px-6 py-4">
-                  <Badge
-                    variant={
-                      order.status === 'paid'
-                        ? 'default'
-                        : order.status === 'pending'
-                          ? 'secondary'
-                          : 'destructive'
-                    }
-                  >
-                    {order.status}
-                  </Badge>
-                </td>
-                <td className="px-6 py-4 text-chocolate-900">
-                  ${order.total.toFixed(2)}
-                </td>
-                <td className="px-6 py-4 text-chocolate-600">
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </td>
-              </tr>
+      {/* Action Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 stitch-border-b pb-4">
+        <div className="flex-1 flex items-center gap-4">
+          <Input
+            type="text"
+            placeholder="Search by Order ID..."
+            value={searchTerm}
+            onChange={(e) => handleFilterChange(e.target.value)}
+            className="max-w-sm"
+          />
+          <select
+            value={statusFilter}
+            onChange={(e) => handleStatusFilterChange(e.target.value as Order['status'] | 'all')}
+            className="h-10 rounded-lg border border-outline bg-white px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="all">All Statuses</option>
+            {ORDER_STATUS.map((status) => (
+              <option key={status} value={status}>
+                {STATUS_LABELS[status]}
+              </option>
             ))}
-          </tbody>
-        </table>
-
-        {orders?.length === 0 && (
-          <div className="p-8 text-center text-chocolate-500">
-            No orders found.
-          </div>
-        )}
+          </select>
+        </div>
+        <Button className="whitespace-nowrap">
+          <span className="material-symbols-outlined mr-2">add</span>
+          Create Manual Order
+        </Button>
       </div>
+
+{/* Orders Table */}
+      <div className="bg-surface-container-low rounded-lg border border-outline-variant/30 overflow-hidden">
+        <DataTable
+          columns={[
+            {
+              key: '_id',
+              label: 'Order ID',
+              render: (_, row) => (
+                <span className="font-mono text-on-surface">
+                  #{row._id.slice(-8)}
+                </span>
+              ),
+            },
+            {
+              key: 'createdAt',
+              label: 'Date',
+              render: (value) => {
+                const date = new Date(value as string);
+                return (
+                  <span className="text-on-surface">
+                    {date.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </span>
+                );
+              },
+            },
+            {
+              key: 'total',
+              label: 'Total',
+              render: (value) => (
+                <span className="font-semibold text-on-surface">
+                  ${(value as number).toFixed(2)}
+                </span>
+              ),
+            },
+            {
+              key: 'status',
+              label: 'Status',
+              render: (value) => {
+                const status = value as Order['status'];
+                return (
+                  <Badge
+                    variant={getStatusBadgeVariant(status)}
+                    size="md"
+                  >
+                    {STATUS_LABELS[status]}
+                  </Badge>
+                );
+              },
+            },
+          ]}
+          data={paginatedOrders}
+          actions={(row) => (
+            <div className="relative">
+              <button
+                className="text-on-surface-variant hover:text-primary transition-colors"
+                aria-label={`Actions for order ${row._id.slice(-8)}`}
+              >
+                <span className="material-symbols-outlined">more_vert</span>
+              </button>
+            </div>
+          )}
+        />
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-on-surface-variant">
+            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{' '}
+            {Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)} of{' '}
+            {filteredOrders.length} orders
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-sm rounded-lg border border-outline hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-1 text-sm rounded-lg border ${
+                  currentPage === page
+                    ? 'bg-primary text-white border-primary'
+                    : 'border-outline hover:bg-surface-container'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 text-sm rounded-lg border border-outline hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {orders?.length === 0 && (
+        <div className="p-8 text-center text-on-surface-variant">
+          No orders found.
+        </div>
+      )}
     </div>
   );
+}
+
+// Helper function to determine badge variant based on status
+function getStatusBadgeVariant(status: Order['status']): 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'outline' {
+  switch (status) {
+    case 'pending':
+      return 'warning';
+    case 'paid':
+      return 'success';
+    case 'processing':
+      return 'default';
+    case 'shipped':
+      return 'secondary';
+    case 'delivered':
+      return 'outline';
+    case 'failed':
+    case 'cancelled':
+      return 'destructive';
+    default:
+      return 'outline';
+  }
 }

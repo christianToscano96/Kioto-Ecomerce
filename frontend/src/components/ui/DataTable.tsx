@@ -12,14 +12,14 @@ interface DataTableProps<T> {
   actions?: (row: T) => ReactNode;
 }
 
-type OrderStatus = 'pending' | 'paid' | 'failed' | 'shipped' | 'processing';
+type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 const statusStyles: Record<OrderStatus, string> = {
-  pending: 'bg-gray-100 text-gray-800',
-  paid: 'bg-green-100 text-green-800',
-  failed: 'bg-terracota-100 text-terracota-700',
-  shipped: 'bg-green-100 text-green-800',
-  processing: 'bg-orange-100 text-orange-800',
+  pending: 'bg-terracota-100 text-terracota-800',
+  processing: 'bg-primary-container text-on-primary-container',
+  shipped: 'bg-secondary-container text-on-secondary-container',
+  delivered: 'bg-verde-bosque-600 text-white',
+  cancelled: 'bg-terracota-600 text-white',
 };
 
 interface StatusBadgeProps {
