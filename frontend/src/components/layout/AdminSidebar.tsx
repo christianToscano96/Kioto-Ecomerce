@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: "fa-tachometer-alt", exact: true },
   { to: "/admin/products", label: "Products", icon: "fa-box" },
+  { to: "/admin/categories", label: "Categories", icon: "fa-tags" },
   { to: "/admin/orders", label: "Orders", icon: "fa-shopping-bag" },
   { to: "/admin/settings", label: "Settings", icon: "fa-cog" },
 ];

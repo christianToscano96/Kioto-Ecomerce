@@ -4,6 +4,8 @@ import { RegisterPage } from '@/pages/RegisterPage';
 import { DashboardLayout } from '@/pages/admin/DashboardLayout';
 import { ProductsList } from '@/pages/admin/ProductsList';
 import { ProductForm } from '@/pages/admin/ProductForm';
+import { CategoriesList } from '@/pages/admin/CategoriesList';
+import { CategoryForm } from '@/pages/admin/CategoryForm';
 import { OrdersList } from '@/pages/admin/OrdersList';
 import { HomePage } from '@/pages/public/HomePage';
 import { ProductsListPage } from '@/pages/public/ProductsListPage';
@@ -36,6 +38,9 @@ function App() {
             <Route path="products" element={<ProductsList />} />
             <Route path="products/new" element={<ProductForm />} />
             <Route path="products/:id/edit" element={<ProductForm />} />
+            <Route path="categories" element={<CategoriesList />} />
+            <Route path="categories/new" element={<CategoryForm />} />
+            <Route path="categories/:id/edit" element={<CategoryForm />} />
             <Route path="orders" element={<OrdersList />} />
           </Route>
 

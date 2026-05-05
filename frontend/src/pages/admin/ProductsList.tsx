@@ -1,9 +1,10 @@
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { MetricCard } from "@/components/ui/MetricCard";
+import { Input } from "@/components/ui/Input";
 import { useProductsStore } from "@/store/products";
-import { useEffect } from "react";
 
 const LoaderIcon = () => (
   <svg
@@ -75,6 +76,21 @@ const TrashIcon = () => (
   </svg>
 );
 
+const ChevronUpIcon = () => (
+  <svg className="h-4 w-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+  </svg>
+);
+
+const ChevronDownIcon = () => (
+  <svg className="h-4 w-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+  </svg>
+);
+
+// Items per page options
+const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50];
+
 export function ProductsList() {
   const products = useProductsStore((state) => state.products);
   const isLoading = useProductsStore((state) => state.isLoading);
@@ -84,15 +100,132 @@ export function ProductsList() {
   );
   const deleteProduct = useProductsStore((state) => state.deleteProduct);
 
+  // Filters & Search
+  const [searchTerm, setSearchTerm] = useState("");
+  const [stockFilter, setStockFilter] = useState<"all" | "low" | "out">("all");
+  const [publishedFilter, setPublishedFilter] = useState<"all" | "published" | "draft">(
+    "all",
+  );
+
+  // Sorting
+  const [sortField, setSortField] = useState<"name" | "price" | "stock">("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Selection
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+
   useEffect(() => {
     fetchAdminProducts();
   }, [fetchAdminProducts]);
 
+  // Filter products
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+
+    return products.filter((product) => {
+      // Search
+      if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+
+      // Stock filter
+      if (stockFilter === "low" && product.stock > 5) return false;
+      if (stockFilter === "out" && product.stock !== 0) return false;
+
+      // Published filter
+      if (publishedFilter === "published" && !product.published) return false;
+      if (publishedFilter === "draft" && product.published) return false;
+
+      return true;
+    });
+  }, [products, searchTerm, stockFilter, publishedFilter]);
+
+  // Sort products
+  const sortedProducts = useMemo(() => {
+    return [...filteredProducts].sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+      const multiplier = sortDirection === "asc" ? 1 : -1;
+
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return (aValue - bValue) * multiplier;
+      }
+      return String(aValue).localeCompare(String(bValue)) * multiplier;
+    });
+  }, [filteredProducts, sortField, sortDirection]);
+
+  // Paginate
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const paginatedProducts = sortedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+
+  // Reset to page 1 when filters change
+  const handleFilterChange = () => {
+    setCurrentPage(1);
+    setSelectedProducts([]);
+  };
+
+  const handleSort = (field: "name" | "price" | "stock") => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedProducts.length === paginatedProducts.length) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts(paginatedProducts.map((p) => p._id));
+    }
+  };
+
+  const handleSelectProduct = (id: string) => {
+    if (selectedProducts.includes(id)) {
+      setSelectedProducts(selectedProducts.filter((p) => p !== id));
+    } else {
+      setSelectedProducts([...selectedProducts, id]);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (
+      window.confirm(
+        `¿Estás seguro de que deseas eliminar ${selectedProducts.length} productos?`,
+      )
+    ) {
+      for (const id of selectedProducts) {
+        await deleteProduct(id);
+      }
+      setSelectedProducts([]);
+    }
+  };
+
   const handleDelete = async (id: string) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este producto?")) {
+    const product = products?.find((p) => p._id === id);
+    if (
+      window.confirm(
+        `¿Estás seguro de que deseas eliminar "${product?.name}"?`,
+      )
+    ) {
       await deleteProduct(id);
     }
   };
+
+  // Calculate metrics
+  const totalItems = products?.length || 0;
+  const lowStock = products?.filter((p) => p.stock <= 5).length || 0;
+  const categories =
+    new Set(products?.map((p) => p.slug?.split("-")[0])).size || 0;
+  const activeSales = products?.filter((p) => p.published).length || 0;
 
   if (isLoading) {
     return (
@@ -110,26 +243,81 @@ export function ProductsList() {
     );
   }
 
-  // Calculate metrics
-  const totalItems = products?.length || 0;
-  const lowStock = products?.filter((p) => p.stock <= 5).length || 0;
-  const categories =
-    new Set(products?.map((p) => p.slug?.split("-")[0])).size || 0;
-  const activeSales = products?.filter((p) => p.published).length || 0;
-
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      {/* Header with title and actions */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-serif font-bold text-on-surface">
           Productos
         </h1>
-        <Link to="/admin/products/new">
-          <Button>
-            <PlusIcon />
-            Nuevo Producto
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          {selectedProducts.length > 0 && (
+            <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
+              <TrashIcon />
+              Eliminar seleccionados ({selectedProducts.length})
+            </Button>
+          )}
+          <Link to="/admin/products/new">
+            <Button>
+              <PlusIcon />
+              Nuevo Producto
+            </Button>
+          </Link>
+        </div>
       </div>
+
+      {/* Filters Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6 stitch-border-b pb-4">
+        <Input
+          type="text"
+          placeholder="Buscar productos..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            handleFilterChange();
+          }}
+          className="max-w-sm"
+        />
+        <select
+          value={stockFilter}
+          onChange={(e) => {
+            setStockFilter(e.target.value as typeof stockFilter);
+            handleFilterChange();
+          }}
+          className="h-10 rounded-lg border border-outline bg-white px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value="all">Todos los stock</option>
+          <option value="low">Stock bajo (≤5)</option>
+          <option value="out">Agotados</option>
+        </select>
+        <select
+          value={publishedFilter}
+          onChange={(e) => {
+            setPublishedFilter(e.target.value as typeof publishedFilter);
+            handleFilterChange();
+          }}
+          className="h-10 rounded-lg border border-outline bg-white px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value="all">Todos</option>
+          <option value="published">Publicados</option>
+          <option value="draft">Borradores</option>
+        </select>
+        <select
+          value={itemsPerPage}
+          onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+          className="h-10 rounded-lg border border-outline bg-white px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          {ITEMS_PER_PAGE_OPTIONS.map((size) => (
+            <option key={size} value={size}>
+              {size} por página
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <MetricCard
@@ -170,21 +358,39 @@ export function ProductsList() {
         />
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      {/* Table */}
+      <div className="bg-surface-container-low rounded-lg border border-outline-variant/30 overflow-hidden">
         <table className="w-full">
-          <thead className="bg-surface-container-low">
+          <thead className="bg-surface-container">
             <tr>
+              <th className="px-6 py-3 text-left">
+                <input
+                  type="checkbox"
+                  checked={selectedProducts.length === paginatedProducts.length && paginatedProducts.length > 0}
+                  onChange={handleSelectAll}
+                  className="h-4 w-4 rounded border-outline-variant"
+                />
+              </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider">
                 Imagen
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider">
-                Nombre
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider cursor-pointer hover:bg-surface-container-low"
+                onClick={() => handleSort("name")}
+              >
+                Nombre {sortField === "name" && (sortDirection === "asc" ? <ChevronUpIcon /> : <ChevronDownIcon />)}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider">
-                Precio
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider cursor-pointer hover:bg-surface-container-low"
+                onClick={() => handleSort("price")}
+              >
+                Precio {sortField === "price" && (sortDirection === "asc" ? <ChevronUpIcon /> : <ChevronDownIcon />)}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider">
-                Stock
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider cursor-pointer hover:bg-surface-container-low"
+                onClick={() => handleSort("stock")}
+              >
+                Stock {sortField === "stock" && (sortDirection === "asc" ? <ChevronUpIcon /> : <ChevronDownIcon />)}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider">
                 Acciones
@@ -192,8 +398,16 @@ export function ProductsList() {
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/40">
-            {products?.map((product) => (
+            {paginatedProducts.map((product) => (
               <tr key={product._id} className="hover:bg-surface-container-low">
+                <td className="px-6 py-4">
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.includes(product._id)}
+                    onChange={() => handleSelectProduct(product._id)}
+                    className="h-4 w-4 rounded border-outline-variant"
+                  />
+                </td>
                 <td className="px-6 py-4">
                   {product.images && product.images.length > 0 ? (
                     <img
@@ -223,7 +437,7 @@ export function ProductsList() {
                   ${product.price.toFixed(2)}
                 </td>
                 <td className="px-6 py-4">
-                  <Badge variant={product.stock > 0 ? "default" : "secondary"}>
+                  <Badge variant={product.stock > 5 ? "default" : "destructive"}>
                     {product.stock} disponibles
                   </Badge>
                 </td>
@@ -248,9 +462,51 @@ export function ProductsList() {
           </tbody>
         </table>
 
-        {products?.length === 0 && (
+        {/* Empty State */}
+        {paginatedProducts.length === 0 && (
           <div className="p-8 text-center text-on-surface-variant">
-            No se encontraron productos. Crea tu primer producto para comenzar.
+            <p className="mb-4">
+              {searchTerm || stockFilter !== "all" || publishedFilter !== "all"
+                ? "No se encontraron productos con esos filtros."
+                : "No se encontraron productos. Crea tu primer producto para comenzar."}
+            </p>
+            {!searchTerm && stockFilter === "all" && publishedFilter === "all" && (
+              <Link to="/admin/products/new">
+                <Button>Crear primer producto</Button>
+              </Link>
+            )}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-outline-variant/40">
+            <p className="text-sm text-on-surface-variant">
+              Mostrando {(currentPage - 1) * itemsPerPage + 1} -{" "}
+              {Math.min(currentPage * itemsPerPage, sortedProducts.length)} de{" "}
+              {sortedProducts.length} productos
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </Button>
+              <span className="text-sm text-on-surface-variant">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Siguiente
+              </Button>
+            </div>
           </div>
         )}
       </div>

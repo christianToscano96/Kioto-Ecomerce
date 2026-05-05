@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, Product, Cart, CartItem, Order } from '../../../shared/src/index';
+import type { User, Product, Cart, CartItem, Order, Category } from '../../../shared/src/index';
 
 // Create axios instance with credentials
 export const api = axios.create({
@@ -62,10 +62,40 @@ export const adminProductsApi = {
     api.post<Product>('/products/public', data),
 
   update: (id: string, data: Partial<Product>) =>
-    api.put<Product>(`/products/${id}`, data),
+    api.put<Product>(`/products/public/${id}`, data),
 
   delete: (id: string) =>
-    api.delete(`/products/${id}`),
+    api.delete(`/products/public/${id}`),
+};
+
+// Admin Categories API
+export const adminCategoriesApi = {
+  list: () =>
+    api.get<{ categories: Category[] }>('/categories').then(res => res.data),
+
+  listPublic: () =>
+    api.get<Category[]>('/categories/public').then(res => ({ categories: res.data })),
+
+  get: (id: string) =>
+    api.get<{ category: Category }>(`/categories/${id}`).then(res => res.data.category),
+
+  create: (data: Partial<Category>) =>
+    api.post<{ category: Category }>('/categories', data).then(res => res.data.category),
+
+  createPublic: (data: Partial<Category>) =>
+    api.post<Category>('/categories/public', data).then(res => res.data),
+
+  update: (id: string, data: Partial<Category>) =>
+    api.put<{ category: Category }>(`/categories/${id}`, data).then(res => res.data.category),
+
+  updatePublic: (id: string, data: Partial<Category>) =>
+    api.put<Product>(`/categories/public/${id}`, data).then(res => res.data),
+
+  delete: (id: string) =>
+    api.delete(`/categories/${id}`),
+
+  deletePublic: (id: string) =>
+    api.delete(`/categories/public/${id}`),
 };
 
 // Cart API
