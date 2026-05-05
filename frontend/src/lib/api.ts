@@ -102,7 +102,7 @@ export const adminCategoriesApi = {
 export const cartApi = {
   get: () => api.get<{ cart: Cart }>('/cart'),
 
-  addItem: (data: { productId: string; quantity: number; size?: string }) =>
+  addItem: (data: { productId: string; quantity: number; size?: string; color?: string }) =>
     api.post<Cart>('/cart/items', data),
 
   updateItem: (itemId: string, quantity: number) =>

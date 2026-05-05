@@ -7,6 +7,7 @@ export interface ICartItem {
   quantity: number;
   price: number;
   size?: string;
+  color?: string;
 }
 
 // Order status enum

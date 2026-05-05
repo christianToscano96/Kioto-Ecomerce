@@ -40,8 +40,8 @@ router.get('/', async (req: Request, res: Response) => {
 router.post('/items', validate(addToCartSchema), async (req: Request, res: Response) => {
   try {
     const sessionId = getSessionId(req);
-    const { productId, quantity, size } = req.body;
-
+    const { productId, quantity, size, color } = req.body;
+    
     // Verify product exists and is published
     const product = await Product.findOne({
       _id: productId,
@@ -64,7 +64,8 @@ router.post('/items', validate(addToCartSchema), async (req: Request, res: Respo
       new Types.ObjectId(productId),
       quantity,
       product.price,
-      size
+      size,
+      color
     );
 
     // Set session ID cookie if not already set

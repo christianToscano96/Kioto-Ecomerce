@@ -62,6 +62,7 @@ export interface CartItem {
     description?: string;
   };
   size?: string;
+  color?: string;
 }
 
 export interface Cart {

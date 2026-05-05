@@ -29,6 +29,9 @@ const cartItemSchema = new Schema<ICartItem>({
   size: {
     type: String,
   },
+  color: {
+    type: String,
+  },
 });
 
 // Cart Schema

@@ -1,57 +1,199 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { Product } from '../../../../shared/src/index';
 
 interface ProductCardProps {
   product: Product;
-  onQuickAdd?: (productId: string) => void;
+  onQuickAdd?: (productId: string, quantity: number, size: string, color?: string) => void;
 }
 
+// Stock status indicator
+const StockBadge = ({ stock }: { stock: number }) => {
+  if (stock === 0) {
+    return (
+      <span className="text-[10px] uppercase tracking-widest text-terracota-600 font-bold">
+        Agotado
+      </span>
+    );
+  }
+  if (stock < 5) {
+    return (
+      <span className="text-[10px] uppercase tracking-widest text-verde-bosque-600 font-bold">
+        Últimas unidades
+      </span>
+    );
+  }
+  return (
+    <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
+      En stock
+    </span>
+  );
+};
+
+// Color swatches
+const ColorSwatches = ({ 
+  colors, 
+  selectedColor, 
+  onSelectColor 
+}: { 
+  colors?: string[];
+  selectedColor?: string;
+  onSelectColor?: (color: string) => void;
+}) => {
+  if (!colors || colors.length === 0) return null;
+  
+  return (
+    <div className="flex gap-2">
+      {colors.map((color, index) => {
+        const isSelected = selectedColor === color;
+        return (
+          <button
+            key={index}
+            onClick={() => onSelectColor?.(color)}
+            className={`w-6 h-6 rounded-full border-2 transition-all ${
+              isSelected ? 'border-primary scale-110' : 'border-outline-variant'
+            }`}
+            style={{ backgroundColor: color.startsWith('#') ? color : undefined }}
+            title={color}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
 export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
+  const [showOptions, setShowOptions] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [quantity, setQuantity] = useState(1);
+
+  // Always show options if product has sizes defined
+  const hasSizes = product.sizes && product.sizes.length > 0;
+  const requiresSelection = hasSizes;
+
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
-    onQuickAdd?.(product._id);
+    if (stock === 0) return;
+    
+    // Show options panel if sizes are required
+    if (requiresSelection && !selectedSize) {
+      setShowOptions(true);
+      return;
+    }
+    
+    onQuickAdd?.(product._id, quantity, selectedSize || undefined, selectedColor || undefined);
+    resetForm();
+    setShowOptions(false);
   };
+
+  const handleConfirm = () => {
+    if (stock === 0) return;
+    onQuickAdd?.(product._id, quantity, selectedSize, selectedColor);
+    setShowOptions(false);
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setSelectedSize('');
+    setSelectedColor('');
+    setQuantity(1);
+  };
+
+  const handleCancel = () => {
+    setShowOptions(false);
+    resetForm();
+  };
+
+  // Use product's sizes if available, otherwise default
+  const sizes = product.sizes && product.sizes.length > 0 ? product.sizes : ['S', 'M', 'L'];
+  const stock = product.stock ?? 0;
 
   return (
     <div className="group bg-surface-container rounded-xl overflow-hidden transition-all duration-500 hover:shadow-xl border-l-2 border-dashed border-outline-variant">
-      <div className="aspect-[3/4] overflow-hidden relative">
-        {product.images && product.images.length > 0 ? (
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-surface-container-highest">
-            Sin imagen
+      <Link to={`/products/${product._id}`} className="block">
+        {/* Image Section */}
+        <div className="aspect-[3/4] overflow-hidden relative">
+          {product.images && product.images.length > 0 ? (
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-surface-container-highest">
+              <span className="text-on-surface-variant text-sm">Sin imagen</span>
+            </div>
+          )}
+          
+          {/* Overlay with view icon on hover */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+            <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+              <span className="material-symbols-outlined text-on-surface">visibility</span>
+            </div>
+          </div>
+          
+          {/* Top right buttons */}
+          <div className="absolute top-4 right-4 flex flex-col gap-2">
+            <button 
+              className="bg-surface/80 backdrop-blur-md p-2 rounded-full text-on-surface hover:text-primary transition-colors"
+              onClick={(e) => e.preventDefault()}
+            >
+              <span className="material-symbols-outlined text-sm">favorite</span>
+            </button>
+          </div>
+          
+          {/* Stock badge */}
+          <div className="absolute bottom-4 left-4">
+            <StockBadge stock={stock} />
+          </div>
+        </div>
+      </Link>
+
+      {/* Content Section */}
+      <div className="p-6 space-y-4">
+        <Link to={`/products/${product._id}`} className="block">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-xl font-serif text-on-surface group-hover:text-primary transition-colors">{product.name}</h3>
+              <p className="text-on-surface-variant text-sm font-light mt-1 line-clamp-2">
+                {product.description || 'Descripción del producto'}
+              </p>
+            </div>
+            <span className="font-serif text-lg text-primary">${product.price.toFixed(2)}</span>
+          </div>
+        </Link>
+
+        {/* Colors */}
+        {product.colors && product.colors.length > 0 && (
+          <div className="space-y-2">
+            <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
+              Colores
+            </span>
+            <ColorSwatches 
+              colors={product.colors} 
+              selectedColor={selectedColor}
+              onSelectColor={setSelectedColor}
+            />
           </div>
         )}
-        <div className="absolute top-4 right-4">
-          <button className="bg-surface/80 backdrop-blur-md p-2 rounded-full text-on-surface hover:text-primary transition-colors">
-            <span className="material-symbols-outlined text-sm">favorite</span>
-          </button>
-        </div>
-      </div>
 
-      <div className="p-8 space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-xl font-serif text-on-surface">{product.name}</h3>
-            <p className="text-on-surface-variant text-sm font-light mt-1">
-              {product.description || 'Descripción del producto'}
-            </p>
-          </div>
-          <span className="font-serif text-lg text-primary">${product.price.toFixed(2)}</span>
-        </div>
-
-        <div className="space-y-3">
-          <span className="label-md text-[10px] uppercase tracking-widest text-on-surface-variant">
+        {/* Sizes */}
+        <div className={`space-y-2 ${showOptions ? 'block' : 'hidden'}`}>
+          <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
             Seleccionar Talla
           </span>
-          <div className="flex gap-3">
-            {['S', 'M', 'L'].map((size) => (
+          <div className="flex gap-2">
+            {sizes.map((size) => (
               <button
                 key={size}
-                className="w-10 h-10 border border-outline-variant rounded-lg text-xs hover:border-primary transition-colors"
+                onClick={() => setSelectedSize(size)}
+                className={`w-10 h-10 border rounded-lg text-xs transition-all ${
+                  selectedSize === size 
+                    ? 'border-primary bg-primary-container text-on-primary-container' 
+                    : 'border-outline-variant hover:border-primary'
+                }`}
+                disabled={stock === 0}
               >
                 {size}
               </button>
@@ -59,12 +201,57 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
           </div>
         </div>
 
-        <button
-          onClick={handleQuickAdd}
-          className="w-full bg-[#e27d60] text-white py-4 rounded-lg font-bold tracking-widest uppercase text-xs hover:bg-primary transition-colors shadow-lg shadow-[#e27d60]/20 active:scale-[0.98]"
-        >
-          Agregar al Carrito
-        </button>
+        {/* Quantity Selector - only shown when options modal is open */}
+        {showOptions && (
+          <div className="space-y-2">
+            <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
+              Cantidad
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                className="w-8 h-8 border border-outline-variant rounded-lg hover:border-primary transition-colors"
+              >
+                -
+              </button>
+              <span className="w-8 text-center font-serif">{quantity}</span>
+              <button
+                onClick={() => setQuantity(Math.min(stock, quantity + 1))}
+                className="w-8 h-8 border border-outline-variant rounded-lg hover:border-primary transition-colors"
+                disabled={quantity >= stock}
+              >
+                +
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Add to Cart */}
+        {!showOptions ? (
+          <button
+            onClick={handleQuickAdd}
+            disabled={stock === 0}
+            className="w-full bg-[#e27d60] text-white py-3 rounded-lg font-bold tracking-widest uppercase text-xs hover:bg-primary transition-colors shadow-lg shadow-[#e27d60]/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {stock === 0 ? 'Agotado' : 'Agregar al Carrito'}
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              onClick={handleCancel}
+              className="flex-1 border border-outline-variant text-on-surface py-2 rounded-lg font-label uppercase text-xs hover:border-primary transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={!selectedSize && sizes.length > 0}
+              className="flex-1 bg-primary text-on-primary py-2 rounded-lg font-bold tracking-widest uppercase text-xs hover:bg-primary-container transition-colors disabled:opacity-50"
+            >
+              Confirmar
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
