@@ -15,9 +15,8 @@ export function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await register({ email, password, name });
-    const user = useAuthStore.getState().user;
-    if (user) {
+    const success = await register({ email, password, name });
+    if (success) {
       navigate('/admin');
     }
   };

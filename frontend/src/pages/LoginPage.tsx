@@ -14,9 +14,8 @@ export function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
-    const user = useAuthStore.getState().user;
-    if (user) {
+    const success = await login(email, password);
+    if (success) {
       navigate('/admin');
     }
   };

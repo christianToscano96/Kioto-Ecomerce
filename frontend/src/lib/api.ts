@@ -53,19 +53,19 @@ export const productsApi = {
 // Admin Products API
 export const adminProductsApi = {
   list: () =>
-    api.get<Product[]>('/products/public').then(res => ({ data: res.data })),
+    api.get<{ products: Product[] }>('/products').then(res => ({ data: res.data.products })),
 
   get: (id: string) =>
-    api.get<Product>(`/public/products/${id}`),
+    api.get<{ product: Product }>(`/products/${id}`).then(res => res.data.product),
 
   create: (data: Partial<Product>) =>
-    api.post<Product>('/products/public', data),
+    api.post<{ product: Product }>('/products', data).then(res => res.data.product),
 
   update: (id: string, data: Partial<Product>) =>
-    api.put<Product>(`/products/public/${id}`, data),
+    api.put<{ product: Product }>(`/products/${id}`, data).then(res => res.data.product),
 
   delete: (id: string) =>
-    api.delete(`/products/public/${id}`),
+    api.delete(`/products/${id}`),
 };
 
 // Admin Categories API
