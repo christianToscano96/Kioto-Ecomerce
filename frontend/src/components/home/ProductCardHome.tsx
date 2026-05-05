@@ -67,10 +67,29 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Always show options if product has sizes defined
   const hasSizes = product.sizes && product.sizes.length > 0;
   const requiresSelection = hasSizes;
+  
+  // Image carousel logic
+  const images = product.images && product.images.length > 0 
+    ? product.images 
+    : ["https://placehold.co/400x500/fdfae9/1c1c12?text=Producto"];
+  const hasMultipleImages = images.length > 1;
+  
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+  
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -111,44 +130,75 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
 
   return (
     <div className="group bg-surface-container rounded-xl overflow-hidden transition-all duration-500 hover:shadow-xl border-l-2 border-dashed border-outline-variant">
-      <Link to={`/products/${product._id}`} className="block">
-        {/* Image Section */}
-        <div className="aspect-[3/4] overflow-hidden relative">
-          {product.images && product.images.length > 0 ? (
-            <img
-              src={product.images[0]}
-              alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-surface-container-highest">
-              <span className="text-on-surface-variant text-sm">Sin imagen</span>
-            </div>
-          )}
-          
-          {/* Overlay with view icon on hover */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-            <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-transform">
-              <span className="material-symbols-outlined text-on-surface">visibility</span>
-            </div>
-          </div>
-          
-          {/* Top right buttons */}
-          <div className="absolute top-4 right-4 flex flex-col gap-2">
-            <button 
-              className="bg-surface/80 backdrop-blur-md p-2 rounded-full text-on-surface hover:text-primary transition-colors"
-              onClick={(e) => e.preventDefault()}
+      {/* Image Section */}
+      <div className="aspect-[3/4] overflow-hidden relative">
+        <Link to={`/products/${product._id}`} className="block w-full h-full">
+          <img
+            src={images[currentImageIndex]}
+            alt={`${product.name} - Image ${currentImageIndex + 1}`}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        </Link>
+        
+        {/* Carousel Navigation - only if multiple images */}
+        {hasMultipleImages && (
+          <>
+            <button
+              onClick={prevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-surface/80 backdrop-blur-md p-1 rounded-full text-on-surface hover:text-primary z-10 opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <span className="material-symbols-outlined text-sm">favorite</span>
+              <span className="material-symbols-outlined text-sm">chevron_left</span>
             </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-surface/80 backdrop-blur-md p-1 rounded-full text-on-surface hover:text-primary z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <span className="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+            
+            {/* Image indicators */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+              {images.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setCurrentImageIndex(index);
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === currentImageIndex 
+                      ? 'bg-white w-4' 
+                      : 'bg-white/50 hover:bg-white/80'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        
+        {/* Overlay with view icon on hover */}
+        <Link to={`/products/${product._id}`} className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+          <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+            <span className="material-symbols-outlined text-on-surface">visibility</span>
           </div>
-          
-          {/* Stock badge */}
-          <div className="absolute bottom-4 left-4">
-            <StockBadge stock={stock} />
-          </div>
+        </Link>
+        
+        {/* Top right buttons */}
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+          <button 
+            className="bg-surface/80 backdrop-blur-md p-2 rounded-full text-on-surface hover:text-primary transition-colors"
+            onClick={(e) => e.preventDefault()}
+          >
+            <span className="material-symbols-outlined text-sm">favorite</span>
+          </button>
         </div>
-      </Link>
+        
+        {/* Stock badge */}
+        <div className="absolute bottom-4 left-4 z-10">
+          <StockBadge stock={stock} />
+        </div>
+      </div>
 
       {/* Content Section */}
       <div className="p-6 space-y-4">

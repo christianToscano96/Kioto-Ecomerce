@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-
+import { useState, useEffect, useCallback } from "react";
+import Banner1 from "../../../assets/banner-1.jpeg";
+import Banner2 from "../../../assets/banner-2.jpeg";
 interface Slide {
   id: number;
   image: string;
@@ -20,29 +21,34 @@ export function HeroCarousel({ slides: propSlides }: HeroCarouselProps) {
   const defaultSlides: Slide[] = [
     {
       id: 1,
-      image: 'https://images.unsplash.com/photo-1516728778615-2d56c9c4c2e9?w=1920&q=80',
-      alt: 'Mostrando suéter de lana orgánica premium',
-      label: 'Edición Limitada',
-      title: 'Suéter',
-      highlight: 'Sandstone Sobredimensionado',
-      cta: 'Descubrir el Tejido',
+      image: Banner1,
+      alt: "Mostrando suéter de lana orgánica premium",
+      label: "",
+      title: "",
+      highlight: "",
+      cta: "Descubrir el Tejido",
     },
     {
       id: 2,
-      image: 'https://images.unsplash.com/photo-1532452109234-9fc7e8c3c0b5?w=1920&q=80',
-      alt: 'Editorial El Arte de la Quietud',
-      label: 'Lujo Sostenible',
-      title: 'El Arte del',
-      highlight: 'Silencio',
-      cta: 'Explorar Editorial',
+      image: Banner2,
+      alt: "Editorial El Arte de la Quietud",
+      label: "",
+      title: "",
+      highlight: "",
+      cta: "Explorar Editorial",
     },
   ];
 
   const slides = propSlides || defaultSlides;
 
-  const moveSlide = useCallback((direction: number) => {
-    setCurrentSlide((prev) => (prev + direction + slides.length) % slides.length);
-  }, [slides.length]);
+  const moveSlide = useCallback(
+    (direction: number) => {
+      setCurrentSlide(
+        (prev) => (prev + direction + slides.length) % slides.length,
+      );
+    },
+    [slides.length],
+  );
 
   useEffect(() => {
     const timer = setInterval(() => moveSlide(1), 8000);
@@ -68,7 +74,8 @@ export function HeroCarousel({ slides: propSlides }: HeroCarouselProps) {
                 {slide.label}
               </span>
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif text-white leading-tight mb-12 drop-shadow-xl">
-                {slide.title} <span className="italic text-[#ffb5a0]">{slide.highlight}</span>
+                {slide.title}{" "}
+                <span className="italic text-[#ffb5a0]">{slide.highlight}</span>
               </h1>
               <button className="bg-[#e27d60] text-white px-12 py-5 rounded-lg font-bold tracking-widest uppercase text-xs hover:bg-primary transition-all duration-500 shadow-2xl active:scale-[0.98]">
                 {slide.cta}
@@ -103,7 +110,9 @@ export function HeroCarousel({ slides: propSlides }: HeroCarouselProps) {
             key={idx}
             onClick={() => setCurrentSlide(idx)}
             className={`w-2 h-2 rounded-full transition-all duration-500 ${
-              idx === currentSlide ? 'bg-white' : 'bg-white/40 hover:bg-white/60'
+              idx === currentSlide
+                ? "bg-white"
+                : "bg-white/40 hover:bg-white/60"
             }`}
           />
         ))}
