@@ -41,3 +41,16 @@ body {
 .btn-admin {
   @apply bg-verde-bosque-600 text-white hover:bg-verde-bosque-700 font-medium py-2 px-4 rounded-lg transition-colors;
 }
+
+/* Hero Carousel Animation */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(1.05); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-fade-in-scale {
+  animation: fadeInScale 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Scrollbar hide */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

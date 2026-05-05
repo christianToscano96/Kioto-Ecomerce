@@ -1,0 +1,113 @@
+import { useState, useEffect, useCallback } from 'react';
+
+interface Slide {
+  id: number;
+  image: string;
+  alt: string;
+  label: string;
+  title: string;
+  highlight: string;
+  cta: string;
+}
+
+interface HeroCarouselProps {
+  slides?: Slide[];
+}
+
+export function HeroCarousel({ slides: propSlides }: HeroCarouselProps) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const defaultSlides: Slide[] = [
+    {
+      id: 1,
+      image: 'https://images.unsplash.com/photo-1516728778615-2d56c9c4c2e9?w=1920&q=80',
+      alt: 'Mostrando suéter de lana orgánica premium',
+      label: 'Edición Limitada',
+      title: 'Suéter',
+      highlight: 'Sandstone Sobredimensionado',
+      cta: 'Descubrir el Tejido',
+    },
+    {
+      id: 2,
+      image: 'https://images.unsplash.com/photo-1532452109234-9fc7e8c3c0b5?w=1920&q=80',
+      alt: 'Editorial El Arte de la Quietud',
+      label: 'Lujo Sostenible',
+      title: 'El Arte del',
+      highlight: 'Silencio',
+      cta: 'Explorar Editorial',
+    },
+  ];
+
+  const slides = propSlides || defaultSlides;
+
+  const moveSlide = useCallback((direction: number) => {
+    setCurrentSlide((prev) => (prev + direction + slides.length) % slides.length);
+  }, [slides.length]);
+
+  useEffect(() => {
+    const timer = setInterval(() => moveSlide(1), 8000);
+    return () => clearInterval(timer);
+  }, [moveSlide]);
+
+  return (
+    <section className="relative h-screen min-h-[700px] w-full overflow-hidden bg-surface-container">
+      <div
+        className="relative h-full flex transition-transform duration-1000 ease-in-out"
+        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+      >
+        {slides.map((slide) => (
+          <div key={slide.id} className="min-w-full h-full relative">
+            <img
+              src={slide.image}
+              alt={slide.alt}
+              className="absolute inset-0 w-full h-full object-cover animate-fade-in-scale"
+            />
+            <div className="absolute inset-0 bg-black/20" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8 z-10">
+              <span className="label-md tracking-[0.4em] uppercase text-white/90 mb-6 drop-shadow-sm">
+                {slide.label}
+              </span>
+              <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif text-white leading-tight mb-12 drop-shadow-xl">
+                {slide.title} <span className="italic text-[#ffb5a0]">{slide.highlight}</span>
+              </h1>
+              <button className="bg-[#e27d60] text-white px-12 py-5 rounded-lg font-bold tracking-widest uppercase text-xs hover:bg-primary transition-all duration-500 shadow-2xl active:scale-[0.98]">
+                {slide.cta}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Carousel Controls */}
+      <div className="absolute inset-y-0 left-8 md:left-12 flex items-center z-20">
+        <button
+          onClick={() => moveSlide(-1)}
+          className="w-12 h-12 rounded-full border border-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-primary transition-all duration-300 active:scale-90"
+        >
+          <span className="material-symbols-outlined">west</span>
+        </button>
+      </div>
+      <div className="absolute inset-y-0 right-8 md:right-12 flex items-center z-20">
+        <button
+          onClick={() => moveSlide(1)}
+          className="w-12 h-12 rounded-full border border-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-primary transition-all duration-300 active:scale-90"
+        >
+          <span className="material-symbols-outlined">east</span>
+        </button>
+      </div>
+
+      {/* Dots */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-4 z-20">
+        {slides.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentSlide(idx)}
+            className={`w-2 h-2 rounded-full transition-all duration-500 ${
+              idx === currentSlide ? 'bg-white' : 'bg-white/40 hover:bg-white/60'
+            }`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}

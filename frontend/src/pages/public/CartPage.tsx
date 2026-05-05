@@ -108,7 +108,7 @@ export function CartPage() {
       <main className="max-w-7xl mx-auto px-8 py-16">
         <header className="mb-12 mt-10">
           <h1 className="font-serif text-5xl font-bold tracking-tight mb-2">
-            Shopping Bag
+            Cesta de la compra
           </h1>
           <p className="font-label text-sm uppercase tracking-[0.2em] text-on-surface-variant">
             {cartItemCount} {cartItemCount === 1 ? "artículo" : "artículos"} en
@@ -129,7 +129,7 @@ export function CartPage() {
           <aside className="lg:col-span-4 mt-16 lg:mt-0">
             <div className="bg-surface-container-low p-8 rounded-xl border-l border-outline-variant/40">
               <h2 className="font-serif text-2xl font-bold mb-8">
-                Order Summary
+                Resumen del pedido
               </h2>
 
               <div className="space-y-4 mb-8">
@@ -140,13 +140,13 @@ export function CartPage() {
                   </span>
                 </div>
                 <div className="flex justify-between font-body text-on-surface-variant">
-                  <span>Shipping</span>
+                  <span>Envío</span>
                   <span className="font-serif text-on-surface">
                     Calculado en el siguiente paso
                   </span>
                 </div>
                 <div className="flex justify-between font-body text-on-surface-variant">
-                  <span>Tax</span>
+                  <span>Impuestos</span>
                   <span className="font-serif text-on-surface">$0.00</span>
                 </div>
                 <div className="pt-4 border-t border-dashed border-outline-variant/40 flex justify-between items-center">
@@ -161,7 +161,7 @@ export function CartPage() {
 
               <Link to="/checkout">
                 <button className="w-full bg-primary text-on-primary py-5 rounded-lg font-label text-sm uppercase tracking-[0.2em] font-bold hover:bg-primary-container transition-colors shadow-sm">
-                  Proceed to Checkout
+                  Ir a pagar
                 </button>
               </Link>
 
