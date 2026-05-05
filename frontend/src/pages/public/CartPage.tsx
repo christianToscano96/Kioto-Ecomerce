@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useCart, useCartTotal, useCartItemCount } from '@/hooks/useCart';
+import { useCartItems, useCartTotal, useCartItemCount, useCartIsLoading, useCartError, useCartStore } from '@/store/cart';
+import { useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { CartItemCard } from '@/components/ui/CartItemCard';
 import { Footer } from '@/components/layout/Footer';
@@ -13,9 +14,16 @@ const LoaderIcon = () => (
 );
 
 export function CartPage() {
-  const { data: cart, isLoading, error } = useCart();
+  const items = useCartItems();
   const cartTotal = useCartTotal();
   const cartItemCount = useCartItemCount();
+  const isLoading = useCartIsLoading();
+  const error = useCartError();
+  const fetchCart = useCartStore.getState().fetchCart;
+
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
 
   if (isLoading) {
     return (
@@ -40,8 +48,6 @@ export function CartPage() {
       </>
     );
   }
-
-  const items = cart?.items || [];
 
   if (items.length === 0) {
     return (

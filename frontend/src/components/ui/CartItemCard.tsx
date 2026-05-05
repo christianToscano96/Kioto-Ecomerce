@@ -1,4 +1,4 @@
-import { useUpdateCartItem, useRemoveFromCart } from '@/lib/api';
+import { useCartStore } from '@/store/cart';
 import type { CartItem } from '../../../../shared/src/index';
 
 interface CartItemCardProps {
@@ -33,19 +33,16 @@ const QuantitySelector = ({
 );
 
 export function CartItemCard({ item }: CartItemCardProps) {
-  const updateCartItem = useUpdateCartItem();
-  const removeCartItem = useRemoveFromCart();
+  const updateCartItem = useCartStore.getState().updateCartItem;
+  const removeCartItem = useCartStore.getState().removeCartItem;
 
   const handleQuantityChange = async (newQuantity: number) => {
     if (newQuantity < 1) return;
-    await updateCartItem.mutateAsync({ 
-      itemId: item.productId, 
-      quantity: newQuantity 
-    });
+    await updateCartItem(item.productId, newQuantity);
   };
 
   const handleRemove = async () => {
-    await removeCartItem.mutateAsync(item.productId);
+    await removeCartItem(item.productId);
   };
 
   // Get product info with fallbacks

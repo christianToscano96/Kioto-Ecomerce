@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
-import { useProducts } from '@/lib/api';
+import { useProductsStore } from '@/store/products';
+import { useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
@@ -14,8 +15,12 @@ const LoaderIcon = () => (
 );
 
 export function HomePage() {
-  const { data: products, isLoading, error } = useProducts();
+  const { products, isLoading, error, fetchProducts } = useProductsStore();
   const featuredProducts = products?.slice(0, 3) || [];
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   return (
     <>

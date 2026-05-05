@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { useCart, useCartTotal, useCartItemCount } from '@/lib/api';
+import { useCartItems, useCartTotal, useCartItemCount, useCartIsLoading } from '@/store/cart';
 import { formatPrice } from '@/lib/utils';
 import { PublicHeader } from '@/components/layout/PublicHeader';
 import { stripe } from '@/lib/stripe';
@@ -17,9 +17,10 @@ const LoaderIcon = () => (
 
 export function CheckoutPage() {
   const navigate = useNavigate();
-  const { data: cart, isLoading: cartLoading } = useCart();
+  const items = useCartItems();
   const cartTotal = useCartTotal();
   const cartItemCount = useCartItemCount();
+  const cartLoading = useCartIsLoading();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -100,8 +101,6 @@ export function CheckoutPage() {
       </>
     );
   }
-
-  const items = cart?.items || [];
 
   if (items.length === 0) {
     return (

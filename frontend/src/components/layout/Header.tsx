@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { useCartItemCount } from "@/hooks/useCart";
+import { useCartItemCount } from "@/store/cart";
 
 const navItems = [
   { to: "/products", label: "Catálogo" },

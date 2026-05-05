@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useProduct, useProducts } from "@/lib/api";
-import { useAddToCart } from "@/hooks/useCart";
+import { useCartIsSyncing, useCartStore } from "@/store/cart";
+import { useProduct, useProductsStore, useProductsError } from "@/store/products";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -111,9 +111,15 @@ export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const { data: product, isLoading, error } = useProduct(id || "");
-  const { data: relatedProducts } = useProducts();
-  const addToCartMutation = useAddToCart();
+  const { product, isLoading } = useProduct(id || "");
+  const productsError = useProductsError();
+  const { products: allProducts } = useProductsStore();
+  const { addToCart, isSyncing } = useCartStore();
+
+  // Fetch related products on mount
+  useEffect(() => {
+    useProductsStore.getState().fetchProducts();
+  }, []);
 
   // Default sizes if not provided by product
   const sizes = product?.sizes || ["S", "M", "L"];
@@ -121,11 +127,7 @@ export function ProductDetailPage() {
   const handleAddToCart = async () => {
     if (!product || !selectedSize) return;
     try {
-      await addToCartMutation.mutateAsync({
-        productId: product._id,
-        quantity: 1,
-        size: selectedSize,
-      });
+      await addToCart(product, 1, selectedSize);
     } catch (err) {
       console.error("Failed to add to cart:", err);
     }
@@ -142,7 +144,7 @@ export function ProductDetailPage() {
     );
   }
 
-  if (error || !product) {
+  if (productsError || !product) {
     return (
       <>
         <Header />
@@ -239,10 +241,10 @@ export function ProductDetailPage() {
 
               <button
                 onClick={handleAddToCart}
-                disabled={!selectedSize || addToCartMutation.isPending}
+                disabled={!selectedSize || isSyncing}
                 className="w-full bg-primary-container text-on-primary-container py-5 rounded-lg font-bold uppercase tracking-widest font-label hover:bg-primary transition-all duration-300 shadow-md disabled:opacity-50"
               >
-                {addToCartMutation.isPending
+                {isSyncing
                   ? "Añadiendo..."
                   : "Añadir al Carrito"}
               </button>
@@ -268,13 +270,13 @@ export function ProductDetailPage() {
         </div>
 
         {/* Complete the Look Section */}
-        {relatedProducts && relatedProducts.length > 1 && (
+        {allProducts && allProducts.length > 1 && (
           <section className="mt-32">
             <h2 className="text-3xl font-serif mb-12 italic">
               Completa el Look
             </h2>
             <div className="bg-surface-container-low p-8 rounded-xl overflow-x-auto flex gap-8 snap-x">
-              {relatedProducts.slice(0, 3).map((relatedProduct) => (
+              {allProducts.slice(0, 3).map((relatedProduct) => (
                 <RelatedProductCard
                   key={relatedProduct._id}
                   product={relatedProduct}

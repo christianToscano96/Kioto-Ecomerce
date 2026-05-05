@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { useProducts } from '@/lib/api';
+import { useProductsStore } from '@/store/products';
 import { PublicHeader } from '@/components/layout/PublicHeader';
 
 const LoaderIcon = () => (
@@ -22,7 +22,11 @@ export function ProductsListPage() {
   const [searchParams] = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const { data: products, isLoading, error } = useProducts();
+  const { products, isLoading, error, fetchProducts } = useProductsStore();
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];

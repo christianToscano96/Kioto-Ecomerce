@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { useAdminProducts, useCreateProduct, useUpdateProduct } from '@/lib/api';
+import { useProductsStore } from '@/store/products';
 
 const SaveIcon = () => (
   <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,11 +21,17 @@ export function ProductForm() {
   const { id } = useParams();
   const isEdit = !!id;
 
-  const { data: products } = useAdminProducts();
-  const createMutation = useCreateProduct();
-  const updateMutation = useUpdateProduct();
+  const products = useProductsStore((state) => state.products);
+  const isLoading = useProductsStore((state) => state.isLoading);
+  const createProduct = useProductsStore((state) => state.createProduct);
+  const updateProduct = useProductsStore((state) => state.updateProduct);
+  const fetchAdminProducts = useProductsStore((state) => state.fetchAdminProducts);
 
   const product = products?.find((p) => p._id === id);
+
+  useEffect(() => {
+    fetchAdminProducts();
+  }, [fetchAdminProducts]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -88,9 +94,9 @@ export function ProductForm() {
 
     try {
       if (isEdit) {
-        await updateMutation.mutateAsync({ id: id!, data: submitData });
+        await updateProduct(id!, submitData);
       } else {
-        await createMutation.mutateAsync(submitData);
+        await createProduct(submitData);
       }
       navigate('/admin/products');
     } catch (error) {
@@ -212,7 +218,7 @@ export function ProductForm() {
         )}
 
         <div className="flex gap-4">
-          <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+          <Button type="submit" disabled={isLoading}>
             <SaveIcon />
             {isEdit ? 'Update Product' : 'Create Product'}
           </Button>
