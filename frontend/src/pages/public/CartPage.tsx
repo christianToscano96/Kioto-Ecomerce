@@ -63,7 +63,7 @@ export function CartPage() {
     return (
       <>
         <Header />
-        <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="max-w-7xl mx-auto px-4 py-20 mt-20">
           <div className="p-4 bg-primary-container text-on-primary rounded-lg text-center">
             Error al cargar el carrito. Por favor, intenta de nuevo.
           </div>
@@ -76,10 +76,10 @@ export function CartPage() {
     return (
       <>
         <Header />
-        <main className="max-w-7xl mx-auto px-8 py-16">
-          <header className="mb-12">
+        <main className="max-w-7xl mx-auto px-8 py-16 ">
+          <header className="mb-12 ">
             <h1 className="font-serif text-5xl font-bold tracking-tight mb-2">
-              Shopping Bag
+              Shopping Bags
             </h1>
             <p className="font-label text-sm uppercase tracking-[0.2em] text-on-surface-variant">
               Tu curation está vacía
@@ -106,7 +106,7 @@ export function CartPage() {
     <>
       <Header />
       <main className="max-w-7xl mx-auto px-8 py-16">
-        <header className="mb-12">
+        <header className="mb-12 mt-10">
           <h1 className="font-serif text-5xl font-bold tracking-tight mb-2">
             Shopping Bag
           </h1>
@@ -119,10 +119,10 @@ export function CartPage() {
         <div className="lg:grid lg:grid-cols-12 lg:gap-16 items-start">
           {/* Cart Items List */}
           <div className="lg:col-span-8 space-y-12">
-{items.map((item) => {
-               const key = (item as any)._id || item.productId;
-               return <CartItemCard key={key} item={item} />;
-             })}
+            {items.map((item) => {
+              const key = (item as any)._id || item.productId;
+              return <CartItemCard key={key} item={item} />;
+            })}
           </div>
 
           {/* Order Summary */}

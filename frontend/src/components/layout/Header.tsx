@@ -1,33 +1,43 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useCartItemCount } from "@/store/cart";
 
 const navItems = [
-  { to: "/products", label: "Catálogo" },
-  { to: "/men", label: "Hombre" },
-  { to: "/women", label: "Mujer" },
-  { to: "/new", label: "Novedades" },
+  { to: "/products", label: "Shop All" },
+  { to: "/men", label: "Men" },
+  { to: "/women", label: "Women" },
+  { to: "/new", label: "New Arrivals" },
 ];
 
 export function Header() {
   const cartItemCount = useCartItemCount();
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-[#fdfae9]/80  backdrop-blur-xl shadow-[0_40px_40px_rgba(28,28,18,0.04)]">
-      <div className="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
+    <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-dashed border-outline-variant/40">
+      <div className="max-w-7xl mx-auto  py-4 flex justify-between items-center">
         {/* Left: Brand + Nav */}
-        <div className="flex items-center gap-12">
+        <div className="flex items-center gap-8">
           <NavLink
             to="/"
-            className="text-2xl font-serif tracking-tight text-[#1c1c12] dark:text-[#1c1c12]"
+            className="font-serif text-2xl font-bold tracking-widest text-on-surface"
           >
             KIOTO
           </NavLink>
-          <div className="hidden md:flex gap-8">
+          <div className="hidden md:flex items-center gap-8 font-serif text-lg tracking-tight">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
-                className="text-[#1c1c12] border-b border-dashed border-transparent pb-1 text-xs uppercase tracking-[0.1em] font-body hover:border-[#99452c] hover:text-[#99452c] transition-all duration-300"
+                className="text-on-surface/80 hover:text-primary transition-colors duration-300"
               >
                 {item.label}
               </NavLink>
@@ -35,18 +45,38 @@ export function Header() {
           </div>
         </div>
 
-{/* Right: Actions */}
-        <div className="flex items-center gap-6">
-          <button className="text-[#1c1c12] active:scale-[0.99] transition-transform">
-            <span className="material-symbols-outlined" data-icon="search">search</span>
-          </button>
-          <NavLink 
-            to="/cart" 
-            className="text-[#1c1c12] active:scale-[0.99] transition-transform relative"
+        {/* Right: Search + Cart */}
+        <div className="flex items-center gap-4">
+          {/* Search Bar */}
+          <form
+            onSubmit={handleSearch}
+            className="hidden md:flex items-center bg-surface-container px-3 py-1.5 rounded-lg border border-transparent focus-within:border-outline transition-all"
           >
-            <span className="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+            <span className="material-symbols-outlined text-on-surface-variant text-sm">
+              search
+            </span>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent border-none focus:ring-0 text-xs placeholder:text-on-surface-variant/50 w-36 font-label"
+            />
+          </form>
+
+          {/* Cart */}
+          <NavLink
+            to="/cart"
+            className="text-primary relative scale-95 active:opacity-80 transition-transform"
+          >
+            <span
+              className="material-symbols-outlined"
+              data-icon="shopping_cart"
+            >
+              shopping_cart
+            </span>
             {cartItemCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-primary text-on-primary text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
                 {cartItemCount}
               </span>
             )}

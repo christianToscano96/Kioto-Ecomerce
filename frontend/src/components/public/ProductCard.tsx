@@ -1,52 +1,51 @@
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import type { Product } from '../../../../shared/src/index';
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart?: (product: Product) => void;
-  showAddToCart?: boolean;
+  onQuickAdd?: (productId: string) => void;
 }
 
-export function ProductCard({ product, onAddToCart, showAddToCart = true }: ProductCardProps) {
-  const handleAddToCart = () => {
-    onAddToCart?.(product);
+export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onQuickAdd?.(product._id);
   };
 
   return (
-    <Card variant="elevated" className="overflow-hidden flex flex-col h-full">
-      <Link to={`/products/${product._id}`} className="flex-1 flex flex-col">
-        {product.images && product.images.length > 0 ? (
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="w-full h-48 object-cover"
-          />
-        ) : (
-          <div className="w-full h-48 bg-chocolate-100 flex items-center justify-center">
-            <span className="text-chocolate-400">No image</span>
-          </div>
-        )}
-        <div className="p-4 flex-1 flex flex-col">
-          <h3 className="font-serif font-semibold text-chocolate-900 mb-2 line-clamp-1">
-            {product.name}
-          </h3>
-          <p className="text-chocolate-600 text-sm mb-2 line-clamp-2 flex-1">
-            {product.description}
-          </p>
-          <p className="text-terracota-600 font-medium text-lg">
-            ${product.price.toFixed(2)}
-          </p>
+    <div className="group relative stitch-border-left pl-6">
+      <Link to={`/products/${product._id}`} className="block">
+        <div className="aspect-[3/4] bg-surface-container overflow-hidden mb-6 rounded-lg">
+          {product.images && product.images.length > 0 ? (
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+              No image
+            </div>
+          )}
         </div>
+
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-serif text-xl text-on-surface">{product.name}</h3>
+          <span className="font-serif text-primary">${product.price.toFixed(2)}</span>
+        </div>
+
+        <p className="text-on-surface-variant font-body text-sm mb-6 line-clamp-2">
+          {product.description}
+        </p>
+
+        <button
+          onClick={handleQuickAdd}
+          className="w-full bg-primary text-on-primary font-label text-sm uppercase tracking-widest py-3 rounded-lg hover:bg-primary-container transition-all flex items-center justify-center gap-2"
+        >
+          <span className="material-symbols-outlined text-base">add</span>
+          Quick Add
+        </button>
       </Link>
-      {showAddToCart && onAddToCart && (
-        <div className="p-4 pt-0">
-          <Button onClick={handleAddToCart} className="w-full" size="sm">
-            Add to Cart
-          </Button>
-        </div>
-      )}
-    </Card>
+    </div>
   );
 }

@@ -1,60 +1,75 @@
-import { NavLink } from 'react-router-dom';
-
-const footerLinks = [
-  { to: '/sustainability', label: 'Sustainability' },
-  { to: '/shipping', label: 'Shipping' },
-  { to: '/returns', label: 'Returns' },
-  { to: '/contact', label: 'Contact' },
-];
+import { Link } from 'react-router-dom';
 
 export function Footer() {
   return (
-    <footer className="bg-[#f1edd6] dark:bg-[#1c1c12] w-full mt-20 border-t border-dashed border-[#dbc1ba]/40">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 px-12 py-16 max-w-screen-2xl mx-auto">
-        {/* Brand + Info */}
+    <footer className="bg-background w-full mt-20 border-t border-dashed border-outline-variant/40">
+      <div className="max-w-7xl mx-auto px-8 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 font-body text-sm tracking-wide uppercase">
         <div className="space-y-6">
-          <h3 className="text-xl font-serif text-[#1c1c12] dark:text-[#fdfae9]">KIOTO</h3>
-          <p className="text-on-surface-variant text-xs font-body leading-relaxed">
-            Crafted for the Earthbound. Boutique organic fashion for those who appreciate the tactile and the timeless.
+          <div className="font-serif text-xl italic text-on-surface">KIOTO</div>
+          <p className="text-on-surface/60 normal-case leading-relaxed">
+            © 2024 KIOTO. Curating for the Earthbound. Crafted with intention and respect for the natural world.
           </p>
         </div>
 
-        {/* Links Column */}
         <div className="flex flex-col gap-4">
-          <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary dark:text-primary-container">
-            Information
-          </h4>
-          <div className="flex flex-col gap-3">
-            {footerLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className="text-[#1c1c12] dark:text-[#fdfae9] text-xs uppercase tracking-[0.1em] hover:translate-x-1 transition-transform duration-200 font-body"
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </div>
+          <h4 className="font-bold text-on-surface">Collection</h4>
+          <Link
+            to="/new"
+            className="text-on-surface/60 hover:underline decoration-dotted decoration-primary underline-offset-4 transition-all"
+          >
+            New Arrivals
+          </Link>
+          <Link
+            to="/best-sellers"
+            className="text-on-surface/60 hover:underline decoration-dotted decoration-primary underline-offset-4 transition-all"
+          >
+            Best Sellers
+          </Link>
+          <Link
+            to="/sustainability"
+            className="text-on-surface/60 hover:underline decoration-dotted decoration-primary underline-offset-4 transition-all"
+          >
+            Sustainability
+          </Link>
         </div>
 
-        {/* Newsletter */}
-        <div className="space-y-6">
-          <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary dark:text-primary-container">
-            Join the Collective
-          </h4>
-          <div className="relative">
+        <div className="flex flex-col gap-4">
+          <h4 className="font-bold text-on-surface">Assistance</h4>
+          <Link
+            to="/shipping"
+            className="text-on-surface/60 hover:underline decoration-dotted decoration-primary underline-offset-4 transition-all"
+          >
+            Shipping
+          </Link>
+          <Link
+            to="/returns"
+            className="text-on-surface/60 hover:underline decoration-dotted decoration-primary underline-offset-4 transition-all"
+          >
+            Returns
+          </Link>
+          <Link
+            to="/contact"
+            className="text-on-surface/60 hover:underline decoration-dotted decoration-primary underline-offset-4 transition-all"
+          >
+            Contact
+          </Link>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <h4 className="font-bold text-on-surface">Journal</h4>
+          <div className="flex border-b border-outline-variant pb-2">
             <input
+              className="bg-transparent border-none focus:ring-0 p-0 text-xs w-full normal-case"
+              placeholder="Email address"
               type="email"
-              placeholder="Email Address"
-              className="w-full bg-transparent border-b border-outline focus:border-primary focus:ring-0 px-0 py-3 text-xs placeholder:text-outline-variant/60 font-body"
             />
-            <button className="absolute right-0 bottom-3 text-primary">
-              <span className="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
-            </button>
+            <button className="text-primary font-bold">Join</button>
           </div>
-          <p className="text-[10px] text-on-surface-variant/70 uppercase tracking-widest">
-            © 2024 KIOTO. Crafted for the Earthbound.
-          </p>
+          <div className="flex gap-4">
+            <span className="material-symbols-outlined text-primary text-lg">public</span>
+            <span className="material-symbols-outlined text-primary text-lg">eco</span>
+            <span className="material-symbols-outlined text-primary text-lg">filter_vintage</span>
+          </div>
         </div>
       </div>
     </footer>
