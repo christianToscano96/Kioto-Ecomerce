@@ -62,16 +62,16 @@ export function ProductForm() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = 'El nombre es requerido';
     }
     if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
-      newErrors.price = 'Valid price is required';
+      newErrors.price = 'Se requiere un precio válido';
     }
     if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
+      newErrors.description = 'La descripción es requerida';
     }
     if (formData.stock === '' || isNaN(Number(formData.stock)) || Number(formData.stock) < 0) {
-      newErrors.stock = 'Valid stock quantity is required';
+      newErrors.stock = 'Se requiere una cantidad válida';
     }
 
     setErrors(newErrors);
@@ -100,19 +100,19 @@ export function ProductForm() {
       }
       navigate('/admin/products');
     } catch (error) {
-      console.error('Error saving product:', error);
+      console.error('Error al guardar producto:', error);
     }
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-serif font-bold text-chocolate-900">
-          {isEdit ? 'Edit Product' : 'New Product'}
+        <h1 className="text-2xl font-serif font-bold text-on-surface">
+          {isEdit ? 'Editar Producto' : 'Nuevo Producto'}
         </h1>
         <Button variant="ghost" onClick={() => navigate('/admin/products')}>
           <XIcon />
-          Cancel
+          Cancelar
         </Button>
       </div>
 
@@ -120,7 +120,7 @@ export function ProductForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <Input
-              label="Name"
+              label="Nombre"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               error={errors.name}
@@ -130,7 +130,7 @@ export function ProductForm() {
 
           <div>
             <Input
-              label="Price ($)"
+              label="Precio ($)"
               type="number"
               step="0.01"
               min="0"
@@ -159,36 +159,36 @@ export function ProductForm() {
               id="published"
               checked={formData.published}
               onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-              className="h-4 w-4 rounded border-chocolate-300 text-verde-bosque-600 focus:ring-verde-bosque-500"
+              className="h-4 w-4 rounded border-outline-variant text-verde-bosque-600 focus:ring-verde-bosque-500"
             />
-            <label htmlFor="published" className="ml-2 text-sm text-chocolate-700">
-              Published
+            <label htmlFor="published" className="ml-2 text-sm text-on-surface">
+              Publicado
             </label>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-chocolate-700 mb-1.5">
-            Image URLs (one per line)
+          <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
+            URLs de Imágenes (una por línea)
           </label>
           <textarea
             value={formData.images}
             onChange={(e) => setFormData({ ...formData, images: e.target.value })}
-            placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+            placeholder="https://ejemplo.com/imagen1.jpg&#10;https://ejemplo.com/imagen2.jpg"
             rows={3}
-            className="flex w-full rounded-lg border border-chocolate-300 bg-white px-3 py-2 text-sm text-chocolate-900 placeholder:text-chocolate-400 focus:outline-none focus:ring-2 focus:ring-verde-bosque-500 focus:border-transparent"
+            className="flex w-full rounded-lg border border-outline bg-white px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-chocolate-700 mb-1.5">
-            Description
+          <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
+            Descripción
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={4}
-            className="flex w-full rounded-lg border border-chocolate-300 bg-white px-3 py-2 text-sm text-chocolate-900 placeholder:text-chocolate-400 focus:outline-none focus:ring-2 focus:ring-verde-bosque-500 focus:border-transparent"
+            className="flex w-full rounded-lg border border-outline bg-white px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
           {errors.description && (
             <span className="text-sm text-terracota-600">{errors.description}</span>
@@ -198,16 +198,16 @@ export function ProductForm() {
         {/* Image Preview */}
         {formData.images && (
           <div>
-            <label className="block text-sm font-medium text-chocolate-700 mb-2">
-              Image Preview
+            <label className="block text-sm font-medium text-on-surface-variant mb-2">
+              Vista Previa de Imágenes
             </label>
             <div className="flex flex-wrap gap-2">
               {formData.images.split('\n').filter(Boolean).map((url, index) => (
                 <img
                   key={index}
                   src={url.trim()}
-                  alt={`Preview ${index + 1}`}
-                  className="h-20 w-20 object-cover rounded border border-chocolate-200"
+                  alt={`Vista ${index + 1}`}
+                  className="h-20 w-20 object-cover rounded border border-outline-variant"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
@@ -220,10 +220,10 @@ export function ProductForm() {
         <div className="flex gap-4">
           <Button type="submit" disabled={isLoading}>
             <SaveIcon />
-            {isEdit ? 'Update Product' : 'Create Product'}
+            {isEdit ? 'Actualizar Producto' : 'Crear Producto'}
           </Button>
           <Button variant="ghost" onClick={() => navigate('/admin/products')}>
-            Cancel
+            Cancelar
           </Button>
         </div>
       </form>

@@ -79,7 +79,9 @@ export function ProductsList() {
   const products = useProductsStore((state) => state.products);
   const isLoading = useProductsStore((state) => state.isLoading);
   const error = useProductsStore((state) => state.error);
-  const fetchAdminProducts = useProductsStore((state) => state.fetchAdminProducts);
+  const fetchAdminProducts = useProductsStore(
+    (state) => state.fetchAdminProducts,
+  );
   const deleteProduct = useProductsStore((state) => state.deleteProduct);
 
   useEffect(() => {
@@ -87,7 +89,7 @@ export function ProductsList() {
   }, [fetchAdminProducts]);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este producto?")) {
       await deleteProduct(id);
     }
   };
@@ -103,7 +105,7 @@ export function ProductsList() {
   if (error) {
     return (
       <div className="p-4 bg-terracota-50 text-terracota-700 rounded-lg">
-        Error loading products. Please try again.
+        Error al cargar productos. Por favor, intenta de nuevo.
       </div>
     );
   }
@@ -118,20 +120,20 @@ export function ProductsList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-serif font-bold text-chocolate-900">
-          Products
+        <h1 className="text-2xl font-serif font-bold text-on-surface">
+          Productos
         </h1>
         <Link to="/admin/products/new">
           <Button>
             <PlusIcon />
-            New Product
+            Nuevo Producto
           </Button>
         </Link>
       </div>
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <MetricCard
-          label="Total Items"
+          label="Total de Artículos"
           value={totalItems}
           icon={
             <span className="material-symbols-outlined text-6xl text-primary/10">
@@ -140,7 +142,7 @@ export function ProductsList() {
           }
         />
         <MetricCard
-          label="Low Stock"
+          label="Stock Bajo"
           value={lowStock}
           icon={
             <span className="material-symbols-outlined text-6xl text-terracota-600/10">
@@ -149,7 +151,7 @@ export function ProductsList() {
           }
         />
         <MetricCard
-          label="Categories"
+          label="Categorías"
           value={categories}
           icon={
             <span className="material-symbols-outlined text-6xl text-verde-bosque-600/10">
@@ -158,7 +160,7 @@ export function ProductsList() {
           }
         />
         <MetricCard
-          label="Active Sales"
+          label="Ventas Activas"
           value={activeSales}
           icon={
             <span className="material-symbols-outlined text-6xl text-primary/10">
@@ -170,28 +172,28 @@ export function ProductsList() {
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="w-full">
-          <thead className="bg-chocolate-50">
+          <thead className="bg-surface-container-low">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-chocolate-700 uppercase tracking-wider">
-                Image
+              <th className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider">
+                Imagen
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-chocolate-700 uppercase tracking-wider">
-                Name
+              <th className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider">
+                Nombre
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-chocolate-700 uppercase tracking-wider">
-                Price
+              <th className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider">
+                Precio
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-chocolate-700 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider">
                 Stock
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-chocolate-700 uppercase tracking-wider">
-                Actions
+              <th className="px-6 py-3 text-left text-xs font-medium text-on-surface-variant uppercase tracking-wider">
+                Acciones
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-chocolate-100">
+          <tbody className="divide-y divide-outline-variant/40">
             {products?.map((product) => (
-              <tr key={product._id} className="hover:bg-chocolate-25">
+              <tr key={product._id} className="hover:bg-surface-container-low">
                 <td className="px-6 py-4">
                   {product.images && product.images.length > 0 ? (
                     <img
@@ -200,29 +202,29 @@ export function ProductsList() {
                       className="h-12 w-12 object-cover rounded"
                     />
                   ) : (
-                    <div className="h-12 w-12 bg-chocolate-100 rounded flex items-center justify-center">
-                      <span className="text-xs text-chocolate-400">
-                        No image
+                    <div className="h-12 w-12 bg-surface-container rounded flex items-center justify-center">
+                      <span className="text-xs text-on-surface-variant">
+                        Sin imagen
                       </span>
                     </div>
                   )}
                 </td>
                 <td className="px-6 py-4">
                   <div>
-                    <div className="font-medium text-chocolate-900">
+                    <div className="font-medium text-on-surface">
                       {product.name}
                     </div>
-                    <div className="text-sm text-chocolate-500">
+                    <div className="text-sm text-on-surface-variant">
                       /{product.slug}
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-chocolate-900">
+                <td className="px-6 py-4 text-on-surface">
                   ${product.price.toFixed(2)}
                 </td>
                 <td className="px-6 py-4">
                   <Badge variant={product.stock > 0 ? "default" : "secondary"}>
-                    {product.stock} in stock
+                    {product.stock} disponibles
                   </Badge>
                 </td>
                 <td className="px-6 py-4">
@@ -247,8 +249,8 @@ export function ProductsList() {
         </table>
 
         {products?.length === 0 && (
-          <div className="p-8 text-center text-chocolate-500">
-            No products found. Create your first product to get started.
+          <div className="p-8 text-center text-on-surface-variant">
+            No se encontraron productos. Crea tu primer producto para comenzar.
           </div>
         )}
       </div>
