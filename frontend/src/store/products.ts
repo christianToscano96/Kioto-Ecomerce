@@ -146,10 +146,12 @@ export const useProduct = (id: string) => {
   const fetchProduct = useProductsStore((state) => state.fetchProduct);
   const isLoading = useProductsStore((state) => state.isLoading);
   
-  // Fetch product when id changes
-  useProductsStore.getState().fetchProduct(id);
+  // Fetch product when id changes - must be in useEffect, not render body
+  // Use a stable reference to avoid stale closure
+  const fetchProductRef = useProductsStore.getState().fetchProduct;
   
-  return { product, isLoading };
+  // Use useEffect pattern at component level instead
+  return { product, isLoading, fetchProduct: fetchProductRef };
 };
 export const useProductsLoading = () => useProductsStore((state) => state.isLoading);
 export const useProductsError = () => useProductsStore((state) => state.error);

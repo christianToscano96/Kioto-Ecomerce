@@ -17,7 +17,7 @@ import apiDocsRoutes from "./routes/api-docs";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5050;
+const PORT = process.env.PORT || 4000;
 
 // Security middleware
 app.use(helmet());

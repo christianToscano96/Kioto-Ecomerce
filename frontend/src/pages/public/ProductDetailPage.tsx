@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useCartIsSyncing, useCartStore } from "@/store/cart";
-import { useProduct, useProductsStore, useProductsError } from "@/store/products";
+import { useProductsStore, useProductsError } from "@/store/products";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -111,10 +111,19 @@ export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const { product, isLoading } = useProduct(id || "");
+  const product = useProductsStore((state) => state.product);
+  const isLoading = useProductsStore((state) => state.isLoading);
+  const fetchProduct = useProductsStore((state) => state.fetchProduct);
   const productsError = useProductsError();
   const { products: allProducts } = useProductsStore();
   const { addToCart, isSyncing } = useCartStore();
+
+  // Fetch product when id changes
+  useEffect(() => {
+    if (id) {
+      fetchProduct(id);
+    }
+  }, [id, fetchProduct]);
 
   // Fetch related products on mount
   useEffect(() => {

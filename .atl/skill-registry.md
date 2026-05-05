@@ -79,6 +79,6 @@ Skills auto-detected by autoskills have been mapped to OpenCode equivalents:
 ## Notes
 
 - Admin dashboard with login/register ready
-- Backend running on port 5050
+- Backend running on port 4000
 - Frontend running on port 5173
 - MongoDB connection established
