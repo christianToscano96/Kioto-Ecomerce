@@ -23,14 +23,29 @@ const PORT = process.env.PORT || 4000;
 app.use(helmet());
 app.use(mongoSanitize());
 
-// Rate limiting
+// Rate limiting - disabled for development
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // increased limit for development
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'development', // Skip in dev
 });
 app.use(limiter);
+
+// Separate rate limiter for cart operations (stricter)
+const cartLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 30, // 30 requests per minute for cart operations
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'development',
+  message: 'Too many cart requests, please slow down.',
+  keyGenerator: (req) => {
+    // Use session ID or IP for anonymous users
+    return req.cookies?.sessionId || req.ip;
+  },
+});
 
 // CORS configuration
 app.use(
@@ -64,7 +79,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/public", publicProductRoutes);
-app.use("/api/cart", cartRoutes);
+app.use("/api/cart", cartLimiter, cartRoutes);
 app.use("/api/checkout", checkoutRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/docs", apiDocsRoutes);

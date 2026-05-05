@@ -22,11 +22,12 @@ export function ProductsListPage() {
   const [searchParams] = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const { products, isLoading, error, fetchProducts } = useProductsStore();
+  const { products, isLoading, error } = useProductsStore();
+  const fetchProducts = useProductsStore.getState().fetchProducts;
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+  }, []); // Empty deps - fetch only once on mount
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];

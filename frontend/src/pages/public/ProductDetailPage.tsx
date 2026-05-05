@@ -111,9 +111,9 @@ export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const product = useProductsStore((state) => state.product);
   const isLoading = useProductsStore((state) => state.isLoading);
-  const fetchProduct = useProductsStore((state) => state.fetchProduct);
   const productsError = useProductsError();
   const { products: allProducts } = useProductsStore();
   const { addToCart, isSyncing } = useCartStore();
@@ -121,11 +121,11 @@ export function ProductDetailPage() {
   // Fetch product when id changes
   useEffect(() => {
     if (id) {
-      fetchProduct(id);
+      useProductsStore.getState().fetchProduct(id);
     }
-  }, [id, fetchProduct]);
+  }, [id]);
 
-  // Fetch related products on mount
+  // Fetch related products on mount only
   useEffect(() => {
     useProductsStore.getState().fetchProducts();
   }, []);
@@ -133,14 +133,17 @@ export function ProductDetailPage() {
   // Default sizes if not provided by product
   const sizes = product?.sizes || ["S", "M", "L"];
 
-  const handleAddToCart = async () => {
-    if (!product || !selectedSize) return;
-    try {
-      await addToCart(product, 1, selectedSize);
-    } catch (err) {
-      console.error("Failed to add to cart:", err);
-    }
-  };
+const handleAddToCart = async () => {
+     if (!product || !selectedSize || isAddingToCart || isSyncing) return;
+     setIsAddingToCart(true);
+     try {
+       await addToCart(product, 1, selectedSize);
+     } catch (err) {
+       console.error("Failed to add to cart:", err);
+     } finally {
+       setIsAddingToCart(false);
+     }
+   };
 
   if (isLoading) {
     return (
@@ -248,15 +251,15 @@ export function ProductDetailPage() {
                 onSelectSize={setSelectedSize}
               />
 
-              <button
-                onClick={handleAddToCart}
-                disabled={!selectedSize || isSyncing}
-                className="w-full bg-primary-container text-on-primary-container py-5 rounded-lg font-bold uppercase tracking-widest font-label hover:bg-primary transition-all duration-300 shadow-md disabled:opacity-50"
-              >
-                {isSyncing
-                  ? "Añadiendo..."
-                  : "Añadir al Carrito"}
-              </button>
+<button
+                 onClick={handleAddToCart}
+                 disabled={!selectedSize || isSyncing || isAddingToCart}
+                 className="w-full bg-primary-container text-on-primary-container py-5 rounded-lg font-bold uppercase tracking-widest font-label hover:bg-primary transition-all duration-300 shadow-md disabled:opacity-50"
+               >
+                 {isSyncing || isAddingToCart
+                   ? "Añadiendo..."
+                   : "Añadir al Carrito"}
+               </button>
             </div>
 
             {/* Accordions */}

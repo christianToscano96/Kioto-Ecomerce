@@ -70,7 +70,7 @@ export const adminProductsApi = {
 
 // Cart API
 export const cartApi = {
-  get: () => api.get<Cart>('/cart'),
+  get: () => api.get<{ cart: Cart }>('/cart'),
 
   addItem: (data: { productId: string; quantity: number; size?: string }) =>
     api.post<Cart>('/cart/items', data),

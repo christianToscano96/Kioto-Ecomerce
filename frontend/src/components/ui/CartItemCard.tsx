@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useCartStore } from '@/store/cart';
 import type { CartItem } from '../../../../shared/src/index';
 
@@ -9,23 +10,27 @@ interface CartItemCardProps {
 const QuantitySelector = ({ 
   quantity, 
   onDecrease, 
-  onIncrease 
+  onIncrease,
+  disabled,
 }: { 
   quantity: number, 
   onDecrease: () => void, 
-  onIncrease: () => void 
+  onIncrease: () => void,
+  disabled?: boolean,
 }) => (
   <div className="flex items-center gap-4 mt-1">
     <button 
       onClick={onDecrease}
-      className="material-symbols-outlined text-sm hover:text-primary transition-colors"
+      disabled={disabled}
+      className="material-symbols-outlined text-sm hover:text-primary transition-colors disabled:opacity-50"
     >
       remove
     </button>
     <span className="text-on-surface font-bold">{quantity}</span>
     <button 
       onClick={onIncrease}
-      className="material-symbols-outlined text-sm hover:text-primary transition-colors"
+      disabled={disabled}
+      className="material-symbols-outlined text-sm hover:text-primary transition-colors disabled:opacity-50"
     >
       add
     </button>
@@ -33,16 +38,33 @@ const QuantitySelector = ({
 );
 
 export function CartItemCard({ item }: CartItemCardProps) {
-  const updateCartItem = useCartStore.getState().updateCartItem;
-  const removeCartItem = useCartStore.getState().removeCartItem;
+  const updateCartItem = useCartStore(state => state.updateCartItem);
+  const removeCartItem = useCartStore(state => state.removeCartItem);
+  const isSyncing = useCartStore(state => state.isSyncing);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Get the cart item ID (not product ID) - the _id from the cart item
+  const cartItemId = (item as any)._id || item.productId;
 
   const handleQuantityChange = async (newQuantity: number) => {
     if (newQuantity < 1) return;
-    await updateCartItem(item.productId, newQuantity);
+    setIsUpdating(true);
+    try {
+      await updateCartItem(cartItemId, newQuantity);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleRemove = async () => {
-    await removeCartItem(item.productId);
+    if (isRemoving) return;
+    setIsRemoving(true);
+    try {
+      await removeCartItem(cartItemId);
+    } finally {
+      setIsRemoving(false);
+    }
   };
 
   // Get product info with fallbacks
@@ -101,6 +123,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
                 quantity={item.quantity}
                 onDecrease={() => handleQuantityChange(item.quantity - 1)}
                 onIncrease={() => handleQuantityChange(item.quantity + 1)}
+                disabled={isUpdating || isSyncing}
               />
             </div>
           </div>
@@ -109,9 +132,16 @@ export function CartItemCard({ item }: CartItemCardProps) {
         <div className="mt-8">
           <button 
             onClick={handleRemove}
-            className="font-label text-xs uppercase tracking-widest text-primary border-b border-dashed border-primary/40 pb-1 hover:border-primary transition-all"
+            disabled={isRemoving || isSyncing}
+            className="font-label text-xs uppercase tracking-widest text-primary border-b border-dashed border-primary/40 pb-1 hover:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            Remove Item
+            {isRemoving && (
+              <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+            )}
+            {isRemoving ? 'Removing...' : 'Remove Item'}
           </button>
         </div>
       </div>

@@ -37,6 +37,7 @@ export interface UpdateProductInput extends Partial<CreateProductInput> {}
 
 // Cart Types
 export interface CartItem {
+  _id?: string; // Cart item subdocument ID
   productId: string;
   quantity: number;
   price: number;
