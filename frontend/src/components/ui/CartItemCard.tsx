@@ -67,28 +67,34 @@ export function CartItemCard({ item }: CartItemCardProps) {
     }
   };
 
-  // Get product info with fallbacks
-  const product = item.product;
+  // Get product info - backend populates 'productId' field
+  const product = (item as any).productId || item.product;
   const name = product?.name || 'Product';
   const price = item.price || product?.price || 0;
-  const image = product?.images?.[0];
+  const images = product?.images;
+  const image = images && images.length > 0 ? images[0] : null;
   const description = product?.description || '';
 
   return (
     <div className="flex flex-col md:flex-row gap-8 pb-12 border-b border-dashed border-outline-variant/40">
       {/* Product Image */}
-      <div className="w-full md:w-48 aspect-[3/4] bg-surface-container overflow-hidden rounded-lg">
+      <div className="w-full md:w-56 aspect-[3/4] bg-surface-container overflow-hidden rounded-xl relative group">
         {image ? (
           <img 
             src={image} 
             alt={name}
-            className="w-full h-full object-cover mix-blend-multiply opacity-90"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-            No image
+          <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant bg-gradient-to-br from-surface-container-high to-surface-container">
+            <span className="material-symbols-outlined text-5xl opacity-30 mb-2">
+              image_not_supported
+            </span>
+            <span className="text-xs uppercase tracking-wider opacity-50">Sin imagen</span>
           </div>
         )}
+        {/* Image overlay on hover */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-xl" />
       </div>
 
       {/* Product Details */}
@@ -113,10 +119,18 @@ export function CartItemCard({ item }: CartItemCardProps) {
                 {(item as any).size || 'M'}
               </span>
             </div>
-            <div>
-              <span className="block mb-1 text-[10px] opacity-60">Color</span>
-              <span className="text-on-surface font-bold">Natural</span>
-            </div>
+<div>
+               <span className="block mb-1 text-[10px] opacity-60">Color</span>
+               <div className="flex items-center gap-2">
+                 {(item as any).color && (
+                   <div 
+                     className="w-4 h-4 rounded-full border border-outline-variant"
+                     style={{ backgroundColor: (item as any).color.startsWith('#') ? (item as any).color : '#8B7355' }}
+                   />
+                 )}
+                 <span className="text-on-surface font-bold">{(item as any).color || 'Natural'}</span>
+               </div>
+             </div>
             <div>
               <span className="block mb-1 text-[10px] opacity-60">Quantity</span>
               <QuantitySelector

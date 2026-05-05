@@ -79,10 +79,10 @@ export function CartPage() {
         <main className="max-w-7xl mx-auto px-8 py-16 ">
           <header className="mb-12 ">
             <h1 className="font-serif text-5xl font-bold tracking-tight mb-2">
-              Shopping Bags
+              Canasta
             </h1>
             <p className="font-label text-sm uppercase tracking-[0.2em] text-on-surface-variant">
-              Tu curation está vacía
+              Tu carrito está vacía
             </p>
           </header>
           <div className="text-center py-16">
@@ -105,18 +105,21 @@ export function CartPage() {
   return (
     <>
       <Header />
-      <main className="max-w-7xl mx-auto px-8 py-16">
-        <header className="mb-12 mt-10">
+<main className="max-w-7xl mx-auto px-8 pb-32 min-h-[calc(100vh-200px)]">
+        {/* Spacer for fixed header */}
+        <div className="h-20 lg:h-24"></div>
+        
+        <header className="mb-12">
           <h1 className="font-serif text-5xl font-bold tracking-tight mb-2">
-            Cesta de la compra
+            Canasta
           </h1>
           <p className="font-label text-sm uppercase tracking-[0.2em] text-on-surface-variant">
             {cartItemCount} {cartItemCount === 1 ? "artículo" : "artículos"} en
-            tu curation
+            tu carrito
           </p>
         </header>
 
-        <div className="lg:grid lg:grid-cols-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
           {/* Cart Items List */}
           <div className="lg:col-span-8 space-y-12">
             {items.map((item) => {
@@ -125,100 +128,103 @@ export function CartPage() {
             })}
           </div>
 
-          {/* Order Summary */}
-          <aside className="lg:col-span-4 mt-16 lg:mt-0">
-            <div className="bg-surface-container-low p-8 rounded-xl border-l border-outline-variant/40">
-              <h2 className="font-serif text-2xl font-bold mb-8">
-                Resumen del pedido
-              </h2>
+          {/* Order Summary - Sticky */}
+          <aside className="lg:col-span-4">
+            <div className="sticky top-32">
+              <div className="bg-surface-container-low p-8 rounded-xl border-l border-outline-variant/40">
+                <h2 className="font-serif text-2xl font-bold mb-8">
+                  Resumen del pedido
+                </h2>
 
-              <div className="space-y-4 mb-8">
-                <div className="flex justify-between font-body text-on-surface-variant">
-                  <span>Subtotal</span>
-                  <span className="font-serif text-on-surface">
-                    ${cartTotal.toFixed(2)}
-                  </span>
+                <div className="space-y-4 mb-8">
+                  <div className="flex justify-between font-body text-on-surface-variant">
+                    <span>Subtotal</span>
+                    <span className="font-serif text-on-surface">
+                      ${cartTotal.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-body text-on-surface-variant">
+                    <span>Envío</span>
+                    <span className="font-serif text-on-surface">
+                      Calculado en el siguiente paso
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-body text-on-surface-variant">
+                    <span>Impuestos</span>
+                    <span className="font-serif text-on-surface">$0.00</span>
+                  </div>
+                  <div className="pt-4 border-t border-dashed border-outline-variant/40 flex justify-between items-center">
+                    <span className="font-label text-xs uppercase tracking-widest font-bold">
+                      Total
+                    </span>
+                    <span className="font-serif text-3xl font-bold text-primary">
+                      ${cartTotal.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between font-body text-on-surface-variant">
-                  <span>Envío</span>
-                  <span className="font-serif text-on-surface">
-                    Calculado en el siguiente paso
-                  </span>
-                </div>
-                <div className="flex justify-between font-body text-on-surface-variant">
-                  <span>Impuestos</span>
-                  <span className="font-serif text-on-surface">$0.00</span>
-                </div>
-                <div className="pt-4 border-t border-dashed border-outline-variant/40 flex justify-between items-center">
-                  <span className="font-label text-xs uppercase tracking-widest font-bold">
-                    Total
-                  </span>
-                  <span className="font-serif text-3xl font-bold text-primary">
-                    ${cartTotal.toFixed(2)}
-                  </span>
-                </div>
-              </div>
 
-              <Link to="/checkout">
-                <button className="w-full bg-primary text-on-primary py-5 rounded-lg font-label text-sm uppercase tracking-[0.2em] font-bold hover:bg-primary-container transition-colors shadow-sm">
-                  Ir a pagar
-                </button>
-              </Link>
+                <Link to="/checkout">
+                  <button className="w-full bg-primary text-on-primary py-5 rounded-lg font-label text-sm uppercase tracking-[0.2em] font-bold hover:bg-primary-container transition-colors shadow-sm">
+                    Ir a pagar
+                  </button>
+                </Link>
 
-              <div className="mt-8 space-y-4">
-                <button
-                  onClick={() => {
-                    if (confirm("¿Vaciar el carrito?")) {
-                      useCartStore.getState().clearCart();
-                    }
-                  }}
-                  className="font-label text-xs uppercase tracking-widest text-terracota-600 border-b border-dashed border-terracota-600/40 pb-1 hover:border-terracota-600 transition-all"
-                >
-                  Vaciar Carrito
-                </button>
-              </div>
-
-              <div className="mt-8 space-y-4">
-                <div className="flex items-start gap-4">
-                  <span className="material-symbols-outlined text-primary text-xl">
-                    local_shipping
-                  </span>
-                  <p className="font-body text-xs text-on-surface-variant">
-                    Envío neutro en carbono complementario en pedidos sobre
-                    $300.
-                  </p>
-                </div>
-                <div className="flex items-start gap-4">
-                  <span className="material-symbols-outlined text-primary text-xl">
-                    verified
-                  </span>
-                  <p className="font-body text-xs text-on-surface-variant">
-                    Fabricado éticamente con garantía de reparación de por vida.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Promo Code Section */}
-            <div className="mt-6 px-4">
-              <details className="group">
-                <summary className="list-none flex items-center justify-between cursor-pointer font-label text-xs uppercase tracking-widest text-on-surface-variant group-open:mb-4">
-                  <span>¿Tienes un código promocional?</span>
-                  <span className="material-symbols-outlined group-open:rotate-180 transition-transform">
-                    expand_more
-                  </span>
-                </summary>
-                <div className="flex gap-2">
-                  <input
-                    className="flex-1 bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-sm font-body px-0 py-2"
-                    placeholder="Ingresa código"
-                    type="text"
-                  />
-                  <button className="font-label text-xs uppercase tracking-widest text-primary font-bold">
-                    Aplicar
+                <div className="mt-8 space-y-4">
+                  <button
+                    onClick={() => {
+                      if (confirm("¿Vaciar el carrito?")) {
+                        useCartStore.getState().clearCart();
+                      }
+                    }}
+                    className="font-label text-xs uppercase tracking-widest text-terracota-600 border-b border-dashed border-terracota-600/40 pb-1 hover:border-terracota-600 transition-all"
+                  >
+                    Vaciar Carrito
                   </button>
                 </div>
-              </details>
+
+                <div className="mt-8 space-y-4">
+                  <div className="flex items-start gap-4">
+                    <span className="material-symbols-outlined text-primary text-xl">
+                      local_shipping
+                    </span>
+                    <p className="font-body text-xs text-on-surface-variant">
+                      Envío neutro en carbono complementario en pedidos sobre
+                      $300.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <span className="material-symbols-outlined text-primary text-xl">
+                      verified
+                    </span>
+                    <p className="font-body text-xs text-on-surface-variant">
+                      Fabricado éticamente con garantía de reparación de por
+                      vida.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Promo Code Section */}
+              <div className="mt-6 px-4">
+                <details className="group">
+                  <summary className="list-none flex items-center justify-between cursor-pointer font-label text-xs uppercase tracking-widest text-on-surface-variant group-open:mb-4">
+                    <span>¿Tienes un código promocional?</span>
+                    <span className="material-symbols-outlined group-open:rotate-180 transition-transform">
+                      expand_more
+                    </span>
+                  </summary>
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-sm font-body px-0 py-2"
+                      placeholder="Ingresa código"
+                      type="text"
+                    />
+                    <button className="font-label text-xs uppercase tracking-widest text-primary font-bold">
+                      Aplicar
+                    </button>
+                  </div>
+                </details>
+              </div>
             </div>
           </aside>
         </div>
