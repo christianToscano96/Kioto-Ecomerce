@@ -31,7 +31,7 @@ export function SidebarFilters({
         {/* Categories */}
         {categories.length > 0 && (
           <div>
-            <h3 className="font-serif text-xl mb-6 text-on-surface italic">Category</h3>
+            <h3 className="font-serif text-xl mb-6 text-on-surface italic">Categoría</h3>
             <ul className="space-y-4 font-label text-sm tracking-wide uppercase text-on-surface-variant">
               {categories.map((category) => (
                 <li
@@ -52,7 +52,7 @@ export function SidebarFilters({
 
         {/* Color Filter */}
         <div className="border-t border-dashed border-outline-variant/40 pt-10">
-          <h3 className="font-serif text-xl mb-6 text-on-surface italic">Earth Tones</h3>
+          <h3 className="font-serif text-xl mb-6 text-on-surface italic">Tonos Terrosos</h3>
           <div className="grid grid-cols-5 gap-3">
             {colors.map((color, index) => (
               <button
@@ -64,7 +64,7 @@ export function SidebarFilters({
                     : 'border border-white/20 hover:scale-110'
                 }`}
                 style={{ backgroundColor: color }}
-                aria-label={`Filter by color ${index + 1}`}
+                aria-label={`Filtrar por color ${index + 1}`}
               />
             ))}
           </div>
@@ -72,7 +72,7 @@ export function SidebarFilters({
 
         {/* Size Filter */}
         <div className="border-t border-dashed border-outline-variant/40 pt-10">
-          <h3 className="font-serif text-xl mb-6 text-on-surface italic">Sizes</h3>
+          <h3 className="font-serif text-xl mb-6 text-on-surface italic">Tallas</h3>
           <div className="flex flex-wrap gap-2">
             {sizes.map((size) => (
               <button

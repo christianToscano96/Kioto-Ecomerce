@@ -69,17 +69,17 @@ export function ProductsListPage() {
       try {
         await addToCart(product, 1);
       } catch (error) {
-        console.error("Failed to add to cart:", error);
+        console.error("Error al agregar al carrito:", error);
       }
     }
   };
 
-  // Categories data (would come from API in real app)
+  // Categorías (en producción vendrían del API)
   const categories = [
-    { name: "Sweaters", count: 12 },
-    { name: "Linen Pants", count: 8, active: true },
-    { name: "Accessories", count: 24 },
-    { name: "Outerwear", count: 6 },
+    { name: "Suéteres", count: 12 },
+    { name: "Pantalones de Lino", count: 8, active: true },
+    { name: "Accesorios", count: 24 },
+    { name: "Ropa de Exterior", count: 6 },
   ];
 
   if (isLoading) {
@@ -100,7 +100,7 @@ export function ProductsListPage() {
         <PublicHeader />
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="p-4 bg-primary-container text-on-primary rounded-lg text-center max-w-md">
-            Error loading products. Please try again.
+            Error al cargar los productos. Por favor, intenta nuevamente.
           </div>
         </div>
       </>
@@ -113,23 +113,23 @@ export function ProductsListPage() {
       <PublicHeader />
 
       <PageContainer>
-        {/* Narrative Header */}
-        <header className="mb-16">
+        {/* Encabezado Narrativo */}
+        <header className="mb-16 mt-16">
           <span className="font-label text-xs uppercase tracking-[0.2em] text-primary font-bold mb-4 block">
-            Seasonal Selection
+            Selección de Temporada
           </span>
           <h1 className="font-serif text-5xl md:text-6xl tracking-tight text-on-surface">
-            New Arrivals
+            Nuevas Llegadas
           </h1>
           <p className="mt-6 text-on-surface-variant max-w-2xl font-body text-lg leading-relaxed">
-            A collection of earthbound essentials, crafted from organic fibers
-            and dyed with the warmth of the soil. Each piece is a testament to
-            the artisan's touch.
+            Una colección de esenciales terrenales, hechos con fibras orgánicas
+            y teñidos con la calidez de la tierra. Cada pieza es un testimonio
+            del toque artesanal.
           </p>
         </header>
 
         <div className="flex flex-col lg:flex-row gap-16">
-          {/* Sidebar Filters */}
+          {/* Filtros Laterales */}
           <SidebarFilters
             categories={categories}
             sizes={["XS", "S", "M", "L", "XL"]}
@@ -137,20 +137,20 @@ export function ProductsListPage() {
             onSizeChange={setSelectedSize}
           />
 
-          {/* Product Grid */}
+          {/* Grid de Productos */}
           <section className="flex-1">
             {filteredProducts.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-on-surface-variant">
                   {searchQuery
-                    ? "No products match your search."
-                    : "No products available yet."}
+                    ? "Ningún producto coincide con tu búsqueda."
+                    : "Aún no hay productos disponibles."}
                 </p>
               </div>
             ) : (
               <>
                 <p className="text-sm text-on-surface-variant mb-4">
-                  Showing {filteredProducts.length} product
+                  Mostrando {filteredProducts.length} producto
                   {filteredProducts.length !== 1 ? "s" : ""}
                 </p>
 
@@ -164,10 +164,10 @@ export function ProductsListPage() {
                   ))}
                 </div>
 
-                {/* Show More Button */}
+                {/* Botón Ver Más */}
                 <div className="mt-20 flex justify-center">
                   <button className="font-label text-sm uppercase tracking-[0.2em] px-12 py-4 border border-outline-variant hover:border-primary transition-colors text-on-surface group">
-                    Show More
+                    Ver Más
                     <span className="inline-block transition-transform group-hover:translate-y-1">
                       ↓
                     </span>

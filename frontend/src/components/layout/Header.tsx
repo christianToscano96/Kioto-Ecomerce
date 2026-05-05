@@ -3,10 +3,8 @@ import { useState } from "react";
 import { useCartItemCount } from "@/store/cart";
 
 const navItems = [
-  { to: "/products", label: "Shop All" },
-  { to: "/men", label: "Men" },
-  { to: "/women", label: "Women" },
-  { to: "/new", label: "New Arrivals" },
+  { to: "/products", label: "Catálogo" },
+  { to: "/new", label: "Nuevas Llegadas" },
 ];
 
 export function Header() {
@@ -57,7 +55,7 @@ export function Header() {
             </span>
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Buscar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent border-none focus:ring-0 text-xs placeholder:text-on-surface-variant/50 w-36 font-label"

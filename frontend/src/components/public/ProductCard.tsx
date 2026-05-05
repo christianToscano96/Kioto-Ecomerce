@@ -23,9 +23,9 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-              No image
-            </div>
+<div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+               Sin imagen
+             </div>
           )}
         </div>
 
@@ -43,7 +43,7 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
           className="w-full bg-primary text-on-primary font-label text-sm uppercase tracking-widest py-3 rounded-lg hover:bg-primary-container transition-all flex items-center justify-center gap-2"
         >
           <span className="material-symbols-outlined text-base">add</span>
-          Quick Add
+          Agregar
         </button>
       </Link>
     </div>
