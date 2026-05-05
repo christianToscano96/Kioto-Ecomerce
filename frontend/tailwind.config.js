@@ -124,12 +124,13 @@ export default {
           800: '#662914',
           900: '#33140a',
         },
-      },
-      fontFamily: {
-        headline: ['Noto Serif', 'Georgia', 'serif'],
-        display: ['Noto Serif', 'Georgia', 'serif'],
+},
+       fontFamily: {
+        headline: ['Noto Serif', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Noto Serif', 'system-ui', '-apple-system', 'sans-serif'],
         body: ['Manrope', 'system-ui', '-apple-system', 'sans-serif'],
         label: ['Manrope', 'system-ui', '-apple-system', 'sans-serif'],
+        serif: ['Noto Serif', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },

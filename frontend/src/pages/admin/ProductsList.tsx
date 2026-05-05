@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { MetricCard } from "@/components/ui/MetricCard";
-import { useAdminProducts, useDeleteProduct } from "@/lib/api";
+import { useProductsStore } from "@/store/products";
+import { useEffect } from "react";
 
 const LoaderIcon = () => (
   <svg
@@ -75,12 +76,19 @@ const TrashIcon = () => (
 );
 
 export function ProductsList() {
-  const { data: products, isLoading, error } = useAdminProducts();
-  const deleteMutation = useDeleteProduct();
+  const products = useProductsStore((state) => state.products);
+  const isLoading = useProductsStore((state) => state.isLoading);
+  const error = useProductsStore((state) => state.error);
+  const fetchAdminProducts = useProductsStore((state) => state.fetchAdminProducts);
+  const deleteProduct = useProductsStore((state) => state.deleteProduct);
+
+  useEffect(() => {
+    fetchAdminProducts();
+  }, [fetchAdminProducts]);
 
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      await deleteMutation.mutateAsync(id);
+      await deleteProduct(id);
     }
   };
 

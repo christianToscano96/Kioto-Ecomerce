@@ -1,101 +1,83 @@
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { useProducts } from '@/lib/api';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { BottomNav } from '@/components/layout/BottomNav';
-
-const LoaderIcon = () => (
-  <svg className="animate-spin h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-  </svg>
-);
+import { Link } from "react-router-dom";
+import { useProductsStore } from "@/store/products";
+import { useEffect } from "react";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { BottomNav } from "@/components/layout/BottomNav";
+import { HeroCarousel } from "@/components/home/HeroCarousel";
+import { ProductCard } from "@/components/home/ProductCardHome";
+import { SectionHeader } from "@/components/home/SectionHeader";
+import { EditorialSection } from "@/components/home/EditorialSection";
 
 export function HomePage() {
-  const { data: products, isLoading, error } = useProducts();
+  const { products, isLoading, error, fetchProducts } = useProductsStore();
+  const featuredProducts = products?.slice(0, 3) || [];
 
-  // Get first 6 products for featured section
-  const featuredProducts = products?.slice(0, 6) || [];
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   return (
     <>
       <Header />
-      <main className="max-w-screen-2xl mx-auto px-8 pt-24 pb-32">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-b from-surface-container-low to-background py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-serif font-bold text-on-surface mb-4">
-                Earthbound Curator
-              </h1>
-              <p className="text-lg md:text-xl text-on-surface-variant mb-8 max-w-2xl mx-auto">
-                Curated collection of handcrafted goods that celebrate the beauty of our natural world
-              </p>
-              <Link to="/products">
-                <Button size="lg">Shop Collection</Button>
-              </Link>
+
+      <main>
+        {/* Hero Carousel */}
+        <HeroCarousel />
+
+        {/* Product Grid Section */}
+        <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+<SectionHeader
+          title="Esenciales Seleccionados"
+          description="Siluetas curadas diseñadas para una vida en armonía con las estaciones."
+        />
+
+          {isLoading && (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
             </div>
-          </div>
+          )}
+
+          {error && (
+            <div className="p-4 bg-primary-container text-on-primary rounded-lg text-center max-w-md mx-auto">
+              Error al cargar productos. Por favor, intenta de nuevo.
+            </div>
+          )}
+
+          {featuredProducts.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          )}
         </section>
 
-        {/* Featured Products */}
-        <section className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-serif font-bold text-on-surface mb-4">
-                Featured Products
-              </h2>
-              <p className="text-on-surface-variant">
-                Discover our handpicked selection of artisan goods
-              </p>
-            </div>
-
-            {isLoading && (
-              <div className="flex items-center justify-center min-h-[400px]">
-                <LoaderIcon />
-              </div>
-            )}
-
-            {error && (
-              <div className="p-4 bg-primary-container text-on-primary rounded-lg text-center">
-                Error loading products. Please try again.
-              </div>
-            )}
-
-            {featuredProducts.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredProducts.map((product) => (
-                  <Card key={product._id} variant="elevated" className="overflow-hidden">
-                    <Link to={`/products/${product._id}`}>
-                      {product.images && product.images.length > 0 ? (
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="w-full h-48 object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-48 bg-surface-container flex items-center justify-center">
-                          <span className="text-on-surface-variant">No image</span>
-                        </div>
-                      )}
-                      <div className="p-4">
-                        <h3 className="font-serif font-semibold text-on-surface mb-2">
-                          {product.name}
-                        </h3>
-                        <p className="text-primary font-medium">
-                          ${product.price.toFixed(2)}
-                        </p>
-                      </div>
-                    </Link>
-                  </Card>
-                ))}
-              </div>
-            )}
+        {/* Editorial Section */}
+        <EditorialSection
+          image="https://images.unsplash.com/photo-1532452109234-9fc7e8c3c0b5?w=1200&q=80"
+          imageAlt="Artistic fashion portrait with natural fabrics"
+          title="El Arte de la Quietud"
+          quote="La moda es la piel que elegimos para nuestras almas."
+        >
+          <p className="text-on-surface-variant text-lg leading-relaxed mb-8">
+            Nuestra colección es un diálogo entre la artesanía humana y los
+            materiales crudos que nos brinda la tierra. Cada puntada es
+            intencional, cada tela es obtenida de forma ética, y cada diseño
+            está hecho para durar más allá de la moda.
+          </p>
+          <div className="border-l-2 border-primary pl-6 py-2">
+            <p className="text-sm font-bold uppercase tracking-widest mb-2">
+              Promesa Sostenible
+            </p>
+            <p className="text-sm text-on-surface-variant italic">
+              100% Cadena de suministro trazable desde la tierra hasta el
+              estante.
+            </p>
           </div>
-        </section>
+        </EditorialSection>
       </main>
+
       <Footer />
       <BottomNav />
     </>

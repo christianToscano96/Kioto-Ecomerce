@@ -1,36 +1,62 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { useCart, useCartTotal, useCartItemCount } from '@/lib/api';
-import { formatPrice } from '@/lib/utils';
-import { PublicHeader } from '@/components/layout/PublicHeader';
-import { stripe } from '@/lib/stripe';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  useCartItems,
+  useCartTotal,
+  useCartItemCount,
+  useCartIsLoading,
+} from "@/store/cart";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { Footer } from "@/components/layout/Footer";
+import {
+  Stepper,
+  FormSection,
+  FloatingLabelInput,
+  SecurityBadge,
+  PrimaryButton,
+} from "@/components/checkout/CheckoutFormComponents";
+import { OrderSummary } from "@/components/checkout/OrderSummary";
+import { stripe } from "@/lib/stripe";
 
 const LoaderIcon = () => (
-  <svg className="animate-spin h-8 w-8 text-terracota-600" fill="none" viewBox="0 0 24 24">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+  <svg
+    className="animate-spin h-8 w-8 text-primary"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    />
   </svg>
 );
 
 export function CheckoutPage() {
   const navigate = useNavigate();
-  const { data: cart, isLoading: cartLoading } = useCart();
+  const items = useCartItems();
   const cartTotal = useCartTotal();
   const cartItemCount = useCartItemCount();
+  const cartLoading = useCartIsLoading();
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    name: "",
+    email: "",
     address: {
-      line1: '',
-      line2: '',
-      city: '',
-      state: '',
-      postal_code: '',
-      country: 'US',
+      line1: "",
+      line2: "",
+      city: "",
+      state: "",
+      postal_code: "",
+      country: "US",
     },
   });
 
@@ -38,8 +64,8 @@ export function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: string) => {
-    if (field.startsWith('address.')) {
-      const addressField = field.split('.')[1];
+    if (field.startsWith("address.")) {
+      const addressField = field.split(".")[1];
       setFormData((prev) => ({
         ...prev,
         address: { ...prev.address, [addressField]: value },
@@ -55,13 +81,12 @@ export function CheckoutPage() {
     setError(null);
 
     try {
-      // Create Stripe checkout session via API
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
+      const response = await fetch("/api/checkout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
           shippingDetails: formData,
         }),
@@ -70,52 +95,59 @@ export function CheckoutPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout session');
+        throw new Error(data.error || "Error al crear sesión de checkout");
       }
 
-      // Redirect to Stripe Checkout using Stripe.js
       if (data.sessionId) {
         await stripe.redirectToCheckout(data.sessionId);
       } else if (data.url) {
-        // Fallback: direct redirect if sessionId not provided
         window.location.href = data.url;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "Ocurrió un error");
       setIsSubmitting(false);
     }
   };
+
+  // Stepper steps
+  const steps = [
+    { number: "01", label: "Envío", active: true },
+    { number: "02", label: "Pago", active: false },
+    { number: "03", label: "Revisión", active: false },
+  ];
 
   if (cartLoading) {
     return (
       <>
         <PublicHeader />
-        <div className="min-h-screen bg-crema-50 py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-center min-h-[400px]">
-              <LoaderIcon />
-            </div>
-          </div>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <LoaderIcon />
         </div>
       </>
     );
   }
 
-  const items = cart?.items || [];
-
   if (items.length === 0) {
     return (
       <>
         <PublicHeader />
-        <div className="min-h-screen bg-crema-50 py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center py-16">
-              <h1 className="text-3xl font-serif font-bold text-chocolate-900 mb-4">Your Cart is Empty</h1>
-              <p className="text-chocolate-600 mb-8">Add items to your cart before checking out.</p>
-              <Button onClick={() => navigate('/products')}>Shop Products</Button>
-            </div>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center py-16">
+            <h1 className="text-3xl font-serif font-bold text-on-surface mb-4">
+              Tu carrito está vacío
+            </h1>
+            <p className="text-on-surface-variant mb-8">
+              Agrega artículos antes de finalizar la compra.
+            </p>
+            <button
+              onClick={() => navigate("/products")}
+              className="font-label uppercase tracking-widest px-8 py-3 bg-primary text-on-primary hover:bg-primary-container transition-colors"
+            >
+              Ver Productos
+            </button>
           </div>
         </div>
+        <Footer />
       </>
     );
   }
@@ -123,132 +155,85 @@ export function CheckoutPage() {
   return (
     <>
       <PublicHeader />
-      <div className="min-h-screen bg-crema-50 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-serif font-bold text-chocolate-900 mb-8">Checkout</h1>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Shipping Form */}
-            <div className="lg:col-span-2">
-              <Card>
-                <h2 className="text-xl font-serif font-semibold text-chocolate-900 mb-6">Shipping Information</h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {error && (
-                    <div className="p-4 bg-terracota-50 text-terracota-700 rounded-lg">
-                      {error}
-                    </div>
-                  )}
-
-                  {/* Contact Information */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <Input
-                        label="Full Name"
-                        required
-                        value={formData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        placeholder="John Doe"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Input
-                        type="email"
-                        label="Email Address"
-                        required
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        placeholder="john@example.com"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Address */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-chocolate-800 mb-3">Shipping Address</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="md:col-span-2">
-                        <Input
-                          label="Address Line 1"
-                          required
-                          value={formData.address.line1}
-                          onChange={(e) => handleInputChange('address.line1', e.target.value)}
-                          placeholder="123 Main Street"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Input
-                          label="Address Line 2 (Optional)"
-                          value={formData.address.line2}
-                          onChange={(e) => handleInputChange('address.line2', e.target.value)}
-                          placeholder="Apt, suite, etc."
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="City"
-                          required
-                          value={formData.address.city}
-                          onChange={(e) => handleInputChange('address.city', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="State / Province"
-                          required
-                          value={formData.address.state}
-                          onChange={(e) => handleInputChange('address.state', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Postal Code"
-                          required
-                          value={formData.address.postal_code}
-                          onChange={(e) => handleInputChange('address.postal_code', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label="Country"
-                          required
-                          value={formData.address.country}
-                          onChange={(e) => handleInputChange('address.country', e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button type="submit" size="lg" disabled={isSubmitting} className="w-full md:w-auto">
-                    {isSubmitting ? 'Processing...' : `Complete Order (${formatPrice(cartTotal)})`}
-                  </Button>
-                </form>
-              </Card>
-            </div>
-
-            {/* Order Summary */}
-            <div>
-              <Card>
-                <h2 className="text-xl font-serif font-semibold text-chocolate-900 mb-4">Order Summary</h2>
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-chocolate-600">Items ({cartItemCount})</span>
-                    <span className="text-chocolate-900">{formatPrice(cartTotal)}</span>
-                  </div>
-                  <div className="border-t border-dashed border-chocolate-200 pt-3">
-                    <div className="flex justify-between text-lg font-semibold">
-                      <span className="text-chocolate-900">Total</span>
-                      <span className="text-terracota-600">{formatPrice(cartTotal)}</span>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-sm text-chocolate-500">
-                  You will be redirected to Stripe to complete your payment securely.
-                </p>
-              </Card>
-            </div>
-          </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+        {/* Checkout Process Indicator */}
+        <div className="mb-16 mt-8">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight mb-12">
+            Finalizar Compra
+          </h1>
+          <Stepper steps={steps} />
         </div>
-      </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+          {/* Forms Column */}
+          <div className="lg:col-span-7 space-y-12">
+            <form onSubmit={handleSubmit}>
+              <FormSection
+                title="Información de Contacto"
+                loginLink={{ text: "INICIAR SESIÓN", onClick: () => {} }}
+              >
+                <div className="space-y-6">
+                  <FloatingLabelInput
+                    label="Correo Electrónico"
+                    type="email"
+                    placeholder="curador@terrenal.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                  />
+                </div>
+              </FormSection>
+
+              <FormSection title="Dirección de Envío">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <FloatingLabelInput
+                    label="Nombre"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                  />
+                  <div className="md:col-span-2">
+                    <FloatingLabelInput
+                      label="Dirección Completa"
+                      placeholder="Calle 123 Artística"
+                      value={formData.address.line1}
+                      onChange={(e) =>
+                        handleInputChange("address.line1", e.target.value)
+                      }
+                    />
+                  </div>
+                  <FloatingLabelInput
+                    label="Ciudad"
+                    value={formData.address.city}
+                    onChange={(e) =>
+                      handleInputChange("address.city", e.target.value)
+                    }
+                  />
+                  <FloatingLabelInput
+                    label="Código Postal"
+                    value={formData.address.postal_code}
+                    onChange={(e) =>
+                      handleInputChange("address.postal_code", e.target.value)
+                    }
+                  />
+                </div>
+              </FormSection>
+
+              <section className="pt-8">
+                <PrimaryButton type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Procesando..." : "Continuar al Pago"}
+                </PrimaryButton>
+              </section>
+            </form>
+          </div>
+
+          {/* Order Summary Sidebar */}
+          <OrderSummary items={items} subtotal={cartTotal} total={cartTotal} />
+        </div>
+
+        <SecurityBadge message="Tu conexión está encriptada y tus datos son manejados con cuidado artesanal." />
+      </main>
+
+      <Footer />
     </>
   );
 }

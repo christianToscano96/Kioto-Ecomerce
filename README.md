@@ -35,7 +35,7 @@ npm run dev
 ### Backend (.env)
 
 ```
-PORT=5050
+PORT=4000
 MONGO_URI=mongodb://localhost:27017/kioto
 JWT_SECRET=your_jwt_secret_here
 JWT_EXPIRES_IN=7d
@@ -48,7 +48,7 @@ FRONTEND_URL=http://localhost:5173
 ### Frontend (.env)
 
 ```
-VITE_API_URL=http://localhost:5050/api
+VITE_API_URL=http://localhost:4000/api
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key
 ```
 

@@ -2,31 +2,23 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { useAuthStore } from '@/store/auth';
-import { authApi } from '@/lib/api';
+import { useAuthStore, useAuthError, useAuthLoading } from '@/store/auth';
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
+  const register = useAuthStore((state) => state.register);
+  const error = useAuthError();
+  const isLoading = useAuthLoading();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await authApi.register({ email, password, name });
-      login(response.data.user, response.data.refreshToken);
+    await register({ email, password, name });
+    const user = useAuthStore.getState().user;
+    if (user) {
       navigate('/admin');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -56,7 +48,7 @@ export function RegisterPage() {
               autoComplete="email"
             />
 
-            <Input
+<Input
               label="Password"
               type="password"
               value={password}

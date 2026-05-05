@@ -2,30 +2,22 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { useAuthStore } from '@/store/auth';
-import { authApi } from '@/lib/api';
+import { useAuthStore, useAuthError, useAuthLoading } from '@/store/auth';
 
 export function LoginPage() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
+  const error = useAuthError();
+  const isLoading = useAuthLoading();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await authApi.login({ email, password });
-      login(response.data.user, response.data.refreshToken);
+    await login(email, password);
+    const user = useAuthStore.getState().user;
+    if (user) {
       navigate('/admin');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -45,7 +37,6 @@ export function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              error={error ? undefined : undefined}
             />
 
             <Input

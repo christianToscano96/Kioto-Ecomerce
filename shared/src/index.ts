@@ -19,6 +19,8 @@ export interface Product {
   description: string;
   stock: number;
   published: boolean;
+  materials?: string;
+  sizes?: string[];
   createdAt: Date;
 }
 
@@ -35,6 +37,7 @@ export interface UpdateProductInput extends Partial<CreateProductInput> {}
 
 // Cart Types
 export interface CartItem {
+  _id?: string; // Cart item subdocument ID
   productId: string;
   quantity: number;
   price: number;
@@ -44,7 +47,9 @@ export interface CartItem {
     name: string;
     images: string[];
     price: number;
+    description?: string;
   };
+  size?: string;
 }
 
 export interface Cart {

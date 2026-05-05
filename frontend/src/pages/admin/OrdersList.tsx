@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Badge } from '@/components/ui/Badge';
 import { DataTable } from '@/components/ui/DataTable';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Input } from '@/components/ui/Input';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { Button } from '@/components/ui/Button';
-import { useAdminOrders } from '@/lib/api';
+import { useOrdersStore } from '@/store/orders';
 import type { Order } from '../../../../shared/src';
 
 const LoaderIcon = () => (
@@ -31,10 +31,17 @@ const STATUS_LABELS: Record<Order['status'], string> = {
 const ITEMS_PER_PAGE = 10;
 
 export function OrdersList() {
-  const { data: orders, isLoading, error } = useAdminOrders();
+  const orders = useOrdersStore((state) => state.orders);
+  const isLoading = useOrdersStore((state) => state.isLoading);
+  const error = useOrdersStore((state) => state.error);
+  const fetchOrders = useOrdersStore((state) => state.fetchOrders);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<Order['status'] | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   // Filter orders based on search and status
   const filteredOrders = useMemo(() => {

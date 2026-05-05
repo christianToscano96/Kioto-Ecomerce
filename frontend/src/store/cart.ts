@@ -1,15 +1,26 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { CartItem } from '../../../shared/src/index';
+import { toast } from 'sonner';
+import type { CartItem, Product } from '../../../shared/src/index';
+import { cartApi } from '../lib/api';
 
 interface CartState {
   items: CartItem[];
   sessionId: string | null;
   isLoading: boolean;
+  isSyncing: boolean;
   error: string | null;
 }
 
 interface CartActions {
+  // Async actions
+  fetchCart: () => Promise<void>;
+  addToCart: (product: Product, quantity: number, size?: string) => Promise<void>;
+  updateCartItem: (itemId: string, quantity: number) => Promise<void>;
+  removeCartItem: (itemId: string) => Promise<void>;
+  clearCart: () => Promise<void>;
+  
+  // Local actions (immediate state updates)
   addItem: (item: CartItem) => void;
   updateItem: (productId: string, quantity: number) => void;
   removeItem: (productId: string) => void;
@@ -28,9 +39,106 @@ export const useCartStore = create<CartStore>()(
       items: [],
       sessionId: null,
       isLoading: false,
+      isSyncing: false,
       error: null,
 
-      // Actions
+// Async actions with optimistic updates
+       fetchCart: async () => {
+         set({ isLoading: true, error: null });
+          try {
+            const response = await cartApi.get();
+            const items = response.data.cart?.items || [];
+            const sessionId = response.data.cart?.sessionId || null;
+            set({ items, sessionId });
+          } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to fetch cart';
+            set({ error: message });
+            toast.error(message);
+          } finally {
+            set({ isLoading: false });
+          }
+        },
+
+      addToCart: async (product, quantity, size) => {
+          set({ isSyncing: true, error: null });
+          const optimisticItem: CartItem = {
+            productId: product._id,
+            quantity,
+            price: product.price,
+          };
+          get().addItem(optimisticItem);
+          
+          try {
+            const response = await cartApi.addItem({ productId: product._id, quantity, size });
+            await get().fetchCart();
+            toast.success('Added to cart');
+          } catch (error: any) {
+            get().removeItem(product._id);
+            const message = error instanceof Error ? error.message : 'Failed to add item';
+            set({ error: message });
+            toast.error(message);
+          } finally {
+            set({ isSyncing: false });
+          }
+        },
+
+      updateCartItem: async (itemId, quantity) => {
+          set({ isSyncing: true, error: null });
+          const items = get().items.map(item => 
+            (item as any)._id === itemId ? { ...item, quantity } : item
+          );
+          set({ items });
+          
+          try {
+            await cartApi.updateItem(itemId, quantity);
+            toast.success('Cart updated');
+          } catch (error) {
+            await get().fetchCart();
+            const message = error instanceof Error ? error.message : 'Failed to update cart';
+            set({ error: message });
+            toast.error(message);
+          } finally {
+            set({ isSyncing: false });
+          }
+        },
+
+       removeCartItem: async (itemId) => {
+           set({ isSyncing: true, error: null });
+           const previousItems = get().items;
+           set({ items: previousItems.filter(item => (item as any)._id !== itemId) });
+           
+           try {
+             await cartApi.removeItem(itemId);
+             toast.success('Removed from cart');
+           } catch (error) {
+             set({ items: previousItems });
+             const message = error instanceof Error ? error.message : 'Failed to remove item';
+             set({ error: message });
+             toast.error(message);
+           } finally {
+             set({ isSyncing: false });
+           }
+         },
+
+       clearCart: async () => {
+         set({ isSyncing: true, error: null });
+         const previousItems = get().items;
+         set({ items: [] });
+         
+         try {
+           await cartApi.clear();
+           toast.success('Cart cleared');
+         } catch (error) {
+           set({ items: previousItems });
+           const message = error instanceof Error ? error.message : 'Failed to clear cart';
+           set({ error: message });
+           toast.error(message);
+         } finally {
+           set({ isSyncing: false });
+         }
+       },
+
+      // Local actions
       addItem: (item) =>
         set((state) => {
           const existingIndex = state.items.findIndex(
@@ -38,7 +146,6 @@ export const useCartStore = create<CartStore>()(
           );
 
           if (existingIndex >= 0) {
-            // Update quantity if item exists
             const newItems = [...state.items];
             newItems[existingIndex] = {
               ...newItems[existingIndex],
@@ -47,7 +154,6 @@ export const useCartStore = create<CartStore>()(
             return { items: newItems };
           }
 
-          // Add new item
           return { items: [...state.items, item] };
         }),
 
@@ -90,3 +196,6 @@ export const useCartTotal = () =>
 export const useCartItemCount = () =>
   useCartStore((state) => state.items.reduce((count, item) => count + item.quantity, 0));
 export const useCartSessionId = () => useCartStore((state) => state.sessionId);
+export const useCartIsLoading = () => useCartStore((state) => state.isLoading);
+export const useCartIsSyncing = () => useCartStore((state) => state.isSyncing);
+export const useCartError = () => useCartStore((state) => state.error);

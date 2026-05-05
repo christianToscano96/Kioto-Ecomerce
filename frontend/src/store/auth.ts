@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { toast } from 'sonner';
 import type { User } from '../../../shared/src/index';
+import { authApi } from '../lib/api';
 
 interface AuthState {
   user: User | null;
@@ -10,8 +12,10 @@ interface AuthState {
 }
 
 interface AuthActions {
-  login: (user: User, refreshToken: string) => void;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  register: (data: { email: string; password: string; name?: string }) => Promise<void>;
+  logout: () => Promise<void>;
+  fetchCurrentUser: () => Promise<void>;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
@@ -21,24 +25,74 @@ type AuthStore = AuthState & AuthActions;
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // State
       user: null,
       refreshToken: null,
       isLoading: false,
       error: null,
 
-      // Actions
-      login: (user, refreshToken) =>
-        set({ user, refreshToken, isLoading: false, error: null }),
+      // Async actions
+      login: async (email, password) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authApi.login({ email, password });
+          set({ 
+            user: response.data.user, 
+            refreshToken: response.data.refreshToken,
+            isLoading: false 
+          });
+          toast.success('Welcome back!');
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Login failed';
+          set({ error: message, isLoading: false });
+          toast.error(message);
+        }
+      },
 
-      logout: () =>
-        set({ user: null, refreshToken: null, isLoading: false, error: null }),
+      register: async (data) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authApi.register(data);
+          set({ 
+            user: response.data.user, 
+            refreshToken: response.data.refreshToken,
+            isLoading: false 
+          });
+          toast.success('Account created!');
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Registration failed';
+          set({ error: message, isLoading: false });
+          toast.error(message);
+        }
+      },
 
+      logout: async () => {
+        set({ isLoading: true });
+        try {
+          await authApi.logout();
+        } catch {
+          // Ignore logout errors
+        } finally {
+          set({ user: null, refreshToken: null, isLoading: false, error: null });
+          toast.success('Logged out');
+        }
+      },
+
+      fetchCurrentUser: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authApi.me();
+          set({ user: response.data.user, isLoading: false });
+        } catch (error) {
+          // Don't show error for unauthenticated requests
+          set({ user: null, isLoading: false });
+        }
+      },
+
+      // Local actions
       setLoading: (loading) => set({ isLoading: loading }),
-
       setError: (error) => set({ error }),
-
       clearError: () => set({ error: null }),
     }),
     {

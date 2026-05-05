@@ -26,6 +26,9 @@ const cartItemSchema = new Schema<ICartItem>({
     required: true,
     min: [0, 'Price must be positive'],
   },
+  size: {
+    type: String,
+  },
 });
 
 // Cart Schema
