@@ -23,7 +23,7 @@ export function Header() {
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-dashed border-outline-variant/40">
-      <div className="max-w-7xl mx-auto  py-4 flex justify-between items-center">
+      <div className="flex justify-between items-center max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         {/* Left: Brand + Nav */}
         <div className="flex items-center gap-8">
           <NavLink
