@@ -133,4 +133,7 @@ export const ordersApi = {
 
   get: (id: string) =>
     api.get<Order>(`/orders/${id}`),
+
+  updateStatus: (id: string, status: string) =>
+    api.patch<Order>(`/orders/${id}/status`, { status }),
 };

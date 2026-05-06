@@ -60,9 +60,9 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
   updateOrderStatus: async (id, status) => {
     set({ isLoading: true, error: null });
     try {
-      // TODO: Add API endpoint for updating order status
+      await ordersApi.updateStatus(id, status);
       await get().fetchOrders();
-      toast.success('Order status updated');
+      toast.success('Estado actualizado');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to update order status';
       set({ error: message });

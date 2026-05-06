@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Badge } from '@/components/ui/Badge';
+import { OrderActions } from '@/components/ui/OrderActions';
 import { DataTable } from '@/components/ui/DataTable';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Input } from '@/components/ui/Input';
@@ -29,6 +30,27 @@ const STATUS_LABELS: Record<Order['status'], string> = {
 
 // Items per page for pagination
 const ITEMS_PER_PAGE = 10;
+
+// Helper function to determine badge variant based on status
+function getStatusBadgeVariant(status: Order['status']): 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'outline' {
+  switch (status) {
+    case 'pending':
+      return 'warning';
+    case 'paid':
+      return 'success';
+    case 'processing':
+      return 'default';
+    case 'shipped':
+      return 'secondary';
+    case 'delivered':
+      return 'outline';
+    case 'failed':
+    case 'cancelled':
+      return 'destructive';
+    default:
+      return 'outline';
+  }
+}
 
 export function OrdersList() {
   const orders = useOrdersStore((state) => state.orders);
@@ -151,72 +173,92 @@ export function OrdersList() {
       </div>
 
 {/* Orders Table */}
-      <div className="bg-surface-container-low rounded-lg border border-outline-variant/30 overflow-hidden">
-        <DataTable
-          columns={[
-            {
-              key: '_id',
-              label: 'ID de Pedido',
-              render: (_, row) => (
-                <span className="font-mono text-on-surface">
-                  #{row._id.slice(-8)}
-                </span>
-              ),
-            },
-            {
-              key: 'createdAt',
-              label: 'Fecha',
-              render: (value) => {
-                const date = new Date(value as string);
-                return (
-                  <span className="text-on-surface">
-                    {date.toLocaleDateString('es-ES', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </span>
-                );
-              },
-            },
-            {
-              key: 'total',
-              label: 'Total',
-              render: (value) => (
-                <span className="font-semibold text-on-surface">
-                  ${(value as number).toFixed(2)}
-                </span>
-              ),
-            },
-            {
-              key: 'status',
-              label: 'Estado',
-              render: (value) => {
-                const status = value as Order['status'];
-                return (
-                  <Badge
-                    variant={getStatusBadgeVariant(status)}
-                    size="md"
-                  >
-                    {STATUS_LABELS[status]}
-                  </Badge>
-                );
-              },
-            },
-          ]}
-          data={paginatedOrders}
-          actions={(row) => (
-            <div className="relative">
-              <button
-                className="text-on-surface-variant hover:text-primary transition-colors"
-                aria-label={`Acciones para pedido ${row._id.slice(-8)}`}
-              >
-                <span className="material-symbols-outlined">more_vert</span>
-              </button>
-            </div>
-          )}
-        />
-      </div>
+       <div className="bg-surface-container-low rounded-lg border border-outline-variant/30 overflow-hidden">
+         <DataTable
+           columns={[
+             {
+               key: '_id',
+               label: 'ID de Pedido',
+               render: (_, row) => (
+                 <span className="font-mono text-on-surface">
+                   #{row._id.slice(-8)}
+                 </span>
+               ),
+             },
+             {
+               key: 'customer',
+               label: 'Cliente',
+               render: (_, row) => (
+                 <div className="text-sm">
+                   <p className="font-medium text-on-surface">
+                     {row.shippingDetails?.name || 'Cliente anónimo'}
+                   </p>
+                   <p className="text-on-surface-variant text-xs">
+                     {row.shippingDetails?.email || '-'}
+                   </p>
+                 </div>
+               ),
+             },
+             {
+               key: 'items',
+               label: 'Productos',
+               render: (_, row) => {
+                 const itemCount = row.items?.length || 0;
+                 const totalQty = row.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+                 return (
+                   <span className="text-sm text-on-surface">
+                     {itemCount} {itemCount === 1 ? 'producto' : 'productos'} ({totalQty} unidades)
+                   </span>
+                 );
+               },
+             },
+             {
+               key: 'createdAt',
+               label: 'Fecha',
+               render: (value) => {
+                 const date = new Date(value as string);
+                 return (
+                   <span className="text-on-surface">
+                     {date.toLocaleDateString('es-ES', {
+                       month: 'short',
+                       day: 'numeric',
+                       year: 'numeric',
+                     })}
+                   </span>
+                 );
+               },
+             },
+             {
+               key: 'total',
+               label: 'Total',
+               render: (value) => (
+                 <span className="font-semibold text-on-surface">
+                   ${(value as number).toFixed(2)}
+                 </span>
+               ),
+             },
+             {
+               key: 'status',
+               label: 'Estado',
+               render: (value) => {
+                 const status = value as Order['status'];
+                 return (
+                   <Badge
+                     variant={getStatusBadgeVariant(status)}
+                     size="md"
+                   >
+                     {STATUS_LABELS[status]}
+                   </Badge>
+                 );
+               },
+             },
+           ]}
+           data={paginatedOrders}
+           actions={(row) => (
+             <OrderActions orderId={row._id} status={row.status} />
+           )}
+         />
+       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -266,25 +308,4 @@ export function OrdersList() {
       )}
     </div>
   );
-}
-
-// Helper function to determine badge variant based on status
-function getStatusBadgeVariant(status: Order['status']): 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'outline' {
-  switch (status) {
-    case 'pending':
-      return 'warning';
-    case 'paid':
-      return 'success';
-    case 'processing':
-      return 'default';
-    case 'shipped':
-      return 'secondary';
-    case 'delivered':
-      return 'outline';
-    case 'failed':
-    case 'cancelled':
-      return 'destructive';
-    default:
-      return 'outline';
-  }
 }

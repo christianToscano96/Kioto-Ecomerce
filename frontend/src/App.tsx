@@ -7,6 +7,7 @@ import { ProductForm } from '@/pages/admin/ProductForm';
 import { CategoriesList } from '@/pages/admin/CategoriesList';
 import { CategoryForm } from '@/pages/admin/CategoryForm';
 import { OrdersList } from '@/pages/admin/OrdersList';
+import { OrderDetailsPage } from '@/pages/admin/OrderDetailsPage';
 import { HomePage } from '@/pages/public/HomePage';
 import { ProductsListPage } from '@/pages/public/ProductsListPage';
 import { ProductDetailPage } from '@/pages/public/ProductDetailPage';
@@ -42,6 +43,7 @@ function App() {
             <Route path="categories/new" element={<CategoryForm />} />
             <Route path="categories/:id/edit" element={<CategoryForm />} />
             <Route path="orders" element={<OrdersList />} />
+            <Route path="orders/:id" element={<OrderDetailsPage />} />
           </Route>
 
           {/* Auth Routes */}
