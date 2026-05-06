@@ -21,9 +21,9 @@ router.get('/public', async (req: Request, res: Response) => {
 // Public endpoint for creating categories (testing only)
 router.post('/public', async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
+    const { name, imageUrl } = req.body;
 
-    const category = await Category.create({ name });
+    const category = await Category.create({ name, imageUrl });
 
     res.status(201).json(category);
   } catch (error) {
@@ -40,11 +40,11 @@ router.post('/public', async (req: Request, res: Response) => {
 router.put('/public/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, imageUrl } = req.body;
 
     const category = await Category.findByIdAndUpdate(
       id,
-      { name },
+      { name, imageUrl },
       { new: true, runValidators: true }
     );
 
@@ -100,9 +100,9 @@ router.get('/', async (req: Request, res: Response) => {
 // POST /api/categories - Create category (admin only)
 router.post('/', validate(createCategorySchema), async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
+    const { name, imageUrl } = req.body;
 
-    const category = await Category.create({ name });
+    const category = await Category.create({ name, imageUrl });
 
     res.status(201).json({ category });
   } catch (error) {
@@ -119,11 +119,11 @@ router.post('/', validate(createCategorySchema), async (req: Request, res: Respo
 router.put('/:id', validate(updateCategorySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, imageUrl } = req.body;
 
     const category = await Category.findByIdAndUpdate(
       id,
-      { name },
+      { name, imageUrl },
       { new: true, runValidators: true }
     );
 

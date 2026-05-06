@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useProductsStore } from "@/store/products";
+import { useCategoriesStore } from "@/store/categories";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/public/ProductCard";
@@ -54,6 +55,13 @@ export function ProductsListPage() {
   const { products, isLoading, error } = useProductsStore();
   const fetchProducts = useProductsStore.getState().fetchProducts;
   const addToCart = useCartStore.getState().addToCart;
+  const { categories: allCategories, fetchCategories } = useCategoriesStore();
+
+  // Fetch categories on mount
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
   // Price bounds
   const minPrice = useMemo(
     () => products?.reduce((min, p) => Math.min(min, p.price), Infinity) || 0,
@@ -80,11 +88,11 @@ export function ProductsListPage() {
     }
   }, [searchQuery, selectedCategory, setSearchParams]);
 
-  // Get unique categories from products
+  // Build categories from store - all categories with product counts
   const categories = useMemo(() => {
-    const cats = new Map<string, number>();
+    // Count products per category
+    const productCounts = new Map<string, number>();
     products?.forEach((p) => {
-      console.log(p);
       const catName =
         typeof p.category === "object" &&
         p.category !== null &&
@@ -92,15 +100,17 @@ export function ProductsListPage() {
           ? p.category.name
           : p.category;
       if (catName) {
-        cats.set(String(catName), (cats.get(String(catName)) || 0) + 1);
+        productCounts.set(String(catName), (productCounts.get(String(catName)) || 0) + 1);
       }
     });
-    return Array.from(cats.entries()).map(([name, count]) => ({
-      name,
-      count,
-      active: name === selectedCategory,
+
+    // Map all categories from store with product counts
+    return allCategories.map((cat) => ({
+      name: cat.name,
+      count: productCounts.get(cat.name) || 0,
+      active: cat.name === selectedCategory,
     }));
-  }, [products, selectedCategory]);
+  }, [products, selectedCategory, allCategories]);
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];

@@ -56,6 +56,7 @@ export function CategoryForm() {
 
   const [formData, setFormData] = useState({
     name: "",
+    imageUrl: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -65,6 +66,7 @@ export function CategoryForm() {
     if (isEdit && category) {
       setFormData({
         name: category.name || "",
+        imageUrl: category.imageUrl || "",
       });
     }
   }, [isEdit, category]);
@@ -122,6 +124,29 @@ export function CategoryForm() {
               required
               placeholder="Ej: Camisas, Pantalones, Accesorios..."
             />
+            
+            <div>
+              <Input
+                label="URL de Imagen (Opcional)"
+                value={formData.imageUrl}
+                onChange={(e) =>
+                  setFormData({ ...formData, imageUrl: e.target.value })
+                }
+                placeholder="https://ejemplo.com/imagen.jpg"
+              />
+              {formData.imageUrl && (
+                <div className="mt-2">
+                  <img
+                    src={formData.imageUrl}
+                    alt="Vista previa"
+                    className="h-32 w-32 object-cover rounded-lg border border-outline-variant"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
