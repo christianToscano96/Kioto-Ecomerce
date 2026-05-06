@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 import { useCategoriesStore } from "@/store/categories";
 import type { Category } from "../../../../shared/src";
 
@@ -125,27 +126,17 @@ export function CategoryForm() {
               placeholder="Ej: Camisas, Pantalones, Accesorios..."
             />
             
+{/* Imagen de categoría */}
             <div>
-              <Input
-                label="URL de Imagen (Opcional)"
-                value={formData.imageUrl}
-                onChange={(e) =>
-                  setFormData({ ...formData, imageUrl: e.target.value })
-                }
-                placeholder="https://ejemplo.com/imagen.jpg"
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">
+                Imagen de Categoría (Opcional)
+              </label>
+              <ImageUpload
+                label=""
+                currentImage={formData.imageUrl}
+                onUpload={(url) => setFormData({ ...formData, imageUrl: url })}
+                onRemove={() => setFormData({ ...formData, imageUrl: "" })}
               />
-              {formData.imageUrl && (
-                <div className="mt-2">
-                  <img
-                    src={formData.imageUrl}
-                    alt="Vista previa"
-                    className="h-32 w-32 object-cover rounded-lg border border-outline-variant"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
             </div>
           </div>
         </div>
