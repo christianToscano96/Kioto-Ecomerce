@@ -13,12 +13,7 @@ export function Footer() {
 
         <div className="flex flex-col gap-4">
           <h4 className="font-bold text-on-surface">Colección</h4>
-          <Link
-            to="/new"
-            className="text-on-surface/60 hover:underline decoration-dotted decoration-primary underline-offset-4 transition-all"
-          >
-            Nuevas Llegadas
-          </Link>
+         
           <Link
             to="/best-sellers"
             className="text-on-surface/60 hover:underline decoration-dotted decoration-primary underline-offset-4 transition-all"

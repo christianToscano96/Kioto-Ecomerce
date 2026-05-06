@@ -81,7 +81,7 @@ export function HomePage() {
                     to="/products"
                     className="inline-flex items-center justify-center gap-2 bg-primary text-on-primary font-medium text-sm px-8 py-3.5 rounded-full hover:bg-primary-hover transition-all shadow-md hover:shadow-lg"
                   >
-                    Descubrir Colección
+                    Ver Catálogo
                   </Link>
                   
                 </div>

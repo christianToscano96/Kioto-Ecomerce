@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import Stripe from 'stripe';
 import { validate } from '../middleware/validation';
 import { createCheckoutSchema } from '../schemas/checkout';
-import { getOrCreateCart, calculateCartTotal, clearCart } from '../utils/cart';
+import { getOrCreateCart, calculateCartTotal, clearCart, calculateShipping } from '../utils/cart';
 import Cart from '../models/Cart';
 import Order from '../models/Order';
 
@@ -16,7 +16,7 @@ const getSessionId = (req: Request): string => {
   return req.cookies?.sessionId || (req.headers['x-session-id'] as string) || 'anonymous';
 };
 
-// POST /api/checkout - Create checkout session
+// POST /api/checkout - Create checkout session (fake mode - no Stripe)
 router.post('/', validate(createCheckoutSchema), async (req: Request, res: Response) => {
   try {
     const sessionId = getSessionId(req);
@@ -28,44 +28,38 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
       return;
     }
 
-    // Populate product details for Stripe line items
+    // Populate product details
     await cart.populate('items.productId', 'name images');
 
-    // Create line items for Stripe
-    const lineItems = cart.items.map(item => {
-      const product = item.productId as any;
-      return {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: product?.name || 'Product',
-            images: product?.images || [],
-          },
-          unit_amount: Math.round(item.price * 100), // Convert to cents
-        },
+    const subtotal = calculateCartTotal(cart.items);
+    const shipping = calculateShipping(req.body.shippingDetails?.address?.postal_code || '');
+    const total = subtotal + shipping;
+
+    // FAKE CHECKOUT: Create order directly without Stripe
+    const order = await Order.create({
+      sessionId,
+      items: cart.items.map(item => ({
+        productId: item.productId,
         quantity: item.quantity,
-      };
+        price: item.price,
+      })),
+      subtotal,
+      shipping,
+      total,
+      status: 'pending', // Will be 'paid' after real Stripe integration
+      shippingDetails: req.body.shippingDetails,
     });
 
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: lineItems,
-      mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/cancel`,
-      metadata: {
-        sessionId,
-        cartId: cart._id.toString(),
-      },
-      shipping_address_collection: {
-        allowed_countries: ['US', 'CA'],
-      },
-    });
+    // Clear the cart using the utility function
+    await clearCart(sessionId);
 
+    // Return fake checkout response (simulating success)
     res.status(200).json({
-      sessionId: session.id,
-      url: session.url,
+      orderId: order._id,
+      sessionId: `fake_session_${order._id}`,
+      success: true,
+      message: 'Order created successfully (fake checkout)',
+      shipping: shipping,
     });
   } catch (error) {
     console.error('Checkout error:', error);
