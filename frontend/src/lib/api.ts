@@ -37,17 +37,23 @@ export const authApi = {
 
 // Products API (public - for storefront)
 export const productsApi = {
-  list: () =>
-    api.get<{ products: Product[] }>('/public/products').then(res => res.data.products),
+  list: async () => {
+    const res = await api.get<{ products: Product[]; pagination: unknown }>('/public/products');
+    return res.data.products || [];
+  },
 
-  get: (id: string) =>
-    api.get<{ product: Product }>(`/public/products/${id}`).then(res => res.data.product),
+  get: async (id: string) => {
+    const res = await api.get<{ product: Product }>(`/public/products/${id}`);
+    return res.data.product;
+  },
 
   getBySlug: (slug: string) =>
     api.get<{ product: Product }>(`/public/products/slug/${slug}`).then(res => res.data.product),
 
-  search: (query: string) =>
-    api.get<{ products: Product[] }>('/public/products', { params: { q: query } }).then(res => res.data.products),
+  search: async (query: string) => {
+    const res = await api.get<{ products: Product[] }>('/public/products', { params: { search: query } });
+    return res.data.products || [];
+  },
 };
 
 // Admin Products API

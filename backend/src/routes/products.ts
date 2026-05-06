@@ -10,7 +10,7 @@ const router = Router();
 // GET /api/products/public - List all products
 router.get('/public', async (req: Request, res: Response) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const products = await Product.find({ published: true }).populate('category', 'name').sort({ createdAt: -1 });
     res.status(200).json(products);
   } catch (error) {
     console.error('Error fetching products:', error);

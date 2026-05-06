@@ -6,6 +6,7 @@ interface SidebarFiltersProps {
   sizes?: string[];
   selectedSize?: string;
   onSizeChange?: (size: string) => void;
+  onCategoryClick?: (categoryName: string) => void;
 }
 
 const earthToneColors = [
@@ -22,6 +23,7 @@ export function SidebarFilters({
   sizes = ['XS', 'S', 'M', 'L', 'XL'],
   selectedSize = 'S',
   onSizeChange,
+  onCategoryClick,
 }: SidebarFiltersProps) {
   const [activeColor, setActiveColor] = useState<string | null>(null);
 
@@ -36,6 +38,7 @@ export function SidebarFilters({
               {categories.map((category) => (
                 <li
                   key={category.name}
+                  onClick={() => onCategoryClick?.(category.name)}
                   className={`flex justify-between items-center group cursor-pointer ${
                     category.active ? 'text-primary font-bold' : ''
                   }`}

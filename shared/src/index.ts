@@ -31,7 +31,7 @@ export interface Product {
   materials?: string;
   sizes?: string[];
   colors?: string[];
-  category?: string;
+  category?: string | { _id: string; name: string; slug?: string };
   createdAt: Date;
   updatedAt?: Date;
 }

@@ -42,7 +42,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const products = await productsApi.list();
-      let filtered = products;
+      let filtered = products || [];
       if (params?.search) {
         filtered = products.filter(p => 
           p.name.toLowerCase().includes(params.search!.toLowerCase()) ||
@@ -52,7 +52,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       set({ products: filtered });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch products';
-      set({ error: message });
+      set({ error: message, products: [] });
       toast.error(message);
     } finally {
       set({ isLoading: false });
