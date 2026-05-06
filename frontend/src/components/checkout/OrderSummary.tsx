@@ -9,12 +9,12 @@ export function OrderItem({ item }: OrderItemProps) {
   
   return (
     <div className="flex gap-6 items-start">
-      <div className="w-24 h-32 bg-surface-container-highest overflow-hidden">
+      <div className="w-24 h-32 bg-surface-container rounded-lg overflow-hidden">
         {product && product.images && product.images.length > 0 ? (
           <img
             src={product.images[0]}
             alt={product.name}
-            className="w-full h-full object-cover mix-blend-multiply opacity-90"
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-xs">
@@ -38,19 +38,23 @@ export function OrderItem({ item }: OrderItemProps) {
 interface OrderSummaryProps {
   items: CartItem[];
   subtotal: number;
-  shipping?: string;
+  shipping?: number;
   total: number;
 }
 
-export function OrderSummary({ items, subtotal, shipping = 'Calculado en el siguiente paso', total }: OrderSummaryProps) {
+export function OrderSummary({ items, subtotal, shipping, total }: OrderSummaryProps) {
+  const shippingLabel = shipping !== undefined 
+    ? `$${shipping.toFixed(2)}` 
+    : 'Calculado en el siguiente paso';
+    
   return (
     <aside className="lg:col-span-5 sticky top-32">
       <div className="bg-surface-container p-8 lg:p-10 border-l border-outline-variant/40">
         <h2 className="font-serif text-2xl mb-10">Resumen del Pedido</h2>
         
         <div className="space-y-8 mb-12">
-          {items.map((item, index) => (
-            <OrderItem key={index} item={item} />
+          {items.map((item) => (
+            <OrderItem key={item._id || item.product?._id} item={item} />
           ))}
         </div>
 
@@ -61,7 +65,7 @@ export function OrderSummary({ items, subtotal, shipping = 'Calculado en el sigu
           </div>
           <div className="flex justify-between font-label text-sm uppercase tracking-widest">
             <span className="text-on-surface/60">Envío</span>
-            <span>{shipping}</span>
+            <span>{shippingLabel}</span>
           </div>
           <div className="flex justify-between font-serif text-xl pt-4">
             <span>Total</span>

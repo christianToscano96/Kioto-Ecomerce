@@ -1,10 +1,10 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useCartItemCount } from "@/store/cart";
+import logoK from '../../../assets/logo.png';
 
 const navItems = [
   { to: "/products", label: "Catálogo" },
-  { to: "/new", label: "Nuevas Llegadas" },
 ];
 
 export function Header() {
@@ -26,9 +26,15 @@ export function Header() {
         <div className="flex items-center gap-8">
           <NavLink
             to="/"
-            className="font-serif text-2xl font-bold tracking-widest text-on-surface"
+            className="flex items-center"
           >
-            KIOTO
+            <div className="h-10 overflow-hidden flex items-center pt-5">
+            <img 
+              src={logoK} 
+              alt="Kioto Logo" 
+              className="h-40 w-auto -mt-2 object-contain "
+            />
+          </div>
           </NavLink>
           <div className="hidden md:flex items-center gap-8 font-serif text-lg tracking-tight">
             {navItems.map((item) => (

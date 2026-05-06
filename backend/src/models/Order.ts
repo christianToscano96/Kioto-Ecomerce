@@ -6,9 +6,23 @@ export interface IOrder extends Document {
   userId?: mongoose.Types.ObjectId;
   sessionId?: string;
   items: ICartItem[];
+  subtotal: number;
+  shipping: number;
   total: number;
   status: OrderStatus;
   stripePaymentIntentId?: string;
+  shippingDetails?: {
+    name: string;
+    email: string;
+    address: {
+      line1: string;
+      line2?: string;
+      city: string;
+      state?: string;
+      postal_code: string;
+      country: string;
+    };
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +57,16 @@ const orderSchema = new Schema<IOrder>(
       type: String,
     },
     items: [orderItemSchema],
+    subtotal: {
+      type: Number,
+      required: [true, 'Subtotal is required'],
+      default: 0,
+    },
+    shipping: {
+      type: Number,
+      required: [true, 'Shipping is required'],
+      default: 0,
+    },
     total: {
       type: Number,
       required: [true, 'Total is required'],
@@ -55,6 +79,18 @@ const orderSchema = new Schema<IOrder>(
     },
     stripePaymentIntentId: {
       type: String,
+    },
+    shippingDetails: {
+      name: { type: String },
+      email: { type: String },
+      address: {
+        line1: { type: String },
+        line2: { type: String },
+        city: { type: String },
+        state: { type: String },
+        postal_code: { type: String },
+        country: { type: String },
+      },
     },
   },
   {

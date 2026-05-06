@@ -1,34 +1,73 @@
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/Button';
-
-const CheckIcon = () => (
-  <svg className="h-16 w-16 text-terracota-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
+import { Link, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { Footer } from "@/components/layout/Footer";
+import { useCartStore } from "@/store/cart";
+import successVideo from '../../../assets/success.mp4';
 
 export function CheckoutSuccessPage() {
+  const [searchParams] = useSearchParams();
+  const orderId = searchParams.get("orderId");
+  const clear = useCartStore((state) => state.clear);
+
+  // Clear cart on mount
+  useEffect(() => {
+    clear();
+  }, [clear]);
+
   return (
-    <div className="min-h-screen bg-crema-50 flex items-center justify-center py-12 px-4">
-      <div className="max-w-md w-full text-center">
-        <div className="mb-6 flex justify-center">
-          <CheckIcon />
+    <>
+      <PublicHeader />
+      
+      <main className="max-w-screen-2xl mx-auto px-4 py-20 mt-16">
+        <div className="max-w-2xl mx-auto text-center">
+          {/* Success Video */}
+          <div className="relative w-64 h-64 mx-auto mb-8 rounded-full overflow-hidden bg-primary-container">
+            <video
+              src={successVideo}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-on-surface mb-4">
+            ¡Gracias por tu compra!
+          </h1>
+          
+          <p className="text-on-surface-variant text-lg mb-2">
+            Tu pedido ha sido recibido y está siendo procesado.
+          </p>
+          
+          {orderId && (
+            <p className="text-on-surface-variant mb-8">
+              Número de orden: <strong className="text-on-surface">#{orderId.slice(-8)}</strong>
+            </p>
+          )}
+
+          <div className="space-y-4">
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 bg-primary text-on-primary font-medium px-8 py-3.5 rounded-full hover:bg-primary-hover transition-colors"
+            >
+              <span className="material-symbols-outlined">shopping_bag</span>
+              Seguir Comprando
+            </Link>
+            
+            <div>
+              <Link
+                to="/"
+                className="text-on-surface-variant hover:text-primary transition-colors text-sm"
+              >
+                ← Volver al inicio
+              </Link>
+            </div>
+          </div>
         </div>
-        <h1 className="text-3xl font-serif font-bold text-chocolate-900 mb-4">
-          Thank you for your order!
-        </h1>
-        <p className="text-chocolate-600 mb-8">
-          Your payment was successful. We've received your order and will process it shortly.
-          You'll receive a confirmation email with your order details.
-        </p>
-        <div className="space-y-4">
-          <Link to="/products">
-            <Button size="lg" className="w-full">
-              Continue Shopping
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </div>
+      </main>
+
+      <Footer />
+    </>
   );
 }

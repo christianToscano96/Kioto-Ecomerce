@@ -16,7 +16,6 @@ import {
   PrimaryButton,
 } from "@/components/checkout/CheckoutFormComponents";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
-import { stripe } from "@/lib/stripe";
 
 const LoaderIcon = () => (
   <svg
@@ -47,6 +46,17 @@ export function CheckoutPage() {
   const cartItemCount = useCartItemCount();
   const cartLoading = useCartIsLoading();
 
+  const [step, setStep] = useState<"shipping" | "payment" | "review">("shipping");
+
+  // Calculate shipping based on postal code (Y4512 = free local shipping)
+  const calculateShipping = (postalCode: string): number => {
+    if (postalCode === 'Y4512') return 0;
+    const numericCode = parseInt(postalCode.replace(/\D/g, ''), 10);
+    if (isNaN(numericCode)) return 15;
+    if (numericCode >= 1000 && numericCode <= 2000) return 5;
+    if (numericCode >= 3000 && numericCode <= 5000) return 10;
+    return 15;
+  };
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -60,6 +70,11 @@ export function CheckoutPage() {
     },
   });
 
+  // Calculate shipping and total based on postal code
+  const shipping = calculateShipping(formData.address.postal_code);
+  const total = cartTotal + shipping;
+
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "transfer">("card");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,6 +88,16 @@ export function CheckoutPage() {
     } else {
       setFormData((prev) => ({ ...prev, [field]: value }));
     }
+  };
+
+  const handleNext = () => {
+    if (step === "shipping") setStep("payment");
+    else if (step === "payment") setStep("review");
+  };
+
+  const handleBack = () => {
+    if (step === "payment") setStep("shipping");
+    else if (step === "review") setStep("payment");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,10 +123,9 @@ export function CheckoutPage() {
         throw new Error(data.error || "Error al crear sesión de checkout");
       }
 
-      if (data.sessionId) {
-        await stripe.redirectToCheckout(data.sessionId);
-      } else if (data.url) {
-        window.location.href = data.url;
+      // Fake checkout - redirect to success page
+      if (data.success) {
+        navigate(`/checkout/success?orderId=${data.orderId}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ocurrió un error");
@@ -109,11 +133,11 @@ export function CheckoutPage() {
     }
   };
 
-  // Stepper steps
+  // Stepper steps - dynamic based on current step
   const steps = [
-    { number: "01", label: "Envío", active: true },
-    { number: "02", label: "Pago", active: false },
-    { number: "03", label: "Revisión", active: false },
+    { number: "01", label: "Envío", active: step === "shipping" },
+    { number: "02", label: "Pago", active: step === "payment" },
+    { number: "03", label: "Revisión", active: step === "review" },
   ];
 
   if (cartLoading) {
@@ -168,66 +192,160 @@ export function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           {/* Forms Column */}
           <div className="lg:col-span-7 space-y-12">
-            <form onSubmit={handleSubmit}>
-              <FormSection
-                title="Información de Contacto"
-                loginLink={{ text: "INICIAR SESIÓN", onClick: () => {} }}
-              >
-                <div className="space-y-6">
-                  <FloatingLabelInput
-                    label="Correo Electrónico"
-                    type="email"
-                    placeholder="curador@terrenal.com"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                  />
-                </div>
-              </FormSection>
-
-              <FormSection title="Dirección de Envío">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <FloatingLabelInput
-                    label="Nombre"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                  />
-                  <div className="md:col-span-2">
+            {/* Step 1: Shipping Form */}
+            {step === "shipping" && (
+              <form onSubmit={(e) => e.preventDefault()}>
+                <FormSection title="Información de Contacto">
+                  <div className="space-y-6">
                     <FloatingLabelInput
-                      label="Dirección Completa"
-                      placeholder="Calle 123 Artística"
-                      value={formData.address.line1}
-                      onChange={(e) =>
-                        handleInputChange("address.line1", e.target.value)
-                      }
+                      label="Correo Electrónico"
+                      type="email"
+                      placeholder="tu@email.com"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
                     />
                   </div>
-                  <FloatingLabelInput
-                    label="Ciudad"
-                    value={formData.address.city}
-                    onChange={(e) =>
-                      handleInputChange("address.city", e.target.value)
-                    }
-                  />
-                  <FloatingLabelInput
-                    label="Código Postal"
-                    value={formData.address.postal_code}
-                    onChange={(e) =>
-                      handleInputChange("address.postal_code", e.target.value)
-                    }
-                  />
-                </div>
-              </FormSection>
+                </FormSection>
 
-              <section className="pt-8">
-                <PrimaryButton type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Procesando..." : "Continuar al Pago"}
-                </PrimaryButton>
-              </section>
-            </form>
+                <FormSection title="Dirección de Envío">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <FloatingLabelInput
+                      label="Nombre Completo"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange("name", e.target.value)}
+                    />
+                    <div className="md:col-span-2">
+                      <FloatingLabelInput
+                        label="Dirección"
+                        placeholder="Calle 123"
+                        value={formData.address.line1}
+                        onChange={(e) => handleInputChange("address.line1", e.target.value)}
+                      />
+                    </div>
+                    <FloatingLabelInput
+                      label="Ciudad"
+                      value={formData.address.city}
+                      onChange={(e) => handleInputChange("address.city", e.target.value)}
+                    />
+                    <FloatingLabelInput
+                      label="Código Postal"
+                      value={formData.address.postal_code}
+                      onChange={(e) => handleInputChange("address.postal_code", e.target.value)}
+                    />
+                    <FloatingLabelInput
+                      label="Provincia/Estado"
+                      value={formData.address.state}
+                      onChange={(e) => handleInputChange("address.state", e.target.value)}
+                    />
+                  </div>
+                </FormSection>
+
+                <section className="pt-8 flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/cart")}
+                    className="px-6 py-3 border border-outline-variant rounded-full hover:bg-surface-container transition-colors"
+                  >
+                    Volver al Carrito
+                  </button>
+                  <PrimaryButton type="button" onClick={handleNext}>
+                    Continuar al Pago
+                  </PrimaryButton>
+                </section>
+              </form>
+            )}
+
+            {/* Step 2: Payment Method */}
+            {step === "payment" && (
+              <form onSubmit={(e) => e.preventDefault()}>
+                <FormSection title="Método de Pago">
+                  <div className="space-y-4">
+                    <label className="flex items-center gap-3 p-4 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container">
+                      <input
+                        type="radio"
+                        name="payment"
+                        value="card"
+                        checked={paymentMethod === "card"}
+                        onChange={() => setPaymentMethod("card")}
+                        className="w-5 h-5"
+                      />
+                      <span className="material-symbols-outlined">credit_card</span>
+                      <span>Tarjeta de Crédito/Débito</span>
+                    </label>
+                    <label className="flex items-center gap-3 p-4 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container">
+                      <input
+                        type="radio"
+                        name="payment"
+                        value="transfer"
+                        checked={paymentMethod === "transfer"}
+                        onChange={() => setPaymentMethod("transfer")}
+                        className="w-5 h-5"
+                      />
+                      <span className="material-symbols-outlined">account_balance</span>
+                      <span>Transferencia Bancaria</span>
+                    </label>
+                  </div>
+                </FormSection>
+
+                <section className="pt-8 flex gap-4">
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="px-6 py-3 border border-outline-variant rounded-full hover:bg-surface-container transition-colors"
+                  >
+                    Volver
+                  </button>
+                  <PrimaryButton type="button" onClick={handleNext}>
+                    Revisar Pedido
+                  </PrimaryButton>
+                </section>
+              </form>
+            )}
+
+            {/* Step 3: Review */}
+            {step === "review" && (
+              <form onSubmit={handleSubmit}>
+                <FormSection title="Resumen del Pedido">
+                  <div className="space-y-4">
+                    <div className="flex justify-between py-2 border-b border-outline-variant">
+                      <span>Subtotal</span>
+                      <span>${cartTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-outline-variant">
+                      <span>Envío</span>
+                      <span>{shipping === 0 ? 'Gratis' : `$${shipping.toFixed(2)}`}</span>
+                    </div>
+                    <div className="flex justify-between py-2 text-lg font-bold">
+                      <span>Total</span>
+                      <span className="text-primary">${total.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </FormSection>
+
+                {error && (
+                  <div className="p-4 bg-red-50 text-red-600 rounded-lg mb-4">
+                    {error}
+                  </div>
+                )}
+
+                <section className="pt-8 flex gap-4">
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="px-6 py-3 border border-outline-variant rounded-full hover:bg-surface-container transition-colors"
+                  >
+                    Volver
+                  </button>
+                  <PrimaryButton type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Procesando..." : "Confirmar Pedido"}
+                  </PrimaryButton>
+                </section>
+              </form>
+            )}
           </div>
 
           {/* Order Summary Sidebar */}
-          <OrderSummary items={items} subtotal={cartTotal} total={cartTotal} />
+          <OrderSummary items={items} subtotal={cartTotal} shipping={shipping} total={total} />
         </div>
 
         <SecurityBadge message="Tu conexión está encriptada y tus datos son manejados con cuidado artesanal." />
