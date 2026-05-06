@@ -105,9 +105,9 @@ export function CartPage() {
   return (
     <>
       <Header />
-<main className="max-w-7xl mx-auto px-8 pb-32 min-h-[calc(100vh-200px)]">
-        {/* Spacer for fixed header */}
-        <div className="h-20 lg:h-24"></div>
+<main className="max-w-7xl mx-auto px-8 pb-32 overflow-visible">
+         {/* Spacer for fixed header */}
+         <div className="h-20 lg:h-24"></div>
         
         <header className="mb-12">
           <h1 className="font-serif text-5xl font-bold tracking-tight mb-2">
@@ -119,19 +119,19 @@ export function CartPage() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-          {/* Cart Items List */}
-          <div className="lg:col-span-8 space-y-12">
-            {items.map((item) => {
-              const key = (item as any)._id || item.productId;
-              return <CartItemCard key={key} item={item} />;
-            })}
-          </div>
+<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
+           {/* Cart Items List */}
+           <div className="lg:col-span-8 space-y-12">
+             {items.map((item) => {
+               const key = (item as any)._id || item.productId;
+               return <CartItemCard key={key} item={item} />;
+             })}
+           </div>
 
-          {/* Order Summary - Sticky */}
-          <aside className="lg:col-span-4">
-            <div className="sticky top-32">
-              <div className="bg-surface-container-low p-8 rounded-xl border-l border-outline-variant/40">
+{/* Order Summary - Sticky */}
+            <aside className="lg:col-span-4">
+              <div className="sticky top-40">
+                <div className="bg-surface-container-low p-8 rounded-xl border-l border-outline-variant/40">
                 <h2 className="font-serif text-2xl font-bold mb-8">
                   Resumen del pedido
                 </h2>
