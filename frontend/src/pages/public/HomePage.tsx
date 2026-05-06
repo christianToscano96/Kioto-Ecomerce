@@ -55,40 +55,52 @@ export function HomePage() {
           </div>
         </section>
 
-        {/* Welcome Banner - Full Screen Kioto Video */}
-        <section className="relative min-h-[100vh] overflow-hidden">
-          {/* Video Background - Full viewport width */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <video
-              src={kiotoVideo}
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="w-full h-auto max-w-none min-h-full object-contain"
-            />
-          </div>
-          
-          {/* Dark overlay for video opacity */}
-          <div className="absolute inset-0 bg-black/50" />
-          {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
-          
-          <div className="relative min-h-[80vh] flex items-center">
-            <div className="max-w-screen-2xl mx-auto px-4 lg:px-8">
-              <div className="max-w-lg">
-                <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">
-                  Bienvenido a Kioto
+{/* Welcome Banner - Feminine Elegant Style */}
+        <section className="bg-surface py-16 border-b border-outline-variant/10">
+          <div className="max-w-screen-2xl mx-auto px-4 lg:px-8">
+            <div className="flex flex-col lg:flex-row gap-12 items-center justify-center">
+              {/* Left Content */}
+              <div className="flex-1 max-w-xl">
+                {/* Soft Badge */}
+                <div className="inline-flex items-center gap-2 bg-primary-container/30 text-primary font-medium text-xs px-4 py-2 rounded-full mb-6">
+                  <span className="material-symbols-outlined text-primary text-sm">favorite</span>
+                  Colección Primavera 2025
+                </div>
+                
+                <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-on-surface mb-4">
+                  Tu Momento, <span className="text-primary">Tu Estilo</span>
                 </h1>
-                <p className="text-white/90 text-base md:text-lg mb-6 drop-shadow">
-                  Descubrí la moda que va con tu estilo. Calidad, diseño y sostenibilidad en cada prenda.
+                
+                <p className="text-on-surface-variant text-base md:text-lg mb-8 max-w-md">
+                  Prendas únicas diseñadas para realzar tu esencia. Calidad premium y detalles que amas.
                 </p>
-                <Link
-                  to="/products"
-                  className="inline-block bg-white text-on-surface font-label uppercase tracking-widest text-xs px-6 py-3 rounded-full hover:bg-white/90 transition-colors shadow-lg"
-                >
-                  Explorar Colección
-                </Link>
+                
+                {/* CTAs */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link
+                    to="/products"
+                    className="inline-flex items-center justify-center gap-2 bg-primary text-on-primary font-medium text-sm px-8 py-3.5 rounded-full hover:bg-primary-hover transition-all shadow-md hover:shadow-lg"
+                  >
+                    Descubrir Colección
+                  </Link>
+                  
+                </div>
+              </div>
+              
+              {/* Right Video */}
+              <div className="flex-1 relative w-full max-w-lg">
+                <div className="relative rounded-2xl overflow-hidden  max-w-lg">
+                  <div className="aspect-video">
+                    <video
+                      src={kiotoVideo}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -135,6 +147,48 @@ export function HomePage() {
           </div>
         </section>
 
+ {/* Sale Banner */}
+        {saleProducts.length > 0 && (
+          <section className="bg-gradient-to-r from-amber-500 to-amber-400 text-white py-8">
+            <div className="max-w-screen-2xl mx-auto px-4">
+              <div className="text-center mb-6">
+                <h2 className="font-serif text-3xl font-bold mb-2">
+                  ¡Ofertas del Día!
+                </h2>
+                <p className="font-body">
+                  Descuentos exclusivos por tiempo limitado
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                {saleProducts.map((product) => (
+                  <Link
+                    key={product._id}
+                    to={`/products/${product._id}`}
+                    className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center hover:bg-white/20 transition-colors"
+                  >
+                    <div className="aspect-square bg-white/20 rounded mb-2 overflow-hidden">
+                      {product.images?.[0] && (
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <p className="text-xs font-bold">
+                      ${product.price.toFixed(2)}
+                    </p>
+                    <p className="text-xs line-through opacity-70">
+                      ${(product.price * 1.5).toFixed(2)}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+        
 {/* New Arrivals Grid */}
         <section className="max-w-screen-2xl mx-auto px-4 py-12 relative">
           <div className="flex items-center justify-between mb-6">
@@ -176,7 +230,7 @@ export function HomePage() {
                 muted
                 loop
                 playsInline
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
               />
             </div>
             {/* Text Content */}
@@ -201,53 +255,13 @@ export function HomePage() {
           </div>
         </section>
 
-        {/* Sale Banner */}
-        {saleProducts.length > 0 && (
-          <section className="bg-gradient-to-r from-amber-500 to-amber-400 text-white py-8">
-            <div className="max-w-screen-2xl mx-auto px-4">
-              <div className="text-center mb-6">
-                <h2 className="font-serif text-3xl font-bold mb-2">
-                  ¡Ofertas del Día!
-                </h2>
-                <p className="font-body">
-                  Descuentos exclusivos por tiempo limitado
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                {saleProducts.map((product) => (
-                  <Link
-                    key={product._id}
-                    to={`/products/${product._id}`}
-                    className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center hover:bg-white/20 transition-colors"
-                  >
-                    <div className="aspect-square bg-white/20 rounded mb-2 overflow-hidden">
-                      {product.images?.[0] && (
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                    </div>
-                    <p className="text-xs font-bold">
-                      ${product.price.toFixed(2)}
-                    </p>
-                    <p className="text-xs line-through opacity-70">
-                      ${(product.price * 1.5).toFixed(2)}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+       
 
 {/* Shipping Banner - Todo el País */}
-        <section className="max-w-screen-2xl mx-auto px-4 py-8">
-          <div className="flex flex-col lg:flex-row gap-4">
+        <section className="max-w-screen-2xl mx-auto px-4 py-8 ">
+          <div className="flex flex-col lg:flex-row gap-4 ">
             {/* Text Content */}
-            <div className="flex-1 bg-white/95 dark:bg-surface rounded-xl p-6 flex items-center border border-outline-variant/20 dark:border-outline-variant/10">
+            <div className="flex-1 bg-surface-container rounded-xl p-6 flex items-center">
               <div className="max-w-md">
                 <div className="inline-flex items-center gap-2 bg-primary-container/20 rounded-full px-3 py-1 mb-3">
                   <span className="material-symbols-outlined text-base text-primary">
@@ -283,7 +297,6 @@ export function HomePage() {
                 </div>
               </div>
             </div>
-
             {/* Video */}
             <div className="flex-1 rounded-xl overflow-hidden aspect-video">
               <video
@@ -292,7 +305,7 @@ export function HomePage() {
                 muted
                 loop
                 playsInline
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
               />
             </div>
           </div>
