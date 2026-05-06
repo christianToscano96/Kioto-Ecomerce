@@ -55,21 +55,48 @@ export function HomePage() {
           </div>
         </section>
 
-        {/* Categories with Kioto Video - Hero Style */}
-        <section className="bg-gradient-to-b from-surface-container to-surface py-10 border-b border-outline-variant/10 relative overflow-hidden">
-          {/* Video Background */}
-          <div className="absolute inset-0 opacity-30 pointer-events-none">
+        {/* Welcome Banner - Full Screen Kioto Video */}
+        <section className="relative min-h-[100vh] overflow-hidden">
+          {/* Video Background - Full viewport width */}
+          <div className="absolute inset-0 flex items-center justify-center">
             <video
               src={kiotoVideo}
               autoPlay
               muted
               loop
               playsInline
-              className="w-full h-full object-cover"
+              className="w-full h-auto max-w-none min-h-full object-contain"
             />
           </div>
           
-          <div className="max-w-screen-2xl mx-auto px-4 relative">
+          {/* Dark overlay for video opacity */}
+          <div className="absolute inset-0 bg-black/50" />
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+          
+          <div className="relative min-h-[80vh] flex items-center">
+            <div className="max-w-screen-2xl mx-auto px-4 lg:px-8">
+              <div className="max-w-lg">
+                <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+                  Bienvenido a Kioto
+                </h1>
+                <p className="text-white/90 text-base md:text-lg mb-6 drop-shadow">
+                  Descubrí la moda que va con tu estilo. Calidad, diseño y sostenibilidad en cada prenda.
+                </p>
+                <Link
+                  to="/products"
+                  className="inline-block bg-white text-on-surface font-label uppercase tracking-widest text-xs px-6 py-3 rounded-full hover:bg-white/90 transition-colors shadow-lg"
+                >
+                  Explorar Colección
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Categories Section */}
+        <section className="bg-surface py-10 border-b border-outline-variant/10">
+          <div className="max-w-screen-2xl mx-auto px-4">
             <div className="text-center mb-8">
               <h2 className="font-serif text-2xl font-bold text-on-surface mb-2">
                 Explorá por Categorías
@@ -79,55 +106,31 @@ export function HomePage() {
               </p>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8 items-center">
-              {/* Video Player - Left Side */}
-              <div className="flex-1 relative">
-                <div className="relative rounded-2xl overflow-hidden shadow-xl max-w-md mx-auto">
-                  {/* Video with floating elements */}
-                  <div className="aspect-[4/3] relative">
-                    <video
-                      src={kiotoVideo}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Categories Grid - Right Side */}
-              <div className="flex-1 w-full">
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 max-w-2xl mx-auto">
-                  {categories.map((category) => (
-                    <Link
-                      key={category._id}
-                      to={`/products?category=${category.name}`}
-                      className="group flex flex-col items-center gap-3 p-3 rounded-xl hover:bg-surface-container-high transition-all duration-300 hover:shadow-md"
-                    >
-                      <div className="w-16 h-16 bg-gradient-to-br from-primary-container to-primary rounded-full flex items-center justify-center overflow-hidden shadow-md group-hover:scale-110 group-hover:shadow-lg transition-transform duration-300">
-                        {category.imageUrl ? (
-                          <img
-                            src={category.imageUrl}
-                            alt={category.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="material-symbols-outlined text-2xl text-on-primary">
-                            category
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs font-medium text-on-surface group-hover:text-primary transition-colors text-center max-w-[80px] truncate">
-                        {category.name}
+            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide justify-center">
+              {categories.map((category) => (
+                <Link
+                  key={category._id}
+                  to={`/products?category=${category.name}`}
+                  className="group flex flex-col items-center gap-3 p-3 rounded-xl hover:bg-surface-container-high transition-all duration-300 hover:shadow-md flex-shrink-0"
+                >
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary-container to-primary rounded-full flex items-center justify-center overflow-hidden shadow-md group-hover:scale-110 group-hover:shadow-lg transition-transform duration-300">
+                    {category.imageUrl ? (
+                      <img
+                        src={category.imageUrl}
+                        alt={category.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="material-symbols-outlined text-2xl text-on-primary">
+                        category
                       </span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+                    )}
+                  </div>
+                  <span className="text-xs font-medium text-on-surface group-hover:text-primary transition-colors text-center max-w-[80px] truncate">
+                    {category.name}
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
