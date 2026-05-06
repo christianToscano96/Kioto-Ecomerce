@@ -4,7 +4,7 @@ import { useProductsStore } from "@/store/products";
 import { useCategoriesStore } from "@/store/categories";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Footer } from "@/components/layout/Footer";
-import { ProductCard } from "@/components/public/ProductCard";
+import { ProductCardGeneric } from "@/components/ui/ProductCardGeneric";
 import { SidebarFilters } from "@/components/public/SidebarFilters";
 import { useCartStore } from "@/store/cart";
 import { PageContainer } from "@/components/ui/Container";
@@ -360,10 +360,9 @@ export function ProductsListPage() {
                     className="animate-fade-in"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <ProductCard
+                    <ProductCardGeneric
                       product={product}
                       onQuickAdd={handleQuickAdd}
-                      view={view}
                     />
                   </div>
                 ))}
