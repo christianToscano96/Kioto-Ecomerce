@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useProductsStore } from '@/store/products';
 import { useCategoriesStore } from '@/store/categories';
 import type { Product } from '../../../../shared/src';
@@ -45,7 +46,7 @@ export function ProductForm() {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    images: ['', '', ''],
+    images: [] as string[],
     description: '',
     stock: '',
     published: false,
@@ -57,27 +58,23 @@ export function ProductForm() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Load product data for editing
-  useEffect(() => {
-    if (isEdit && product) {
-      setFormData({
-        name: product.name || '',
-        price: product.price?.toString() || '',
-        images: [
-          product.images?.[0] || '',
-          product.images?.[1] || '',
-          product.images?.[2] || '',
-        ],
-        description: product.description || '',
-        stock: product.stock?.toString() || '',
-        published: product.published || false,
-        materials: product.materials || '',
-        sizes: product.sizes || [],
-        colors: product.colors || [],
-        category: product.category || '',
-      });
-    }
-  }, [isEdit, product]);
+// Load product data for editing
+   useEffect(() => {
+     if (isEdit && product) {
+       setFormData({
+         name: product.name || '',
+         price: product.price?.toString() || '',
+         images: product.images || [],
+         description: product.description || '',
+         stock: product.stock?.toString() || '',
+         published: product.published || false,
+         materials: product.materials || '',
+         sizes: product.sizes || [],
+         colors: product.colors || [],
+         category: product.category || '',
+       });
+     }
+   }, [isEdit, product]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -356,66 +353,50 @@ export function ProductForm() {
           </div>
         </div>
 
-        {/* Columna derecha - Imágenes */}
-        <div className="w-full lg:w-80 space-y-4">
-          <div className="bg-surface-container-low rounded-xl p-5 border border-outline-variant/40">
-            <h2 className="text-base font-serif font-bold text-on-surface mb-4">Imágenes del Producto</h2>
-            
-            <div className="space-y-3">
-              {[0, 1, 2].map((index) => (
-                <div key={index} className="relative">
-                  <Input
-                    label={`Imagen ${index + 1}`}
-                    placeholder="https://ejemplo.com/imagen.jpg"
-                    value={formData.images[index] || ''}
-                    onChange={(e) => {
-                      const newImages = [...formData.images];
-                      newImages[index] = e.target.value;
-                      setFormData({ ...formData, images: newImages });
-                    }}
-                    className="font-mono text-xs"
-                  />
-                  {formData.images[index] && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newImages = [...formData.images];
-                        newImages[index] = '';
-                        setFormData({ ...formData, images: newImages });
-                      }}
-                      className="absolute right-2 top-7 w-5 h-5 bg-terracota-500 text-white rounded-full text-[10px] flex items-center justify-center hover:bg-terracota-600"
-                      title="Eliminar"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Image Preview */}
-            {formData.images.some((img) => img.trim()) && (
-              <div className="mt-4">
-                <label className="block text-xs font-medium text-on-surface-variant mb-2">
-                  Vista Previa
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {formData.images.filter(Boolean).map((url, index) => (
-                    <img
-                      key={index}
-                      src={url}
-                      alt={`Vista ${index + 1}`}
-                      className="h-14 w-14 object-cover rounded border border-outline-variant"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+{/* Columna derecha - Imágenes */}
+         <div className="w-full lg:w-80 space-y-4">
+           <div className="bg-surface-container-low rounded-xl p-5 border border-outline-variant/40">
+             <h2 className="text-base font-serif font-bold text-on-surface mb-4">Imágenes del Producto</h2>
+             
+             <div className="space-y-3">
+               {/* Existing images */}
+               {formData.images.map((img, index) => (
+                 <ImageUpload
+                   key={index}
+                   label={`Imagen ${index + 1}`}
+                   currentImage={img}
+                   onUpload={(url) => {
+                     const newImages = [...formData.images];
+                     newImages[index] = url;
+                     setFormData({ ...formData, images: newImages });
+                   }}
+                   onRemove={() => {
+                     setFormData(prev => ({
+                       ...prev,
+                       images: prev.images.filter((_, i) => i !== index),
+                     }));
+                   }}
+                 />
+               ))}
+               
+               {/* Add more images button */}
+               {formData.images.length < 5 && (
+                 <button
+                   type="button"
+                   onClick={() => {
+                     setFormData(prev => ({
+                       ...prev,
+                       images: [...prev.images, ''],
+                     }));
+                   }}
+                   className="text-xs text-primary hover:text-primary/80"
+                 >
+                   + Agregar imagen
+                 </button>
+               )}
+             </div>
+           </div>
+         </div>
       </form>
 
       {/* Actions bar fijo abajo */}
