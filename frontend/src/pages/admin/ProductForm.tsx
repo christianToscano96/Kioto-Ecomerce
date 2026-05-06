@@ -71,7 +71,7 @@ export function ProductForm() {
          materials: product.materials || '',
          sizes: product.sizes || [],
          colors: product.colors || [],
-         category: product.category || '',
+         category: typeof product.category === 'object' ? product.category?._id : product.category || '',
        });
      }
    }, [isEdit, product]);

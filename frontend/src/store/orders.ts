@@ -14,6 +14,7 @@ interface OrdersActions {
   fetchOrders: () => Promise<void>;
   fetchOrder: (id: string) => Promise<void>;
   updateOrderStatus: (id: string, status: string) => Promise<void>;
+  createManualOrder: (data: { customerEmail: string; customerName: string; items: any[] }) => Promise<void>;
   setOrders: (orders: Order[]) => void;
   setOrder: (order: Order | null) => void;
   setLoading: (loading: boolean) => void;
@@ -60,11 +61,26 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
   updateOrderStatus: async (id, status) => {
     set({ isLoading: true, error: null });
     try {
-      // TODO: Add API endpoint for updating order status
+      await ordersApi.updateStatus(id, status);
       await get().fetchOrders();
-      toast.success('Order status updated');
+      toast.success('Estado actualizado');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to update order status';
+      set({ error: message });
+      toast.error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  createManualOrder: async (data: { customerEmail: string; customerName: string; items: any[] }) => {
+    set({ isLoading: true, error: null });
+    try {
+      await ordersApi.createManual(data);
+      await get().fetchOrders();
+      toast.success('Pedido manual creado');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create manual order';
       set({ error: message });
       toast.error(message);
     } finally {

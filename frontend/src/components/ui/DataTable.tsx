@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 interface Column<T> {
-  key: keyof T;
+  key?: keyof T;
   label: string;
   render?: (value: any, row: T) => ReactNode;
 }
@@ -47,9 +47,9 @@ export function DataTable<T extends Record<string, any>>({
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-dashed border-outline-variant/40">
-            {columns.map((column) => (
+{columns.map((column, colIndex) => (
               <th
-                key={String(column.key)}
+                key={column.key ? String(column.key) : `col-${colIndex}`}
                 className="py-4 text-[10px] uppercase tracking-widest font-semibold text-on-surface-variant"
               >
                 {column.label}
@@ -68,11 +68,11 @@ export function DataTable<T extends Record<string, any>>({
               key={index}
               className="border-b border-dashed border-outline-variant/20 hover:bg-surface-container-low transition-colors"
             >
-              {columns.map((column) => (
-                <td key={String(column.key)} className="py-6">
+{columns.map((column, colIndex) => (
+                <td key={column.key ? String(column.key) : `cell-${index}-${colIndex}`} className="py-6">
                   {column.render
-                    ? column.render(row[column.key], row)
-                    : String(row[column.key] ?? '')}
+                    ? column.render(column.key ? row[column.key] : undefined, row)
+                    : column.key ? String(row[column.key] ?? '') : null}
                 </td>
               ))}
               {actions && <td className="py-6">{actions(row)}</td>}

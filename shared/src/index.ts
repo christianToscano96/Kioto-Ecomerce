@@ -87,10 +87,25 @@ export interface Order {
   userId?: string;
   sessionId?: string;
   items: OrderItem[];
+  subtotal?: number;
+  shipping?: number;
   total: number;
   status: OrderStatus;
-  stripePaymentIntentId: string;
+  stripePaymentIntentId?: string;
+  shippingDetails?: {
+    name?: string;
+    email?: string;
+    address?: {
+      line1?: string;
+      line2?: string;
+      city?: string;
+      state?: string;
+      postal_code?: string;
+      country?: string;
+    };
+  };
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 // API Response Types

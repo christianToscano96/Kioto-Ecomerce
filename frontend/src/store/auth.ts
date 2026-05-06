@@ -12,8 +12,8 @@ interface AuthState {
 }
 
 interface AuthActions {
-  login: (email: string, password: string) => Promise<void>;
-  register: (data: { email: string; password: string; name?: string }) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (data: { email: string; password: string; name?: string }) => Promise<boolean>;
   logout: () => Promise<void>;
   fetchCurrentUser: () => Promise<void>;
   setLoading: (loading: boolean) => void;

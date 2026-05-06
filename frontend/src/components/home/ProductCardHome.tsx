@@ -101,7 +101,7 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
       return;
     }
     
-    onQuickAdd?.(product._id, quantity, selectedSize || undefined, selectedColor || undefined);
+    onQuickAdd?.(product._id, quantity, selectedSize || '', selectedColor || undefined);
     resetForm();
     setShowOptions(false);
   };
