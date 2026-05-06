@@ -59,6 +59,58 @@ router.post('/register', validate(registerSchema), async (req: Request, res: Res
   }
 });
 
+// POST /api/auth/register-admin - Create admin user (development only)
+router.post('/register-admin', async (req: Request, res: Response) => {
+  if (process.env.NODE_ENV === 'production') {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+
+  try {
+    const { email, password, name } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      res.status(409).json({ error: 'Email already registered' });
+      return;
+    }
+
+    const user = await User.create({
+      email,
+      password,
+      name,
+      role: 'admin',
+    });
+
+    const accessToken = generateAccessToken({
+      userId: user._id.toString(),
+      role: user.role,
+    });
+
+    const refreshToken = generateRefreshToken({
+      userId: user._id.toString(),
+      role: user.role,
+    });
+
+    setAuthCookie(res, accessToken);
+
+    const userResponse = {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      name: user.name,
+    };
+
+    res.status(201).json({
+      user: userResponse,
+      refreshToken,
+    });
+  } catch (error) {
+    console.error('Admin registration error:', error);
+    res.status(500).json({ error: 'Registration failed' });
+  }
+});
+
 // POST /api/auth/login - Login with credentials, set cookie
 router.post('/login', validate(loginSchema), async (req: Request, res: Response) => {
   try {

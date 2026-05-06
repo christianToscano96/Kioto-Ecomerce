@@ -9,6 +9,16 @@ export interface User {
   createdAt: Date;
 }
 
+// Category Types
+export interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  imageUrl?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
 // Product Types
 export interface Product {
   _id: string;
@@ -21,7 +31,10 @@ export interface Product {
   published: boolean;
   materials?: string;
   sizes?: string[];
+  colors?: string[];
+  category?: string | { _id: string; name: string; slug?: string };
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 export interface CreateProductInput {
@@ -50,6 +63,7 @@ export interface CartItem {
     description?: string;
   };
   size?: string;
+  color?: string;
 }
 
 export interface Cart {

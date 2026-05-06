@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useProductsStore } from "@/store/products";
+import { useCartStore } from "@/store/cart";
 import { useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -11,6 +12,7 @@ import { EditorialSection } from "@/components/home/EditorialSection";
 
 export function HomePage() {
   const { products, isLoading, error, fetchProducts } = useProductsStore();
+  const addToCart = useCartStore((state) => state.addToCart);
   const featuredProducts = products?.slice(0, 3) || [];
 
   useEffect(() => {
@@ -47,7 +49,16 @@ export function HomePage() {
           {featuredProducts.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
               {featuredProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
+                <ProductCard 
+                  key={product._id} 
+                  product={product} 
+                  onQuickAdd={async (productId, quantity, size, color) => {
+                    const product = featuredProducts.find(p => p._id === productId);
+                    if (product) {
+                      await addToCart(product, quantity, size, color);
+                    }
+                  }}
+                />
               ))}
             </div>
           )}

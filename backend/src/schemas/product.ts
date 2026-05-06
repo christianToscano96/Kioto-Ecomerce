@@ -5,10 +5,14 @@ export const createProductSchema = z.object({
   body: z.object({
     name: z.string().min(1, 'Product name is required'),
     price: z.number().min(0, 'Price must be non-negative'),
-    images: z.array(z.string().url('Invalid image URL')).optional().default([]),
+    images: z.array(z.string().url('Invalid image URL')).max(3, 'Maximum 3 images allowed').optional().default([]),
     description: z.string().min(1, 'Description is required'),
     stock: z.number().int().min(0, 'Stock must be non-negative').default(0),
     published: z.boolean().default(false),
+    materials: z.string().optional(),
+    sizes: z.array(z.string()).optional(),
+    colors: z.array(z.string()).optional(),
+    category: z.string().optional(),
   }),
 });
 
@@ -17,10 +21,14 @@ export const updateProductSchema = z.object({
   body: z.object({
     name: z.string().min(1, 'Product name is required').optional(),
     price: z.number().min(0, 'Price must be non-negative').optional(),
-    images: z.array(z.string().url('Invalid image URL')).optional(),
+    images: z.array(z.string().url('Invalid image URL')).max(3, 'Maximum 3 images allowed').optional(),
     description: z.string().min(1, 'Description is required').optional(),
     stock: z.number().int().min(0, 'Stock must be non-negative').optional(),
     published: z.boolean().optional(),
+    materials: z.string().optional(),
+    sizes: z.array(z.string()).optional(),
+    colors: z.array(z.string()).optional(),
+    category: z.string().optional(),
   }),
   params: z.object({
     id: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid product ID'),

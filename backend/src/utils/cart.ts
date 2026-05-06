@@ -24,7 +24,8 @@ export const addToCart = async (
   productId: Types.ObjectId,
   quantity: number,
   price: number,
-  size?: string
+  size?: string,
+  color?: string
 ): Promise<ICart> => {
   // Verify product exists and stock is available
   const product = await Product.findOne({ _id: productId, published: true });
@@ -43,12 +44,13 @@ export const addToCart = async (
   
   const cart = await getOrCreateCart(sessionId);
   
-  // Check if item already exists in cart (same product + same size)
+  // Check if item already exists in cart (same product + same size + same color)
   const existingItemIndex = cart.items.findIndex(
     item => item.productId.toString() === productId.toString() && 
-    (item as any).size === size
+    (item as any).size === size &&
+    (item as any).color === color
   );
-  
+
   if (existingItemIndex >= 0) {
     // Check if total quantity exceeds stock
     const newQuantity = cart.items[existingItemIndex].quantity + quantity;
@@ -62,6 +64,7 @@ export const addToCart = async (
       quantity,
       price,
       size,
+      color,
     } as any);
   }
   

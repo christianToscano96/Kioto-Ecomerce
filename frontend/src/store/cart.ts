@@ -59,28 +59,28 @@ export const useCartStore = create<CartStore>()(
           }
         },
 
-      addToCart: async (product, quantity, size) => {
-          set({ isSyncing: true, error: null });
-          const optimisticItem: CartItem = {
-            productId: product._id,
-            quantity,
-            price: product.price,
-          };
-          get().addItem(optimisticItem);
-          
-          try {
-            const response = await cartApi.addItem({ productId: product._id, quantity, size });
-            await get().fetchCart();
-            toast.success('Added to cart');
-          } catch (error: any) {
-            get().removeItem(product._id);
-            const message = error instanceof Error ? error.message : 'Failed to add item';
-            set({ error: message });
-            toast.error(message);
-          } finally {
-            set({ isSyncing: false });
-          }
-        },
+addToCart: async (product, quantity, size, color) => {
+           set({ isSyncing: true, error: null });
+           const optimisticItem: CartItem = {
+             productId: product._id,
+             quantity,
+             price: product.price,
+           };
+           get().addItem(optimisticItem);
+           
+           try {
+             const response = await cartApi.addItem({ productId: product._id, quantity, size, color });
+             await get().fetchCart();
+             toast.success('Added to cart');
+           } catch (error: any) {
+             get().removeItem(product._id);
+             const message = error instanceof Error ? error.message : 'Failed to add item';
+             set({ error: message });
+             toast.error(message);
+           } finally {
+             set({ isSyncing: false });
+           }
+         },
 
       updateCartItem: async (itemId, quantity) => {
           set({ isSyncing: true, error: null });

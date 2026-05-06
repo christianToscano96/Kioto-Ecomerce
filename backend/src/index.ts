@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import { connectDatabase } from "./config/database";
 import authRoutes from "./routes/auth";
 import productRoutes from "./routes/products";
+import categoryRoutes from "./routes/categories";
 import publicProductRoutes from "./routes/publicProducts";
 import cartRoutes from "./routes/cart";
 import checkoutRoutes from "./routes/checkout";
@@ -78,6 +79,7 @@ app.get("/health", (_req, res) => {
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
 app.use("/api/public", publicProductRoutes);
 app.use("/api/cart", cartLimiter, cartRoutes);
 app.use("/api/checkout", checkoutRoutes);

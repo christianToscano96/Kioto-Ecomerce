@@ -18,13 +18,13 @@ const LoaderIcon = () => (
 // Status configuration with Earthbound Curator colors
 const ORDER_STATUS: Order['status'][] = ['pending', 'paid', 'failed', 'processing', 'shipped', 'delivered', 'cancelled'];
 const STATUS_LABELS: Record<Order['status'], string> = {
-  pending: 'Pending',
-  paid: 'Paid',
-  failed: 'Failed',
-  processing: 'Processing',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
+  pending: 'Pendiente',
+  paid: 'Pagado',
+  failed: 'Fallido',
+  processing: 'Procesando',
+  shipped: 'Enviado',
+  delivered: 'Entregado',
+  cancelled: 'Cancelado',
 };
 
 // Items per page for pagination
@@ -84,7 +84,7 @@ export function OrdersList() {
   if (error) {
     return (
       <div className="p-4 bg-terracota-50 text-terracota-700 rounded-lg">
-        Error loading orders. Please try again.
+        Error al cargar pedidos. Por favor, intenta de nuevo.
       </div>
     );
   }
@@ -92,30 +92,30 @@ export function OrdersList() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Orders"
-        description="Manage and track customer orders"
-        eyebrow="Admin Panel"
+        title="Pedidos"
+        description="Gestionar y seguir los pedidos de clientes"
+        eyebrow="Panel de Administración"
       />
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
-          label="Processing"
+          label="Procesando"
           value={orders?.filter(o => o.status === 'pending').length || 0}
           icon={<span className="material-symbols-outlined text-6xl text-primary/10">pending_actions</span>}
         />
         <MetricCard
-          label="Awaiting Shipment"
+          label="En Espera de Envío"
           value={orders?.filter(o => o.status === 'paid').length || 0}
           icon={<span className="material-symbols-outlined text-6xl text-verde-bosque-600/10">local_shipping</span>}
         />
         <MetricCard
-          label="Total Revenue"
+          label="Ingresos Totales"
           value={`$${orders?.reduce((sum, o) => sum + o.total, 0).toFixed(2) || '0.00'}`}
           icon={<span className="material-symbols-outlined text-6xl text-primary/10">attach_money</span>}
         />
         <MetricCard
-          label="Returns"
+          label="Devoluciones"
           value={orders?.filter(o => o.status === 'cancelled').length || 0}
           icon={<span className="material-symbols-outlined text-6xl text-terracota-600/10">assignment_return</span>}
         />
@@ -126,7 +126,7 @@ export function OrdersList() {
         <div className="flex-1 flex items-center gap-4">
           <Input
             type="text"
-            placeholder="Search by Order ID..."
+            placeholder="Buscar por ID de Pedido..."
             value={searchTerm}
             onChange={(e) => handleFilterChange(e.target.value)}
             className="max-w-sm"
@@ -136,7 +136,7 @@ export function OrdersList() {
             onChange={(e) => handleStatusFilterChange(e.target.value as Order['status'] | 'all')}
             className="h-10 rounded-lg border border-outline bg-white px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <option value="all">All Statuses</option>
+            <option value="all">Todos los Estados</option>
             {ORDER_STATUS.map((status) => (
               <option key={status} value={status}>
                 {STATUS_LABELS[status]}
@@ -146,7 +146,7 @@ export function OrdersList() {
         </div>
         <Button className="whitespace-nowrap">
           <span className="material-symbols-outlined mr-2">add</span>
-          Create Manual Order
+          Crear Pedido Manual
         </Button>
       </div>
 
@@ -156,7 +156,7 @@ export function OrdersList() {
           columns={[
             {
               key: '_id',
-              label: 'Order ID',
+              label: 'ID de Pedido',
               render: (_, row) => (
                 <span className="font-mono text-on-surface">
                   #{row._id.slice(-8)}
@@ -165,12 +165,12 @@ export function OrdersList() {
             },
             {
               key: 'createdAt',
-              label: 'Date',
+              label: 'Fecha',
               render: (value) => {
                 const date = new Date(value as string);
                 return (
                   <span className="text-on-surface">
-                    {date.toLocaleDateString('en-US', {
+                    {date.toLocaleDateString('es-ES', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',
@@ -190,7 +190,7 @@ export function OrdersList() {
             },
             {
               key: 'status',
-              label: 'Status',
+              label: 'Estado',
               render: (value) => {
                 const status = value as Order['status'];
                 return (
@@ -209,7 +209,7 @@ export function OrdersList() {
             <div className="relative">
               <button
                 className="text-on-surface-variant hover:text-primary transition-colors"
-                aria-label={`Actions for order ${row._id.slice(-8)}`}
+                aria-label={`Acciones para pedido ${row._id.slice(-8)}`}
               >
                 <span className="material-symbols-outlined">more_vert</span>
               </button>
@@ -222,9 +222,9 @@ export function OrdersList() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-on-surface-variant">
-            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{' '}
-            {Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)} of{' '}
-            {filteredOrders.length} orders
+            Mostrando {(currentPage - 1) * ITEMS_PER_PAGE + 1} al{' '}
+            {Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)} de{' '}
+            {filteredOrders.length} pedidos
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -232,7 +232,7 @@ export function OrdersList() {
               disabled={currentPage === 1}
               className="px-3 py-1 text-sm rounded-lg border border-outline hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Previous
+              Anterior
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
@@ -252,7 +252,7 @@ export function OrdersList() {
               disabled={currentPage === totalPages}
               className="px-3 py-1 text-sm rounded-lg border border-outline hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Next
+              Siguiente
             </button>
           </div>
         </div>
@@ -261,7 +261,7 @@ export function OrdersList() {
       {/* Empty State */}
       {orders?.length === 0 && (
         <div className="p-8 text-center text-on-surface-variant">
-          No orders found.
+          No se encontraron pedidos.
         </div>
       )}
     </div>

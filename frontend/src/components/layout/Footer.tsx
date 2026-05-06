@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 export function Footer() {
   return (
@@ -7,7 +7,7 @@ export function Footer() {
         <div className="space-y-6">
           <div className="font-serif text-xl italic text-on-surface">KIOTO</div>
           <p className="text-on-surface/60 normal-case leading-relaxed">
-            © 2024 KIOTO. Curando para los Terrenales. Hecho con intención y respeto por el mundo natural.
+            © 2026 KIOTO.
           </p>
         </div>
 
@@ -66,9 +66,15 @@ export function Footer() {
             <button className="text-primary font-bold">Unirme</button>
           </div>
           <div className="flex gap-4">
-            <span className="material-symbols-outlined text-primary text-lg">public</span>
-            <span className="material-symbols-outlined text-primary text-lg">eco</span>
-            <span className="material-symbols-outlined text-primary text-lg">filter_vintage</span>
+            <span className="material-symbols-outlined text-primary text-lg">
+              public
+            </span>
+            <span className="material-symbols-outlined text-primary text-lg">
+              eco
+            </span>
+            <span className="material-symbols-outlined text-primary text-lg">
+              filter_vintage
+            </span>
           </div>
         </div>
       </div>

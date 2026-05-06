@@ -29,7 +29,8 @@ router.get('/products', validate(productQuerySchema), async (req: Request, res: 
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .select('-__v'),
+        .select('-__v')
+        .populate('category', 'name'), // Populate category name
       Product.countDocuments(query),
     ]);
 
@@ -53,48 +54,48 @@ router.get('/products', validate(productQuerySchema), async (req: Request, res: 
 });
 
 // GET /api/public/products/:id - Get single product by ID or slug
-router.get('/products/:id', async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    
-    // Check if id is a valid ObjectId (24 hex characters)
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+ router.get('/products/:id', async (req: Request, res: Response) => {
+   try {
+     const { id } = req.params;
+     
+     // Check if id is a valid ObjectId (24 hex characters)
+     const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+     
+     let product = null;
+     
+     // If it looks like an ObjectId, try to find by ID first
+     if (isObjectId) {
+       product = await Product.findById(id).select('-__v').populate('category', 'name');
+       
+       // If found by ID but not published, try by slug
+       if (product && (product as any).published === false) {
+         product = null;
+       }
+     }
+     
+     // If not found by ID (or wasn't an ObjectId), try by slug
+     if (!product) {
+       product = await Product.findOne({ slug: id, published: true }).select('-__v').populate('category', 'name');
+     }
 
-    let product = null;
-    
-    // If it looks like an ObjectId, try to find by ID first
-    if (isObjectId) {
-      product = await Product.findById(id).select('-__v');
-      
-      // If found by ID but not published, try by slug
-      if (product && (product as any).published === false) {
-        product = null;
-      }
-    }
-    
-    // If not found by ID (or wasn't an ObjectId), try by slug
-    if (!product) {
-      product = await Product.findOne({ slug: id, published: true }).select('-__v');
-    }
+     if (!product) {
+       res.status(404).json({ error: 'Product not found' });
+       return;
+     }
 
-    if (!product) {
-      res.status(404).json({ error: 'Product not found' });
-      return;
-    }
-
-    res.status(200).json({ product });
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    res.status(500).json({ error: 'Failed to fetch product' });
-  }
-});
+     res.status(200).json({ product });
+   } catch (error) {
+     console.error('Error fetching product:', error);
+     res.status(500).json({ error: 'Failed to fetch product' });
+   }
+ });
 
 // GET /api/public/products/slug/:slug - Get single product by slug (alias)
 router.get('/products/slug/:slug', async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
 
-    const product = await Product.findOne({ slug, published: true }).select('-__v');
+    const product = await Product.findOne({ slug, published: true }).select('-__v').populate('category', 'name');
 
     if (!product) {
       res.status(404).json({ error: 'Product not found' });

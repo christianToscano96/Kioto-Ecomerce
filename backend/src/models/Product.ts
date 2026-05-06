@@ -9,6 +9,10 @@ export interface IProduct extends Document {
   description: string;
   stock: number;
   published: boolean;
+  materials?: string;
+  sizes?: string[];
+  colors?: string[];
+  category?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +57,26 @@ const productSchema = new mongoose.Schema<IProduct>(
     published: {
       type: Boolean,
       default: false,
+    },
+    materials: {
+      type: String,
+      trim: true,
+    },
+    sizes: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    colors: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
     },
   },
   {

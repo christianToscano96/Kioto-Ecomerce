@@ -1,14 +1,23 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth";
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: "fa-tachometer-alt", exact: true },
   { to: "/admin/products", label: "Products", icon: "fa-box" },
+  { to: "/admin/categories", label: "Categories", icon: "fa-tags" },
   { to: "/admin/orders", label: "Orders", icon: "fa-shopping-bag" },
   { to: "/admin/settings", label: "Settings", icon: "fa-cog" },
 ];
 
 export function AdminSidebar() {
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = '/login';
+  };
+
   return (
     <aside className="w-64 bg-background border-r border-outline/40 min-h-screen flex flex-col">
       {/* Brand Header */}
@@ -45,7 +54,10 @@ export function AdminSidebar() {
       
       {/* Footer */}
       <div className="p-4 border-t border-outline/40">
-        <button className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface hover:text-on-surface w-full transition-colors">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface hover:text-on-surface w-full transition-colors"
+        >
           <i className="fa fa-sign-out-alt w-5 text-center"></i>
           <span>Logout</span>
         </button>

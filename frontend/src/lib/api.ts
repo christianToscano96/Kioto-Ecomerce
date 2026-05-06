@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, Product, Cart, CartItem, Order } from '../../../shared/src/index';
+import type { User, Product, Cart, CartItem, Order, Category } from '../../../shared/src/index';
 
 // Create axios instance with credentials
 export const api = axios.create({
@@ -37,42 +37,78 @@ export const authApi = {
 
 // Products API (public - for storefront)
 export const productsApi = {
-  list: () =>
-    api.get<{ products: Product[] }>('/public/products').then(res => res.data.products),
+  list: async () => {
+    const res = await api.get<{ products: Product[]; pagination: unknown }>('/public/products');
+    return res.data.products || [];
+  },
 
-  get: (id: string) =>
-    api.get<{ product: Product }>(`/public/products/${id}`).then(res => res.data.product),
+  get: async (id: string) => {
+    const res = await api.get<{ product: Product }>(`/public/products/${id}`);
+    return res.data.product;
+  },
 
   getBySlug: (slug: string) =>
     api.get<{ product: Product }>(`/public/products/slug/${slug}`).then(res => res.data.product),
 
-  search: (query: string) =>
-    api.get<{ products: Product[] }>('/public/products', { params: { q: query } }).then(res => res.data.products),
+  search: async (query: string) => {
+    const res = await api.get<{ products: Product[] }>('/public/products', { params: { search: query } });
+    return res.data.products || [];
+  },
 };
 
 // Admin Products API
 export const adminProductsApi = {
   list: () =>
-    api.get<Product[]>('/products/public').then(res => ({ data: res.data })),
+    api.get<{ products: Product[] }>('/products').then(res => ({ data: res.data.products })),
 
   get: (id: string) =>
-    api.get<Product>(`/public/products/${id}`),
+    api.get<{ product: Product }>(`/products/${id}`).then(res => res.data.product),
 
   create: (data: Partial<Product>) =>
-    api.post<Product>('/products/public', data),
+    api.post<{ product: Product }>('/products', data).then(res => res.data.product),
 
   update: (id: string, data: Partial<Product>) =>
-    api.put<Product>(`/products/${id}`, data),
+    api.put<{ product: Product }>(`/products/${id}`, data).then(res => res.data.product),
 
   delete: (id: string) =>
     api.delete(`/products/${id}`),
+};
+
+// Admin Categories API
+export const adminCategoriesApi = {
+  list: () =>
+    api.get<{ categories: Category[] }>('/categories').then(res => res.data),
+
+  listPublic: () =>
+    api.get<Category[]>('/categories/public').then(res => ({ categories: res.data })),
+
+  get: (id: string) =>
+    api.get<{ category: Category }>(`/categories/${id}`).then(res => res.data.category),
+
+  create: (data: Partial<Category>) =>
+    api.post<{ category: Category }>('/categories', data).then(res => res.data.category),
+
+  createPublic: (data: Partial<Category>) =>
+    api.post<Category>('/categories/public', data).then(res => res.data),
+
+  update: (id: string, data: Partial<Category>) =>
+    api.put<{ category: Category }>(`/categories/${id}`, data).then(res => res.data.category),
+
+  updatePublic: (id: string, data: Partial<Category>) =>
+    api.put<Product>(`/categories/public/${id}`, data).then(res => res.data),
+
+  delete: (id: string) =>
+    api.delete(`/categories/${id}`),
+
+  deletePublic: (id: string) =>
+    api.delete(`/categories/public/${id}`),
 };
 
 // Cart API
 export const cartApi = {
   get: () => api.get<{ cart: Cart }>('/cart'),
 
-  addItem: (data: { productId: string; quantity: number; size?: string }) =>
+  addItem: (data: { productId: string; quantity: number; size?: string; color?: string }) =>
     api.post<Cart>('/cart/items', data),
 
   updateItem: (itemId: string, quantity: number) =>

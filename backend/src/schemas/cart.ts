@@ -6,6 +6,7 @@ export const addToCartSchema = z.object({
     productId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid product ID'),
     quantity: z.number().int().min(1, 'Quantity must be at least 1'),
     size: z.string().optional(),
+    color: z.string().optional(),
   }),
 });
 

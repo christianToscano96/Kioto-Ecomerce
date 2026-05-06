@@ -43,10 +43,12 @@ export const useAuthStore = create<AuthStore>()(
             isLoading: false 
           });
           toast.success('Welcome back!');
+          return true;
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Login failed';
           set({ error: message, isLoading: false });
           toast.error(message);
+          return false;
         }
       },
 
@@ -60,19 +62,22 @@ export const useAuthStore = create<AuthStore>()(
             isLoading: false 
           });
           toast.success('Account created!');
+          return true;
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Registration failed';
           set({ error: message, isLoading: false });
           toast.error(message);
+          return false;
         }
       },
 
       logout: async () => {
         set({ isLoading: true });
         try {
+          // Try to call backend logout
           await authApi.logout();
         } catch {
-          // Ignore logout errors
+          // Ignore errors - clear local state anyway
         } finally {
           set({ user: null, refreshToken: null, isLoading: false, error: null });
           toast.success('Logged out');
