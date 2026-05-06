@@ -136,4 +136,7 @@ export const ordersApi = {
 
   updateStatus: (id: string, status: string) =>
     api.patch<Order>(`/orders/${id}/status`, { status }),
+
+  createManual: (data: { customerEmail: string; customerName: string; items: { productId: string; quantity: number }[] }) =>
+    api.post<Order>('/orders/manual', data),
 };

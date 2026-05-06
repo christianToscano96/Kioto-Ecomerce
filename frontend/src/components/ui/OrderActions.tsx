@@ -6,9 +6,10 @@ import type { Order } from '../../../../shared/src';
 interface OrderActionsProps {
   orderId: string;
   status: Order['status'];
+  onPrintLabel?: (orderId: string) => void;
 }
 
-export function OrderActions({ orderId, status }: OrderActionsProps) {
+export function OrderActions({ orderId, status, onPrintLabel }: OrderActionsProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -60,6 +61,16 @@ export function OrderActions({ orderId, status }: OrderActionsProps) {
             <span className="material-symbols-outlined text-sm">visibility</span>
             Ver Detalle
           </button>
+          
+          {onPrintLabel && (
+            <button
+              onClick={() => { onPrintLabel(orderId); setOpen(false); }}
+              className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-sm">print</span>
+              Imprimir Etiqueta
+            </button>
+          )}
           
           {status !== 'delivered' && status !== 'cancelled' && nextStatus() && (
             <button

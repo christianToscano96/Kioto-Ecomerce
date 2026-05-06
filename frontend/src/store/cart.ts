@@ -59,7 +59,7 @@ export const useCartStore = create<CartStore>()(
           }
         },
 
-addToCart: async (product, quantity, size, color) => {
+addToCart: async (product: Product, quantity: number, size?: string, color?: string) => {
            set({ isSyncing: true, error: null });
            const optimisticItem: CartItem = {
              productId: product._id,

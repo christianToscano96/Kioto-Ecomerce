@@ -5,6 +5,7 @@ import { createCheckoutSchema } from '../schemas/checkout';
 import { getOrCreateCart, calculateCartTotal, clearCart, calculateShipping } from '../utils/cart';
 import Cart from '../models/Cart';
 import Order from '../models/Order';
+import Product from '../models/Product';
 
 const router = Router();
 
@@ -18,25 +19,43 @@ const getSessionId = (req: Request): string => {
 
 // POST /api/checkout - Create checkout session (fake mode - no Stripe)
 router.post('/', validate(createCheckoutSchema), async (req: Request, res: Response) => {
+  const session = await Order.startSession();
+  session.startTransaction();
+  
   try {
     const sessionId = getSessionId(req);
     const cart = await getOrCreateCart(sessionId);
 
     // Check if cart has items
     if (cart.items.length === 0) {
+      await session.abortTransaction();
+      session.endSession();
       res.status(400).json({ error: 'Cart is empty' });
       return;
     }
 
     // Populate product details
-    await cart.populate('items.productId', 'name images');
+    await cart.populate('items.productId', 'name images stock');
+
+    // Check stock availability
+    for (const item of cart.items) {
+      const product = item.productId as any;
+      if (product.stock < item.quantity) {
+        await session.abortTransaction();
+        session.endSession();
+        res.status(400).json({ 
+          error: `Insufficient stock for ${product.name}. Available: ${product.stock}, Required: ${item.quantity}` 
+        });
+        return;
+      }
+    }
 
     const subtotal = calculateCartTotal(cart.items);
     const shipping = calculateShipping(req.body.shippingDetails?.address?.postal_code || '');
     const total = subtotal + shipping;
 
     // FAKE CHECKOUT: Create order directly without Stripe
-    const order = await Order.create({
+    const order = await Order.create([{
       sessionId,
       items: cart.items.map(item => ({
         productId: item.productId,
@@ -46,22 +65,37 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
       subtotal,
       shipping,
       total,
-      status: 'pending', // Will be 'paid' after real Stripe integration
+      status: 'pending',
       shippingDetails: req.body.shippingDetails,
-    });
+    }], { session });
 
-    // Clear the cart using the utility function
+    // Deduct stock from products atomically
+    await Promise.all(
+      cart.items.map(item =>
+        Product.findByIdAndUpdate(
+          item.productId,
+          { $inc: { stock: -item.quantity } },
+          { session }
+        )
+      )
+    );
+
+    // Clear the cart
     await clearCart(sessionId);
 
-    // Return fake checkout response (simulating success)
+    await session.commitTransaction();
+    session.endSession();
+
     res.status(200).json({
-      orderId: order._id,
-      sessionId: `fake_session_${order._id}`,
+      orderId: order[0]._id,
+      sessionId: `fake_session_${order[0]._id}`,
       success: true,
-      message: 'Order created successfully (fake checkout)',
+      message: 'Order created successfully',
       shipping: shipping,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error('Checkout error:', error);
     res.status(500).json({ error: 'Failed to create checkout session' });
   }
@@ -86,11 +120,13 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
   // Handle the event
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session;
+    const stripeSession = event.data.object as Stripe.Checkout.Session;
+    const mongoSession = await Order.startSession();
+    mongoSession.startTransaction();
 
     try {
       // Get the cart from metadata
-      const sessionId = session.metadata?.sessionId;
+      const sessionId = stripeSession.metadata?.sessionId;
 
       if (!sessionId) {
         throw new Error('No session ID in metadata');
@@ -101,14 +137,29 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
       if (!cart || cart.items.length === 0) {
         console.error(`No cart found for session ${sessionId}`);
+        await mongoSession.abortTransaction();
+        mongoSession.endSession();
         res.json({ received: true });
         return;
+      }
+
+      // Check stock availability before creating order
+      await cart.populate('items.productId', 'name stock');
+      for (const item of cart.items) {
+        const product = item.productId as any;
+        if (product.stock < item.quantity) {
+          console.error(`Insufficient stock for ${product.name} (ID: ${product._id})`);
+          await mongoSession.abortTransaction();
+          mongoSession.endSession();
+          res.json({ received: true });
+          return;
+        }
       }
 
       const total = calculateCartTotal(cart.items);
 
       // Create order
-      const order = await Order.create({
+      const order = await Order.create([{
         sessionId,
         items: cart.items.map(item => ({
           productId: item.productId,
@@ -117,16 +168,31 @@ router.post('/webhook', async (req: Request, res: Response) => {
         })),
         total,
         status: 'paid',
-        stripePaymentIntentId: session.payment_intent as string,
-      });
+        stripePaymentIntentId: stripeSession.payment_intent as string,
+      }], { session: mongoSession });
+
+      // Deduct stock from products atomically
+      await Promise.all(
+        cart.items.map(item =>
+          Product.findByIdAndUpdate(
+            item.productId,
+            { $inc: { stock: -item.quantity } },
+            { session: mongoSession }
+          )
+        )
+      );
 
       // Clear the cart using the utility function
       await clearCart(sessionId);
 
-      console.log(`Order ${order._id} created from session ${session.id}`);
+      await mongoSession.commitTransaction();
+      mongoSession.endSession();
+
+      console.log(`Order ${order[0]._id} created from session ${stripeSession.id}`);
     } catch (error) {
+      await mongoSession.abortTransaction();
+      mongoSession.endSession();
       console.error('Error creating order from webhook:', error);
-      // Still return 200 to acknowledge receipt, but log the error
     }
   } else if (event.type === 'checkout.session.expired') {
     // Handle expired sessions if needed
