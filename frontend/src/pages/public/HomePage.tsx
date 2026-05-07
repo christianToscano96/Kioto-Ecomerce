@@ -72,7 +72,7 @@ export function HomePage() {
                 </h1>
                 
                 <p className="text-on-surface-variant text-base md:text-lg mb-8 max-w-md">
-                  Prendas únicas diseñadas para realzar tu esencia. Calidad premium y detalles que amas.
+                  Prendas únicas para realzar tu esencia. Calidad premium y detalles que amas.
                 </p>
                 
                 {/* CTAs */}

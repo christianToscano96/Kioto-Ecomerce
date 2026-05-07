@@ -3,11 +3,11 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
 
 const navItems = [
-  { to: "/admin", label: "Dashboard", icon: "fa-tachometer-alt", exact: true },
-  { to: "/admin/products", label: "Products", icon: "fa-box" },
-  { to: "/admin/categories", label: "Categories", icon: "fa-tags" },
-  { to: "/admin/orders", label: "Orders", icon: "fa-shopping-bag" },
-  { to: "/admin/settings", label: "Settings", icon: "fa-cog" },
+  { to: "/admin", label: "Tablero", icon: "fa-tachometer-alt", exact: true },
+  { to: "/admin/products", label: "Productos", icon: "fa-box" },
+  { to: "/admin/categories", label: "Categorías", icon: "fa-tags" },
+  { to: "/admin/orders", label: "Pedidos", icon: "fa-shopping-bag" },
+  { to: "/admin/settings", label: "Configuración", icon: "fa-cog" },
 ];
 
 export function AdminSidebar() {
@@ -26,7 +26,7 @@ export function AdminSidebar() {
           Kioto
         </h1>
         <p className="text-xs text-on-surface-variant/70 font-medium tracking-widest uppercase mt-1">
-          Admin Dashboard
+          Panel de Control
         </p>
       </div>
       
@@ -59,7 +59,7 @@ export function AdminSidebar() {
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface hover:text-on-surface w-full transition-colors"
         >
           <i className="fa fa-sign-out-alt w-5 text-center"></i>
-          <span>Logout</span>
+          <span>Cerrar Sesión</span>
         </button>
       </div>
     </aside>
