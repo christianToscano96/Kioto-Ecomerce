@@ -269,7 +269,7 @@ export function SettingsPage() {
                   <div>
                     <label className="text-sm font-medium text-on-surface mb-2 block">Logo</label>
                     <ImageUpload
-                      label="Logo"
+                
                       currentImage={localSettings.store?.logo}
                       onUpload={(url) => updateField('store.logo', url)}
                       onRemove={() => updateField('store.logo', '')}
