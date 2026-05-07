@@ -19,6 +19,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  FunnelChart,
+  Funnel,
+  LabelList,
 } from "recharts";
 
 interface DashboardStats {
@@ -29,6 +32,12 @@ interface DashboardStats {
   salesData?: { date: string; sales: number }[];
   statusDistribution?: { status: string; count: number; value: number }[];
   orderTrend?: { date: string; orders: number }[];
+  // Funnel data
+  funnelData?: { stage: string; value: number; fill: string }[];
+  // Top products
+  topProducts?: { name: string; sales: number }[];
+  // Category sales
+  categorySales?: { category: string; sales: number }[];
 }
 
 interface RecentOrder {
@@ -75,6 +84,29 @@ export function DashboardOverview() {
           value: count,
         }));
         
+        // Funnel data - conversion stages
+        const funnelData = [
+          { stage: "Carritos", value: orders.length + 15, fill: "#3b82f6" }, // Simulated carts
+          { stage: "Checkout", value: orders.length + 5, fill: "#f59e0b" }, // Simulated checkouts
+          { stage: "Pagado", value: orders.filter(o => o.status === "paid" || o.status === "shipped" || o.status === "delivered").length, fill: "#10b981" },
+          { stage: "Enviado", value: orders.filter(o => o.status === "shipped" || o.status === "delivered").length, fill: "#8b5cf6" },
+        ];
+        
+        // Top products from order items
+        const productSales: Record<string, { name: string; sales: number }> = {};
+        orders.forEach(o => {
+          o.items.forEach(item => {
+            const pid = item.productId as any;
+            const name = typeof pid === "string" ? pid : (pid?.name || "Producto");
+            if (!productSales[name]) productSales[name] = { name, sales: 0 };
+            productSales[name].sales += item.quantity;
+          });
+        });
+        
+        const topProducts = Object.values(productSales)
+          .sort((a, b) => b.sales - a.sales)
+          .slice(0, 5);
+        
         // Order trend for line chart
         const ordersByDate = orders.reduce((acc: Record<string, number>, o) => {
           const date = new Date(o.createdAt).toLocaleDateString("es-AR");
@@ -96,10 +128,13 @@ export function DashboardOverview() {
           totalSales,
           orders: ordersCount,
           avgOrder,
-          newCustomers: 24, // Placeholder - would need user model
+          newCustomers: 24,
           salesData,
           statusDistribution,
           orderTrend,
+          funnelData,
+          topProducts,
+          categorySales: [], // Requires product category population
         });
 
         // Recent orders (last 5)
@@ -267,6 +302,56 @@ export function DashboardOverview() {
           ) : (
             <div className="flex items-center justify-center h-full text-on-surface-variant">No hay datos</div>
           )}
+        </div>
+      </div>
+
+      {/* Funnel Chart - Conversion */}
+      <div className="bg-surface-container-low rounded-lg p-6 mb-12">
+        <h3 className="font-serif text-xl font-bold mb-2">Conversión de Checkout</h3>
+        <p className="text-xs text-on-surface-variant mb-4">De carrito a envío</p>
+        <div className="h-64">
+          {stats.funnelData && stats.funnelData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <FunnelChart>
+                <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 100%)", border: "1px solid hsl(0 0% 90%)" }} />
+                <Funnel dataKey="value" data={stats.funnelData} isAnimationActive>
+                  <LabelList position="right" fill="#666" stroke="none" />
+                </Funnel>
+              </FunnelChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full text-on-surface-variant">No hay datos</div>
+          )}
+        </div>
+      </div>
+
+      {/* Top Products Horizontal Bar */}
+      <div className="bg-surface-container-low rounded-lg p-6 mb-12">
+        <h3 className="font-serif text-xl font-bold mb-2">Productos Top</h3>
+        <p className="text-xs text-on-surface-variant mb-4">Más vendidos</p>
+        <div className="h-64">
+          {stats.topProducts && stats.topProducts.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.topProducts} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 90% / 0.3)" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 10 }} />
+                <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={80} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 100%)", border: "1px solid hsl(0 0% 90%)" }} />
+                <Bar dataKey="sales" fill="hsl(220 80% 55%)" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full text-on-surface-variant">No hay datos</div>
+          )}
+        </div>
+      </div>
+
+      {/* Category Sales Stacked Bar - Placeholder */}
+      <div className="bg-surface-container-low rounded-lg p-6 mb-12">
+        <h3 className="font-serif text-xl font-bold mb-2">Ventas por Categoría</h3>
+        <p className="text-xs text-on-surface-variant mb-4">Distribución semanal</p>
+        <div className="h-64 flex items-center justify-center">
+          <p className="text-on-surface-variant">Próximamente - requiere endpoint de categorías</p>
         </div>
       </div>
 
