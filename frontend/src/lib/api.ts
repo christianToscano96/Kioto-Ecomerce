@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, Product, Cart, CartItem, Order, Category } from '../../../shared/src/index';
+import type { User, Product, Cart, CartItem, Order, Category, Settings } from '../../../shared/src/index';
 
 // Create axios instance with credentials
 export const api = axios.create({
@@ -139,4 +139,22 @@ export const ordersApi = {
 
   createManual: (data: { customerEmail: string; customerName: string; items: { productId: string; quantity: number }[] }) =>
     api.post<Order>('/orders/manual', data),
+};
+
+// Settings API
+export const settingsApi = {
+  get: () =>
+    api.get<Settings>('/settings'),
+
+  update: (settings: Settings) =>
+    api.put<Settings>('/settings', settings),
+};
+
+// Profile API
+export const profileApi = {
+  update: (data: { name?: string; email?: string }) =>
+    api.put<{ user: User }>('/auth/profile', data),
+  
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    api.put('/auth/password', data),
 };

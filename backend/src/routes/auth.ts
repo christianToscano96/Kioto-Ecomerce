@@ -219,4 +219,72 @@ router.get('/me', authenticate, async (req: AuthenticatedRequest, res: Response)
   res.status(200).json({ user: userResponse });
 });
 
+// PUT /api/auth/profile - Update user profile (name, email)
+router.put('/profile', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { name, email } = req.body;
+    
+    if (!req.user) {
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
+    }
+
+    const updateData: { name?: string; email?: string } = {};
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    const userResponse = {
+      _id: user!._id,
+      email: user!.email,
+      role: user!.role,
+      name: user!.name,
+    };
+
+    res.status(200).json({ user: userResponse });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// PUT /api/auth/password - Change user password
+router.put('/password', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!req.user) {
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Verify current password
+    const isPasswordValid = await user.comparePassword(currentPassword);
+    if (!isPasswordValid) {
+      res.status(401).json({ error: 'Current password is incorrect' });
+      return;
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Password change error:', error);
+    res.status(500).json({ error: 'Failed to update password' });
+  }
+});
+
 export default router;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useCartItems,
@@ -16,6 +16,7 @@ import {
   PrimaryButton,
 } from "@/components/checkout/CheckoutFormComponents";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
+import { api } from "@/lib/api";
 
 const LoaderIcon = () => (
   <svg
@@ -74,9 +75,21 @@ export function CheckoutPage() {
   const shipping = calculateShipping(formData.address.postal_code);
   const total = cartTotal + shipping;
 
+  // Load terms from settings
+  useEffect(() => {
+    api.get('/settings').then(res => {
+      if (res.data?.policies?.terms) {
+        setStoreTerms(res.data.policies.terms);
+      }
+    }).catch(() => {});
+  }, []);
+
   const [paymentMethod, setPaymentMethod] = useState<"card" | "transfer">("card");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [storeTerms, setStoreTerms] = useState<string>("");
+  const [showTerms, setShowTerms] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     if (field.startsWith("address.")) {
@@ -322,6 +335,29 @@ export function CheckoutPage() {
                   </div>
                 </FormSection>
 
+                {/* Terms Agreement */}
+                <div className="mt-6 p-4 bg-surface-container rounded-lg border border-outline-variant/30">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="w-5 h-5 mt-0.5 rounded border-outline focus:ring-2 focus:ring-primary"
+                      required
+                    />
+                    <span className="text-sm text-on-surface">
+                      Acepto los{' '}
+                      <button
+                        type="button"
+                        onClick={() => setShowTerms(true)}
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Términos y Condiciones
+                      </button>
+                    </span>
+                  </label>
+                </div>
+
                 {error && (
                   <div className="p-4 bg-red-50 text-red-600 rounded-lg mb-4">
                     {error}
@@ -336,7 +372,7 @@ export function CheckoutPage() {
                   >
                     Volver
                   </button>
-                  <PrimaryButton type="submit" disabled={isSubmitting}>
+                  <PrimaryButton type="submit" disabled={isSubmitting || !termsAccepted}>
                     {isSubmitting ? "Procesando..." : "Confirmar Pedido"}
                   </PrimaryButton>
                 </section>
@@ -348,10 +384,42 @@ export function CheckoutPage() {
           <OrderSummary items={items} subtotal={cartTotal} shipping={shipping} total={total} />
         </div>
 
-        <SecurityBadge message="Tu conexión está encriptada y tus datos son manejados con cuidado artesanal." />
-      </main>
+<SecurityBadge message="Tu conexión está encriptada y tus datos son manejados con cuidado artesanal." />
+       </main>
 
-      <Footer />
+       {/* Terms Modal */}
+       {showTerms && (
+         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+           <div className="bg-background rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
+             <div className="flex justify-between items-center mb-4">
+               <h2 className="text-xl font-bold">Términos y Condiciones</h2>
+               <button
+                 onClick={() => setShowTerms(false)}
+                 className="text-on-surface hover:text-primary"
+               >
+                 <span className="material-symbols-outlined">close</span>
+               </button>
+             </div>
+             <div className="prose prose-sm max-w-none text-on-surface">
+               {storeTerms ? (
+                 <p className="whitespace-pre-wrap">{storeTerms}</p>
+               ) : (
+                 <p>Términos y condiciones no configurados.</p>
+               )}
+             </div>
+             <div className="mt-6 flex justify-end">
+               <button
+                 onClick={() => setShowTerms(false)}
+                 className="px-4 py-2 bg-primary text-on-primary rounded-lg"
+               >
+                 Cerrar
+               </button>
+             </div>
+           </div>
+         </div>
+       )}
+
+       <Footer />
     </>
   );
 }

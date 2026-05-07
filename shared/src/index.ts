@@ -129,3 +129,53 @@ export interface AuthResponse {
   user: User;
   token: string;
 }
+
+// Settings Types
+export interface Settings {
+  profile?: {
+    name?: string;
+    email?: string;
+    password?: string;
+  };
+  store?: {
+    name?: string;
+    logo?: string;
+    currency?: string;
+    timezone?: string;
+    taxEnabled?: boolean;
+    taxRate?: number;
+    shipping?: {
+      flatRate?: number;
+      freeShippingOver?: number;
+    };
+  };
+  payments?: {
+    stripe?: {
+      testMode?: boolean;
+      publishableKey?: string;
+      secretKey?: string;
+    };
+  };
+  notifications?: {
+    orderEmails?: boolean;
+    lowStockEmails?: boolean;
+    webhookUrl?: string;
+  };
+  appearance?: {
+    primaryColor?: string;
+    darkMode?: boolean;
+  };
+  security?: {
+    twoFactor?: boolean;
+    apiKey?: string;
+  };
+  social?: {
+    instagram?: string;
+    whatsapp?: string;
+    facebook?: string;
+  };
+  policies?: {
+    terms?: string;
+    privacy?: string;
+  };
+}
