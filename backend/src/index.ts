@@ -15,6 +15,7 @@ import checkoutRoutes from "./routes/checkout";
 import orderRoutes from "./routes/orders";
 import apiDocsRoutes from "./routes/api-docs";
 import uploadRoutes from "./routes/upload";
+import settingsRoutes from "./routes/settings";
 
 dotenv.config();
 
@@ -87,6 +88,7 @@ app.use("/api/checkout", checkoutRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/docs", apiDocsRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/settings", settingsRoutes);
 
 // Error handling middleware
 app.use(

@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCartItemCount } from "@/store/cart";
+import { api } from "@/lib/api";
 import logoK from '../../../assets/logo.png';
 
 const navItems = [
@@ -10,7 +11,17 @@ const navItems = [
 export function Header() {
   const cartItemCount = useCartItemCount();
   const [searchQuery, setSearchQuery] = useState("");
+  const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch store logo from settings
+    api.get('/settings').then(res => {
+      if (res.data?.store?.logo) {
+        setStoreLogo(res.data.store.logo);
+      }
+    }).catch(() => {});
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +41,8 @@ export function Header() {
           >
             <div className="h-10 overflow-hidden flex items-center pt-5">
             <img 
-              src={logoK} 
-              alt="Kioto Logo" 
+              src={storeLogo || logoK} 
+              alt="Store Logo" 
               className="h-40 w-auto -mt-2 object-contain "
             />
           </div>
