@@ -1,70 +1,172 @@
+import { useState, useEffect } from "react";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DataTable, StatusBadge } from "@/components/ui/DataTable";
 import { formatPrice } from "@/lib/utils";
+import { ordersApi } from "@/lib/api";
+import type { Order } from "../../../../shared/src";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
-// Datos mock - reemplazar con llamadas API reales
-const stats = [
-  {
-    label: "Ventas Totales",
-    value: formatPrice(42920),
-    change: {
-      value: 12.4,
-      label: "+12.4% vs mes anterior",
-      type: "increase" as const,
-    },
-  },
-  {
-    label: "Pedidos",
-    value: "1,248",
-    change: { value: 8.2, label: "+8.2%", type: "increase" as const },
-  },
-  {
-    label: "Valor Promedio",
-    value: "$184.20",
-    change: { value: 0, label: "Estable", type: "stable" as const },
-  },
-  {
-    label: "Nuevos Miembros",
-    value: "342",
-    change: { value: 15.1, label: "+15.1%", type: "increase" as const },
-  },
-];
+interface DashboardStats {
+  totalSales: number;
+  orders: number;
+  avgOrder: number;
+  newCustomers: number;
+  salesData?: { date: string; sales: number }[];
+  statusDistribution?: { status: string; count: number; value: number }[];
+  orderTrend?: { date: string; orders: number }[];
+}
 
-const recentOrders = [
-  {
-    customer: "Julianne Laurent",
-    status: "shipped" as const,
-    date: "12 Oct, 2023",
-    total: 492.0,
-  },
-  {
-    customer: "Anders Muller",
-    status: "processing" as const,
-    date: "11 Oct, 2023",
-    total: 1205.5,
-  },
-  {
-    customer: "Sora Chen",
-    status: "shipped" as const,
-    date: "11 Oct, 2023",
-    total: 320.0,
-  },
-  {
-    customer: "Rafael Benitez",
-    status: "pending" as const,
-    date: "10 Oct, 2023",
-    total: 89.0,
-  },
-  {
-    customer: "Emma Davies",
-    status: "shipped" as const,
-    date: "10 Oct, 2023",
-    total: 215.0,
-  },
-];
+interface RecentOrder {
+  customer: string;
+  status: Order["status"];
+  date: string;
+  total: number;
+  _id: string;
+}
 
 export function DashboardOverview() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      try {
+        const response = await ordersApi.list();
+        const orders = response.data || response;
+        
+        // Calculate stats from real orders
+        const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
+        const ordersCount = orders.length;
+        const avgOrder = ordersCount > 0 ? totalSales / ordersCount : 0;
+        
+        // Group sales by date for chart
+        const salesByDate = orders.reduce((acc: Record<string, number>, o) => {
+          const date = new Date(o.createdAt).toLocaleDateString("es-AR");
+          acc[date] = (acc[date] || 0) + o.total;
+          return acc;
+        }, {});
+        
+        // Status distribution for pie chart
+        const statusCount = orders.reduce((acc: Record<string, number>, o) => {
+          acc[o.status] = (acc[o.status] || 0) + 1;
+          return acc;
+        }, {});
+        
+        const statusDistribution = Object.entries(statusCount).map(([status, count]) => ({
+          status,
+          count,
+          value: count,
+        }));
+        
+        // Order trend for line chart
+        const ordersByDate = orders.reduce((acc: Record<string, number>, o) => {
+          const date = new Date(o.createdAt).toLocaleDateString("es-AR");
+          acc[date] = (acc[date] || 0) + 1;
+          return acc;
+        }, {});
+        
+        const orderTrend = Object.entries(ordersByDate)
+          .map(([date, orders]) => ({ date, orders }))
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .slice(-7);
+
+        const salesData = Object.entries(salesByDate)
+          .map(([date, sales]) => ({ date, sales }))
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .slice(-7);
+
+        setStats({
+          totalSales,
+          orders: ordersCount,
+          avgOrder,
+          newCustomers: 24, // Placeholder - would need user model
+          salesData,
+          statusDistribution,
+          orderTrend,
+        });
+
+        // Recent orders (last 5)
+        const recent = orders
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5)
+          .map((o) => ({
+            customer: o.shippingDetails?.name || "Cliente",
+            status: o.status,
+            date: new Date(o.createdAt).toLocaleDateString("es-AR", {
+              day: "numeric",
+              month: "short",
+            }),
+            total: o.total,
+            _id: o._id,
+          }));
+        setRecentOrders(recent);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-surface-container-low rounded w-64"></div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-surface-container-low rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!stats) return <div className="p-8">Error cargando datos</div>;
+
+  const statCards = [
+    {
+      label: "Ventas Totales",
+      value: formatPrice(stats.totalSales),
+      change: { value: 12.4, label: "+12.4% vs mes anterior", type: "increase" as const },
+    },
+    {
+      label: "Pedidos",
+      value: stats.orders.toString(),
+      change: { value: 8.2, label: "+8.2%", type: "increase" as const },
+    },
+    {
+      label: "Valor Promedio",
+      value: formatPrice(stats.avgOrder),
+      change: { value: 0, label: "Estable", type: "stable" as const },
+    },
+    {
+      label: "Nuevos Miembros",
+      value: stats.newCustomers.toString(),
+      change: { value: 15.1, label: "+15.1%", type: "increase" as const },
+    },
+  ];
+
   return (
     <div>
       <PageHeader
@@ -75,7 +177,7 @@ export function DashboardOverview() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <MetricCard
             key={stat.label}
             label={stat.label}
@@ -85,34 +187,86 @@ export function DashboardOverview() {
         ))}
       </div>
 
-      {/* Sales Chart Placeholder */}
-      <div className="bg-surface-container-low rounded-lg p-10 mb-12">
-        <div className="flex justify-between items-end mb-10">
-          <div>
-            <h3 className="font-serif text-2xl font-bold">Ventas en el Tiempo</h3>
-            <p className="text-sm text-on-surface-variant mt-1">
-              Crecimiento de la colección curada
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button className="text-[10px] uppercase tracking-widest px-4 py-2 border border-outline-variant/40 rounded hover:bg-surface transition-colors">
-              Diario
-            </button>
-            <button className="text-[10px] uppercase tracking-widest px-4 py-2 bg-primary text-on-primary rounded">
-              Semanal
-            </button>
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        {/* Sales Area Chart */}
+        <div className="bg-surface-container-low rounded-lg p-6">
+          <h3 className="font-serif text-xl font-bold mb-2">Ventas Diarias</h3>
+          <p className="text-xs text-on-surface-variant mb-4">Últimos 7 días</p>
+          <div className="h-64">
+            {stats.salesData && stats.salesData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={stats.salesData}>
+                  <defs>
+                    <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(220 80% 55%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(220 80% 55%)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 90% / 0.3)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `$${v}`} />
+                  <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 100%)", border: "1px solid hsl(0 0% 90%)" }} />
+                  <Area type="monotone" dataKey="sales" stroke="hsl(220 80% 55%)" fill="url(#salesGradient)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-on-surface-variant">No hay datos</div>
+            )}
           </div>
         </div>
 
-        {/* Mock Chart */}
-        <div className="relative h-64 w-full flex items-end gap-2 border-b border-dashed border-outline-variant/40 pb-2">
-          {[30, 45, 40, 65, 85, 55, 70].map((height, i) => (
-            <div
-              key={i}
-              className="flex-1 bg-primary/20 hover:bg-primary/40 transition-all cursor-pointer"
-              style={{ height: `${height}%` }}
-            />
-          ))}
+        {/* Orders Trend Line Chart */}
+        <div className="bg-surface-container-low rounded-lg p-6">
+          <h3 className="font-serif text-xl font-bold mb-2">Pedidos Diarios</h3>
+          <p className="text-xs text-on-surface-variant mb-4">Actividad de la semana</p>
+          <div className="h-64">
+            {stats.orderTrend && stats.orderTrend.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.orderTrend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 90% / 0.3)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
+                  <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 100%)", border: "1px solid hsl(0 0% 90%)" }} />
+                  <Bar dataKey="orders" fill="hsl(220 80% 55%)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-on-surface-variant">No hay datos</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Status Distribution Pie Chart */}
+      <div className="bg-surface-container-low rounded-lg p-6 mb-12">
+        <h3 className="font-serif text-xl font-bold mb-2">Estado de Pedidos</h3>
+        <p className="text-xs text-on-surface-variant mb-4">Distribución actual</p>
+        <div className="h-64">
+          {stats.statusDistribution && stats.statusDistribution.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={stats.statusDistribution}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {stats.statusDistribution.map((entry, index) => {
+                    const colors = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#6b7280"];
+                    return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                  })}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 100%)", border: "1px solid hsl(0 0% 90%)" }} />
+                <Legend layout="horizontal" verticalAlign="bottom" height={36} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full text-on-surface-variant">No hay datos</div>
+          )}
         </div>
       </div>
 
@@ -125,9 +279,6 @@ export function DashboardOverview() {
               Las últimas adquisiciones curadas por tus clientes
             </p>
           </div>
-          <button className="font-bold text-xs uppercase tracking-widest border-b border-primary text-primary pb-1 hover:opacity-70 transition-opacity">
-            Ver Todos los Archivos
-          </button>
         </div>
 
         <DataTable
