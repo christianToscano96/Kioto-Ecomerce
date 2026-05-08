@@ -33,8 +33,8 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
   fetchOrders: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await ordersApi.list();
-      set({ orders: response.data });
+      const orders = await ordersApi.list();
+      set({ orders });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch orders';
       set({ error: message });
@@ -47,8 +47,8 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
   fetchOrder: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await ordersApi.get(id);
-      set({ order: response.data });
+      const order = await ordersApi.get(id);
+      set({ order });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch order';
       set({ error: message });

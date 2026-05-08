@@ -4,10 +4,30 @@ import Product from '../models/Product';
 
 const router = Router();
 
-// Get all orders (admin only)
+// Get all orders (admin only) - supports date filtering
 router.get('/', async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
+    const { days, from, to } = req.query;
+    const query: Record<string, unknown> = {};
+
+    if (days) {
+      const daysAgo = new Date();
+      daysAgo.setDate(daysAgo.getDate() - Number(days));
+      query.createdAt = { $gte: daysAgo };
+    } else if (from || to) {
+      const dateQuery: Record<string, Date> = {};
+      if (from) dateQuery.$gte = new Date(from as string);
+      if (to) {
+        const endDate = new Date(to as string);
+        endDate.setHours(23, 59, 59, 999);
+        dateQuery.$lte = endDate;
+      }
+      if (Object.keys(dateQuery).length > 0) {
+        query.createdAt = dateQuery;
+      }
+    }
+
+    const orders = await Order.find(query).sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch orders' });

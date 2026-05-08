@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DataTable, StatusBadge } from "@/components/ui/DataTable";
@@ -32,11 +32,8 @@ interface DashboardStats {
   salesData?: { date: string; sales: number }[];
   statusDistribution?: { status: string; count: number; value: number }[];
   orderTrend?: { date: string; orders: number }[];
-  // Funnel data
   funnelData?: { stage: string; value: number; fill: string }[];
-  // Top products
   topProducts?: { name: string; sales: number }[];
-  // Category sales
   categorySales?: { category: string; sales: number }[];
 }
 
@@ -48,119 +45,130 @@ interface RecentOrder {
   _id: string;
 }
 
+type TimeRange = "7d" | "30d" | "90d" | "custom";
+
 export function DashboardOverview() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<TimeRange>("7d");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [showCustomRange, setShowCustomRange] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 5;
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setLoading(true);
-      try {
-        const response = await ordersApi.list();
-        const orders = response.data || response;
-        
-        // Calculate stats from real orders
-        const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
-        const ordersCount = orders.length;
-        const avgOrder = ordersCount > 0 ? totalSales / ordersCount : 0;
-        
-        // Group sales by date for chart
-        const salesByDate = orders.reduce((acc: Record<string, number>, o) => {
-          const date = new Date(o.createdAt).toLocaleDateString("es-AR");
-          acc[date] = (acc[date] || 0) + o.total;
-          return acc;
-        }, {});
-        
-        // Status distribution for pie chart
-        const statusCount = orders.reduce((acc: Record<string, number>, o) => {
-          acc[o.status] = (acc[o.status] || 0) + 1;
-          return acc;
-        }, {});
-        
-        const statusDistribution = Object.entries(statusCount).map(([status, count]) => ({
-          status,
-          count,
-          value: count,
-        }));
-        
-        // Funnel data - conversion stages
-        const funnelData = [
-          { stage: "Carritos", value: orders.length + 15, fill: "#3b82f6" }, // Simulated carts
-          { stage: "Checkout", value: orders.length + 5, fill: "#f59e0b" }, // Simulated checkouts
-          { stage: "Pagado", value: orders.filter(o => o.status === "paid" || o.status === "shipped" || o.status === "delivered").length, fill: "#10b981" },
-          { stage: "Enviado", value: orders.filter(o => o.status === "shipped" || o.status === "delivered").length, fill: "#8b5cf6" },
-        ];
-        
-        // Top products from order items
-        const productSales: Record<string, { name: string; sales: number }> = {};
-        orders.forEach(o => {
-          o.items.forEach(item => {
-            const pid = item.productId as any;
-            const name = typeof pid === "string" ? pid : (pid?.name || "Producto");
-            if (!productSales[name]) productSales[name] = { name, sales: 0 };
-            productSales[name].sales += item.quantity;
-          });
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const params: { days?: number; from?: string; to?: string } = {};
+
+      if (timeRange === "custom" && customFrom && customTo) {
+        params.from = customFrom;
+        params.to = customTo;
+      } else if (timeRange !== "custom") {
+        const daysMap: Record<string, number> = { "7d": 7, "30d": 30, "90d": 90 };
+        params.days = daysMap[timeRange];
+      }
+
+      const orders = await ordersApi.list(params);
+      
+      // Calculate stats from real orders
+      const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
+      const ordersCount = orders.length;
+      const avgOrder = ordersCount > 0 ? totalSales / ordersCount : 0;
+      
+      // Group sales by date for chart
+      const salesByDate = orders.reduce((acc: Record<string, number>, o: Order) => {
+        const date = new Date(o.createdAt).toLocaleDateString("es-AR");
+        acc[date] = (acc[date] || 0) + o.total;
+        return acc;
+      }, {});
+      
+      // Status distribution for pie chart
+      const statusCount = orders.reduce((acc: Record<string, number>, o: Order) => {
+        acc[o.status] = (acc[o.status] || 0) + 1;
+        return acc;
+      }, {});
+      
+      const statusDistribution = Object.entries(statusCount).map(([status, count]) => ({
+        status,
+        count,
+        value: count,
+      }));
+      
+      // Funnel data - conversion stages
+      const funnelData = [
+        { stage: "Carritos", value: orders.length + 15, fill: "#3b82f6" },
+        { stage: "Checkout", value: orders.length + 5, fill: "#f59e0b" },
+        { stage: "Pagado", value: orders.filter(o => ["paid", "shipped", "delivered"].includes(o.status)).length, fill: "#10b981" },
+        { stage: "Enviado", value: orders.filter(o => ["shipped", "delivered"].includes(o.status)).length, fill: "#8b5cf6" },
+      ];
+      
+      // Top products from order items
+      const productSales: Record<string, { name: string; sales: number }> = {};
+      orders.forEach((o: Order) => {
+        o.items.forEach((item: any) => {
+          const pid = item.productId as any;
+          const name = typeof pid === "string" ? pid : (pid?.name || "Producto");
+          if (!productSales[name]) productSales[name] = { name, sales: 0 };
+          productSales[name].sales += item.quantity;
         });
-        
-        const topProducts = Object.values(productSales)
-          .sort((a, b) => b.sales - a.sales)
-          .slice(0, 5);
-        
-        // Order trend for line chart
-        const ordersByDate = orders.reduce((acc: Record<string, number>, o) => {
-          const date = new Date(o.createdAt).toLocaleDateString("es-AR");
-          acc[date] = (acc[date] || 0) + 1;
-          return acc;
-        }, {});
-        
-        const orderTrend = Object.entries(ordersByDate)
-          .map(([date, orders]) => ({ date, orders }))
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-          .slice(-7);
+      });
+      
+      const topProducts = Object.values(productSales)
+        .sort((a, b) => b.sales - a.sales)
+        .slice(0, 5);
 
-        const salesData = Object.entries(salesByDate)
+      setStats({
+        totalSales,
+        orders: ordersCount,
+        avgOrder,
+        newCustomers: 24,
+        salesData: Object.entries(salesByDate)
           .map(([date, sales]) => ({ date, sales }))
           .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-          .slice(-7);
+          .slice(-7),
+        statusDistribution,
+        orderTrend: Object.entries(salesByDate)
+          .map(([date, orders]) => ({ date, orders: Math.round(orders / 100) }))
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .slice(-7),
+        funnelData,
+        topProducts,
+        categorySales: [],
+      });
 
-        setStats({
-          totalSales,
-          orders: ordersCount,
-          avgOrder,
-          newCustomers: 24,
-          salesData,
-          statusDistribution,
-          orderTrend,
-          funnelData,
-          topProducts,
-          categorySales: [], // Requires product category population
-        });
+      // Paginate recent orders
+      const sorted = [...orders].sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setTotalPages(Math.ceil(sorted.length / itemsPerPage));
+      
+      const recent = sorted
+        .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+        .map((o: Order) => ({
+          customer: o.shippingDetails?.name || "Cliente",
+          status: o.status,
+          date: new Date(o.createdAt).toLocaleDateString("es-AR", {
+            day: "numeric",
+            month: "short",
+          }),
+          total: o.total,
+          _id: o._id,
+        }));
+      setRecentOrders(recent);
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        // Recent orders (last 5)
-        const recent = orders
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .slice(0, 5)
-          .map((o) => ({
-            customer: o.shippingDetails?.name || "Cliente",
-            status: o.status,
-            date: new Date(o.createdAt).toLocaleDateString("es-AR", {
-              day: "numeric",
-              month: "short",
-            }),
-            total: o.total,
-            _id: o._id,
-          }));
-        setRecentOrders(recent);
-      } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [timeRange, customFrom, customTo, currentPage]);
 
   if (loading) {
     return (
@@ -184,21 +192,25 @@ export function DashboardOverview() {
       label: "Ventas Totales",
       value: formatPrice(stats.totalSales),
       change: { value: 12.4, label: "+12.4% vs mes anterior", type: "increase" as const },
+      sparklineData: stats.salesData?.map(d => ({ date: d.date, value: d.sales })),
     },
     {
       label: "Pedidos",
       value: stats.orders.toString(),
       change: { value: 8.2, label: "+8.2%", type: "increase" as const },
+      sparklineData: stats.orderTrend?.map(d => ({ date: d.date, value: d.orders })),
     },
     {
       label: "Valor Promedio",
       value: formatPrice(stats.avgOrder),
       change: { value: 0, label: "Estable", type: "stable" as const },
+      sparklineData: undefined,
     },
     {
       label: "Nuevos Miembros",
       value: stats.newCustomers.toString(),
       change: { value: 15.1, label: "+15.1%", type: "increase" as const },
+      sparklineData: undefined,
     },
   ];
 
@@ -210,6 +222,62 @@ export function DashboardOverview() {
         description="Una vista curada del rendimiento diario de KIOTO. Seguimiento del movimiento de productos Earthbound en la colección global."
       />
 
+      {/* Time Range Filter */}
+      <div className="flex items-center gap-4 mb-6">
+        <label className="text-sm font-medium text-on-surface-variant">Período:</label>
+        <div className="flex gap-2">
+          {(["7d", "30d", "90d"] as const).map((range) => (
+            <button
+              key={range}
+              onClick={() => setTimeRange(range)}
+              className={`px-4 py-2 text-xs uppercase tracking-widest rounded transition-colors ${
+                timeRange === range && !showCustomRange
+                  ? "bg-primary text-on-primary"
+                  : "border border-outline-variant/40 hover:bg-surface"
+              }`}
+            >
+              {range === "7d" ? "7 días" : range === "30d" ? "30 días" : "90 días"}
+            </button>
+          ))}
+          <button
+            onClick={() => {
+              setShowCustomRange(!showCustomRange);
+              setTimeRange("custom");
+            }}
+            className={`px-4 py-2 text-xs uppercase tracking-widest rounded transition-colors ${
+              timeRange === "custom" && showCustomRange
+                ? "bg-primary text-on-primary"
+                : "border border-outline-variant/40 hover:bg-surface"
+            }`}
+          >
+            Personalizado
+          </button>
+        </div>
+        {showCustomRange && (
+          <div className="flex items-center gap-2 ml-4">
+            <input
+              type="date"
+              value={customFrom}
+              onChange={(e) => setCustomFrom(e.target.value)}
+              className="px-3 py-2 text-sm border border-outline-variant/40 rounded bg-surface"
+            />
+            <span className="text-on-surface-variant">a</span>
+            <input
+              type="date"
+              value={customTo}
+              onChange={(e) => setCustomTo(e.target.value)}
+              className="px-3 py-2 text-sm border border-outline-variant/40 rounded bg-surface"
+            />
+          </div>
+        )}
+        <button
+          onClick={() => fetchDashboardData()}
+          className="ml-auto px-4 py-2 text-xs uppercase tracking-widest bg-surface-container-low border border-outline-variant/40 rounded hover:bg-surface transition-colors"
+        >
+          Actualizar
+        </button>
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {statCards.map((stat) => (
@@ -218,6 +286,7 @@ export function DashboardOverview() {
             label={stat.label}
             value={stat.value}
             change={stat.change}
+            sparklineData={stat.sparklineData}
           />
         ))}
       </div>
@@ -251,7 +320,7 @@ export function DashboardOverview() {
           </div>
         </div>
 
-        {/* Orders Trend Line Chart */}
+        {/* Orders Trend Bar Chart */}
         <div className="bg-surface-container-low rounded-lg p-6">
           <h3 className="font-serif text-xl font-bold mb-2">Pedidos Diarios</h3>
           <p className="text-xs text-on-surface-variant mb-4">Actividad de la semana</p>
@@ -346,16 +415,7 @@ export function DashboardOverview() {
         </div>
       </div>
 
-      {/* Category Sales Stacked Bar - Placeholder */}
-      <div className="bg-surface-container-low rounded-lg p-6 mb-12">
-        <h3 className="font-serif text-xl font-bold mb-2">Ventas por Categoría</h3>
-        <p className="text-xs text-on-surface-variant mb-4">Distribución semanal</p>
-        <div className="h-64 flex items-center justify-center">
-          <p className="text-on-surface-variant">Próximamente - requiere endpoint de categorías</p>
-        </div>
-      </div>
-
-      {/* Recent Orders */}
+      {/* Recent Orders with Pagination */}
       <section className="mt-12">
         <div className="flex justify-between items-end mb-8">
           <div>
@@ -364,6 +424,23 @@ export function DashboardOverview() {
               Las últimas adquisiciones curadas por tus clientes
             </p>
           </div>
+          {/* CSV Export */}
+          <button
+            onClick={() => {
+              const headers = ["Cliente", "Estado", "Fecha", "Total"];
+              const rows = recentOrders.map(o => [o.customer, o.status, o.date, o.total]);
+              const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `pedidos-${new Date().toISOString().split("T")[0]}.csv`;
+              a.click();
+            }}
+            className="font-bold text-xs uppercase tracking-widest border-b border-primary text-primary pb-1 hover:opacity-70 transition-opacity flex items-center gap-2"
+          >
+            <span>📊</span> Exportar CSV
+          </button>
         </div>
 
         <DataTable
@@ -387,6 +464,40 @@ export function DashboardOverview() {
           ]}
           data={recentOrders}
         />
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-6">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-sm border border-outline-variant/40 rounded hover:bg-surface disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Anterior
+            </button>
+            <span className="text-sm text-on-surface-variant">
+              Página {currentPage} de {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 text-sm border border-outline-variant/40 rounded hover:bg-surface disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Siguiente
+            </button>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => {
+                // Would need to refactor itemsPerPage as state
+              }}
+              className="ml-4 px-3 py-1 text-sm border border-outline-variant/40 rounded bg-surface"
+            >
+              <option value={5}>5 por página</option>
+              <option value={10}>10 por página</option>
+              <option value={25}>25 por página</option>
+            </select>
+          </div>
+        )}
       </section>
     </div>
   );

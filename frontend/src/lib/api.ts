@@ -128,17 +128,17 @@ export const checkoutApi = {
 
 // Orders API
 export const ordersApi = {
-  list: () =>
-    api.get<Order[]>('/orders'),
+  list: (params?: { days?: number; from?: string; to?: string; limit?: number; page?: number }) =>
+    api.get<Order[]>('/orders', { params }).then(res => res.data),
 
   get: (id: string) =>
-    api.get<Order>(`/orders/${id}`),
+    api.get<Order>(`/orders/${id}`).then(res => res.data),
 
   updateStatus: (id: string, status: string) =>
-    api.patch<Order>(`/orders/${id}/status`, { status }),
+    api.patch<Order>(`/orders/${id}/status`, { status }).then(res => res.data),
 
   createManual: (data: { customerEmail: string; customerName: string; items: { productId: string; quantity: number }[] }) =>
-    api.post<Order>('/orders/manual', data),
+    api.post<Order>('/orders/manual', data).then(res => res.data),
 };
 
 // Settings API
