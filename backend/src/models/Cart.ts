@@ -5,6 +5,7 @@ import { ICartItem } from './types';
 export interface ICart extends Document {
   sessionId: string;
   items: ICartItem[];
+  converted?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +44,11 @@ const cartSchema = new Schema<ICart>(
       unique: true,
     },
     items: [cartItemSchema],
+    converted: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,

@@ -58,8 +58,8 @@ export const productsApi = {
 
 // Admin Products API
 export const adminProductsApi = {
-  list: () =>
-    api.get<{ products: Product[] }>('/products').then(res => ({ data: res.data.products })),
+  list: (params?: { limit?: number; skip?: number; published?: boolean; category?: string }) =>
+    api.get<{ products: Product[] }>('/products', { params }).then(res => res.data.products),
 
   get: (id: string) =>
     api.get<{ product: Product }>(`/products/${id}`).then(res => res.data.product),
@@ -118,6 +118,9 @@ export const cartApi = {
     api.delete<Cart>(`/cart/items/${itemId}`),
 
   clear: () => api.delete('/cart'),
+
+  getStats: () => 
+    api.get<{ totalCarts: number; abandonedCarts: number; convertedCarts: number; conversionRate: string }>('/cart/stats'),
 };
 
 // Checkout API
@@ -126,19 +129,18 @@ export const checkoutApi = {
     api.post<{ url: string }>('/checkout', data),
 };
 
-// Orders API
 export const ordersApi = {
-  list: () =>
-    api.get<Order[]>('/orders'),
+  list: (params?: { days?: number; from?: string; to?: string; limit?: number; page?: number }) =>
+    api.get<Order[]>('/orders', { params }).then(res => res.data),
 
   get: (id: string) =>
-    api.get<Order>(`/orders/${id}`),
+    api.get<Order>(`/orders/${id}`).then(res => res.data),
 
   updateStatus: (id: string, status: string) =>
-    api.patch<Order>(`/orders/${id}/status`, { status }),
+    api.patch<Order>(`/orders/${id}/status`, { status }).then(res => res.data),
 
   createManual: (data: { customerEmail: string; customerName: string; items: { productId: string; quantity: number }[] }) =>
-    api.post<Order>('/orders/manual', data),
+    api.post<Order>('/orders/manual', data).then(res => res.data),
 };
 
 // Settings API

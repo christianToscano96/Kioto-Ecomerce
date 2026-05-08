@@ -5,11 +5,16 @@ import Product from '../models/Product';
 
 /**
  * Get or create a cart for a session
+ * If cart exists but is already converted, create a fresh one
  */
 export const getOrCreateCart = async (sessionId: string): Promise<ICart> => {
   let cart = await Cart.findOne({ sessionId });
 
   if (!cart) {
+    cart = await Cart.create({ sessionId, items: [] });
+  } else if (cart.converted) {
+    // Cart already purchased - create a new fresh cart
+    await Cart.deleteOne({ sessionId });
     cart = await Cart.create({ sessionId, items: [] });
   }
 
@@ -149,10 +154,17 @@ export const removeFromCart = async (
 };
 
 /**
- * Clear the entire cart
+ * Clear the entire cart (deprecated - use markCartAsConverted)
  */
 export const clearCart = async (sessionId: string): Promise<void> => {
   await Cart.findOneAndDelete({ sessionId });
+};
+
+/**
+ * Mark cart as converted (customer completed checkout)
+ */
+export const markCartAsConverted = async (sessionId: string): Promise<void> => {
+  await Cart.updateOne({ sessionId }, { $set: { converted: true } });
 };
 
 /**

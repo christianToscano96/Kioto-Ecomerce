@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import Stripe from 'stripe';
 import { validate } from '../middleware/validation';
 import { createCheckoutSchema } from '../schemas/checkout';
-import { getOrCreateCart, calculateCartTotal, clearCart, calculateShipping } from '../utils/cart';
+import { getOrCreateCart, calculateCartTotal, calculateShipping, markCartAsConverted } from '../utils/cart';
 import Cart from '../models/Cart';
 import Order from '../models/Order';
 import Product from '../models/Product';
@@ -80,8 +80,8 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
       )
     );
 
-    // Clear the cart
-    await clearCart(sessionId);
+    // Mark cart as converted (customer completed purchase)
+    await markCartAsConverted(sessionId);
 
     await session.commitTransaction();
     session.endSession();
@@ -182,8 +182,8 @@ router.post('/webhook', async (req: Request, res: Response) => {
         )
       );
 
-      // Clear the cart using the utility function
-      await clearCart(sessionId);
+      // Mark cart as converted
+      await markCartAsConverted(sessionId);
 
       await mongoSession.commitTransaction();
       mongoSession.endSession();

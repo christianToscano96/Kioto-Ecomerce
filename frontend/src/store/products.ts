@@ -73,20 +73,20 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     }
   },
 
-  // Admin products
-  fetchAdminProducts: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await adminProductsApi.list();
-      set({ products: response.data });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch admin products';
-      set({ error: message });
-      toast.error(message);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+   // Admin products
+   fetchAdminProducts: async () => {
+     set({ isLoading: true, error: null });
+     try {
+       const products = await adminProductsApi.list();
+       set({ products });
+     } catch (error) {
+       const message = error instanceof Error ? error.message : 'Failed to fetch admin products';
+       set({ error: message });
+       toast.error(message);
+     } finally {
+       set({ isLoading: false });
+     }
+   },
 
   createProduct: async (data) => {
     set({ isLoading: true, error: null });
