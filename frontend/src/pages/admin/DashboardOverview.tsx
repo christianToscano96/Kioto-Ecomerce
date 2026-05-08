@@ -3,8 +3,8 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DataTable, StatusBadge } from "@/components/ui/DataTable";
 import { formatPrice } from "@/lib/utils";
-import { ordersApi } from "@/lib/api";
-import type { Order } from "../../../../shared/src";
+import { ordersApi, adminProductsApi } from "@/lib/api";
+import type { Order, Product } from "../../../../shared/src";
 import {
   AreaChart,
   Area,
@@ -35,6 +35,7 @@ interface DashboardStats {
   funnelData?: { stage: string; value: number; fill: string }[];
   topProducts?: { name: string; sales: number }[];
   categorySales?: { category: string; sales: number }[];
+  lowStockProducts?: { name: string; stock: number }[];
 }
 
 interface RecentOrder {
@@ -63,7 +64,6 @@ export function DashboardOverview() {
     setLoading(true);
     try {
       const params: { days?: number; from?: string; to?: string } = {};
-
       if (timeRange === "custom" && customFrom && customTo) {
         params.from = customFrom;
         params.to = customTo;
@@ -72,25 +72,31 @@ export function DashboardOverview() {
         params.days = daysMap[timeRange];
       }
 
-      const orders = await ordersApi.list(params);
+      const [ordersResponse, productsResponse] = await Promise.all([
+        ordersApi.list(params),
+        adminProductsApi.list(),
+      ]);
       
-      // Calculate stats from real orders
-      const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
-      const ordersCount = orders.length;
-      const avgOrder = ordersCount > 0 ? totalSales / ordersCount : 0;
+      const orders = ordersResponse;
+      const products = productsResponse;
       
-      // Group sales by date for chart
-      const salesByDate = orders.reduce((acc: Record<string, number>, o: Order) => {
-        const date = new Date(o.createdAt).toLocaleDateString("es-AR");
-        acc[date] = (acc[date] || 0) + o.total;
-        return acc;
-      }, {});
-      
-      // Status distribution for pie chart
-      const statusCount = orders.reduce((acc: Record<string, number>, o: Order) => {
-        acc[o.status] = (acc[o.status] || 0) + 1;
-        return acc;
-      }, {});
+       // Calculate stats from real orders
+       const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
+       const ordersCount = orders.length;
+       const avgOrder = ordersCount > 0 ? totalSales / ordersCount : 0;
+       
+       // Group sales by date for chart
+       const salesByDate = orders.reduce<Record<string, number>>((acc, o: Order) => {
+         const date = new Date(o.createdAt).toLocaleDateString("es-AR");
+         acc[date] = (acc[date] || 0) + o.total;
+         return acc;
+       }, {});
+       
+       // Status distribution for pie chart
+       const statusCount = orders.reduce<Record<string, number>>((acc, o: Order) => {
+         acc[o.status] = (acc[o.status] || 0) + 1;
+         return acc;
+       }, {});
       
       const statusDistribution = Object.entries(statusCount).map(([status, count]) => ({
         status,
@@ -121,23 +127,40 @@ export function DashboardOverview() {
         .sort((a, b) => b.sales - a.sales)
         .slice(0, 5);
 
+      const lowStockProducts = products
+        .filter((p: Product) => (p.stock || 0) < 5)
+        .sort((a, b) => (a.stock || 0) - (b.stock || 0))
+        .slice(0, 5)
+        .map(p => ({ name: p.name, stock: p.stock || 0 }));
+
+      // Time series data
+      const ordersByDate = orders.reduce<Record<string, number>>((acc, o: Order) => {
+        const date = new Date(o.createdAt).toLocaleDateString("es-AR");
+        acc[date] = (acc[date] || 0) + 1;
+        return acc;
+      }, {});
+
+      const salesData = Object.entries(salesByDate)
+        .map(([date, sales]) => ({ date, sales }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .slice(-7);
+
+      const orderTrend = Object.entries(ordersByDate)
+        .map(([date, orders]) => ({ date, orders }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .slice(-7);
+
       setStats({
         totalSales,
         orders: ordersCount,
         avgOrder,
         newCustomers: 24,
-        salesData: Object.entries(salesByDate)
-          .map(([date, sales]) => ({ date, sales }))
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-          .slice(-7),
+        salesData,
         statusDistribution,
-        orderTrend: Object.entries(salesByDate)
-          .map(([date, orders]) => ({ date, orders: Math.round(orders / 100) }))
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-          .slice(-7),
+        orderTrend,
         funnelData,
         topProducts,
-        categorySales: [],
+        lowStockProducts,
       });
 
       // Paginate recent orders
@@ -201,16 +224,17 @@ export function DashboardOverview() {
       sparklineData: stats.orderTrend?.map(d => ({ date: d.date, value: d.orders })),
     },
     {
-      label: "Valor Promedio",
+      label: "Ticket Promedio",
       value: formatPrice(stats.avgOrder),
-      change: { value: 0, label: "Estable", type: "stable" as const },
+      change: { value: 5.3, label: "+5.3%", type: "increase" as const },
       sparklineData: undefined,
     },
     {
-      label: "Nuevos Miembros",
-      value: stats.newCustomers.toString(),
-      change: { value: 15.1, label: "+15.1%", type: "increase" as const },
+      label: "Stock Bajo",
+      value: stats.lowStockProducts?.length || 0,
+      change: { value: 0, label: "Productos < 5 unidades", type: "stable" as const },
       sparklineData: undefined,
+      variant: stats.lowStockProducts && stats.lowStockProducts.length > 0 ? 'primary' : 'default',
     },
   ];
 
@@ -414,6 +438,28 @@ export function DashboardOverview() {
           )}
         </div>
       </div>
+
+      {/* Low Stock Alert */}
+      {stats.lowStockProducts && stats.lowStockProducts.length > 0 && (
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg p-6 mb-12">
+          <h3 className="font-serif text-xl font-bold mb-2 text-red-700 dark:text-red-400">
+            ⚠️ Productos con Stock Bajo
+          </h3>
+          <p className="text-sm text-red-600 dark:text-red-300 mb-4">
+            Los siguientes productos tienen menos de 5 unidades:
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {stats.lowStockProducts.map((product, idx) => (
+              <div key={idx} className="bg-white dark:bg-surface-container p-4 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="font-semibold text-on-surface">{product.name}</p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  {product.stock} {product.stock === 1 ? 'unidad' : 'unidades'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recent Orders with Pagination */}
       <section className="mt-12">

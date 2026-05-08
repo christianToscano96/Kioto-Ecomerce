@@ -58,8 +58,8 @@ export const productsApi = {
 
 // Admin Products API
 export const adminProductsApi = {
-  list: () =>
-    api.get<{ products: Product[] }>('/products').then(res => ({ data: res.data.products })),
+  list: (params?: { limit?: number; skip?: number; published?: boolean; category?: string }) =>
+    api.get<{ products: Product[] }>('/products', { params }).then(res => res.data.products),
 
   get: (id: string) =>
     api.get<{ product: Product }>(`/products/${id}`).then(res => res.data.product),
@@ -126,7 +126,6 @@ export const checkoutApi = {
     api.post<{ url: string }>('/checkout', data),
 };
 
-// Orders API
 export const ordersApi = {
   list: (params?: { days?: number; from?: string; to?: string; limit?: number; page?: number }) =>
     api.get<Order[]>('/orders', { params }).then(res => res.data),
