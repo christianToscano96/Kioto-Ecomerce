@@ -18,6 +18,7 @@ const SETTINGS_SECTIONS = [
   { id: 'profile', label: 'Perfil', icon: 'person' },
   { id: 'store', label: 'Tienda', icon: 'storefront' },
   { id: 'payments', label: 'Pagos', icon: 'credit_card' },
+  { id: 'email', label: 'Email', icon: 'mail' },
   { id: 'notifications', label: 'Notificaciones', icon: 'notifications' },
   { id: 'appearance', label: 'Apariencia', icon: 'palette' },
   { id: 'security', label: 'Seguridad', icon: 'security' },
@@ -45,6 +46,11 @@ const DEFAULT_SETTINGS: Settings = {
       publishableKey: '',
       secretKey: '',
     },
+  },
+  email: {
+    user: '',
+    pass: '',
+    from: '',
   },
   notifications: {
     orderEmails: true,
@@ -343,6 +349,34 @@ export function SettingsPage() {
                     value={localSettings.payments?.stripe?.secretKey || ''}
                     onChange={(value) => updateField('payments.stripe.secretKey', value)}
                     secret
+                  />
+                </div>
+              </SettingsCard>
+            </>
+          )}
+
+          {activeSection === 'email' && (
+            <>
+              <SettingsCard title="Email SMTP" description="Configuración para envío de emails">
+                <div className="space-y-4">
+                  <Input
+                    label="Email de Gmail"
+                    placeholder="tu-email@gmail.com"
+                    value={localSettings.email?.user || ''}
+                    onChange={(e) => updateField('email.user', e.target.value)}
+                  />
+                  <Input
+                    label="App Password"
+                    type="password"
+                    placeholder="Contraseña de aplicación de Gmail"
+                    value={localSettings.email?.pass || ''}
+                    onChange={(e) => updateField('email.pass', e.target.value)}
+                  />
+                  <Input
+                    label="Email Remitente"
+                    placeholder="orders@kioto.com"
+                    value={localSettings.email?.from || ''}
+                    onChange={(e) => updateField('email.from', e.target.value)}
                   />
                 </div>
               </SettingsCard>

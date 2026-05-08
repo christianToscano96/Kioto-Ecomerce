@@ -6,6 +6,7 @@ import { getOrCreateCart, calculateCartTotal, calculateShipping, markCartAsConve
 import Cart from '../models/Cart';
 import Order from '../models/Order';
 import Product from '../models/Product';
+import { sendOrderConfirmationEmail, sendAdminNotificationEmail } from '../services/email';
 
 const router = Router();
 
@@ -19,17 +20,12 @@ const getSessionId = (req: Request): string => {
 
 // POST /api/checkout - Create checkout session (fake mode - no Stripe)
 router.post('/', validate(createCheckoutSchema), async (req: Request, res: Response) => {
-  const session = await Order.startSession();
-  session.startTransaction();
-  
   try {
     const sessionId = getSessionId(req);
     const cart = await getOrCreateCart(sessionId);
 
     // Check if cart has items
     if (cart.items.length === 0) {
-      await session.abortTransaction();
-      session.endSession();
       res.status(400).json({ error: 'Cart is empty' });
       return;
     }
@@ -41,8 +37,6 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
     for (const item of cart.items) {
       const product = item.productId as any;
       if (product.stock < item.quantity) {
-        await session.abortTransaction();
-        session.endSession();
         res.status(400).json({ 
           error: `Insufficient stock for ${product.name}. Available: ${product.stock}, Required: ${item.quantity}` 
         });
@@ -54,8 +48,8 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
     const shipping = calculateShipping(req.body.shippingDetails?.address?.postal_code || '');
     const total = subtotal + shipping;
 
-    // FAKE CHECKOUT: Create order directly without Stripe
-    const order = await Order.create([{
+    // FAKE CHECKOUT: Create order directly without Stripe (no transactions for standalone MongoDB)
+    const order = await Order.create({
       sessionId,
       items: cart.items.map(item => ({
         productId: item.productId,
@@ -67,15 +61,14 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
       total,
       status: 'pending',
       shippingDetails: req.body.shippingDetails,
-    }], { session });
+    });
 
-    // Deduct stock from products atomically
+    // Deduct stock from products
     await Promise.all(
       cart.items.map(item =>
         Product.findByIdAndUpdate(
           item.productId,
-          { $inc: { stock: -item.quantity } },
-          { session }
+          { $inc: { stock: -item.quantity } }
         )
       )
     );
@@ -83,19 +76,28 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
     // Mark cart as converted (customer completed purchase)
     await markCartAsConverted(sessionId);
 
-    await session.commitTransaction();
-    session.endSession();
+// Send order confirmation email
+     try {
+       await sendOrderConfirmationEmail(order, (order._id as any).toString());
+       // Send admin notification
+       try {
+         await sendAdminNotificationEmail(order, (order._id as any).toString(), order.shippingDetails?.name || 'Cliente');
+       } catch (adminEmailError) {
+         console.error('Failed to send admin notification email:', adminEmailError);
+       }
+     } catch (emailError) {
+      console.error('Failed to send confirmation email:', emailError);
+      // Don't fail the order if email fails
+    }
 
     res.status(200).json({
-      orderId: order[0]._id,
-      sessionId: `fake_session_${order[0]._id}`,
+      orderId: order._id,
+      sessionId: `fake_session_${order._id}`,
       success: true,
       message: 'Order created successfully',
       shipping: shipping,
     });
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error('Checkout error:', error);
     res.status(500).json({ error: 'Failed to create checkout session' });
   }
@@ -121,8 +123,6 @@ router.post('/webhook', async (req: Request, res: Response) => {
   // Handle the event
   if (event.type === 'checkout.session.completed') {
     const stripeSession = event.data.object as Stripe.Checkout.Session;
-    const mongoSession = await Order.startSession();
-    mongoSession.startTransaction();
 
     try {
       // Get the cart from metadata
@@ -137,8 +137,6 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
       if (!cart || cart.items.length === 0) {
         console.error(`No cart found for session ${sessionId}`);
-        await mongoSession.abortTransaction();
-        mongoSession.endSession();
         res.json({ received: true });
         return;
       }
@@ -149,35 +147,52 @@ router.post('/webhook', async (req: Request, res: Response) => {
         const product = item.productId as any;
         if (product.stock < item.quantity) {
           console.error(`Insufficient stock for ${product.name} (ID: ${product._id})`);
-          await mongoSession.abortTransaction();
-          mongoSession.endSession();
           res.json({ received: true });
           return;
         }
       }
 
       const total = calculateCartTotal(cart.items);
+      const subtotal = total; // Use cart total as subtotal
+      const shipping = Number(stripeSession.metadata?.shipping) || 0;
 
-      // Create order
-      const order = await Order.create([{
+      // Extract shipping details from Stripe session
+      const customerDetails = stripeSession.customer_details;
+      const shippingDetails = {
+        name: customerDetails?.name || '',
+        email: customerDetails?.email || '',
+        address: {
+          line1: customerDetails?.address?.line1 || '',
+          line2: customerDetails?.address?.line2 || '',
+          city: customerDetails?.address?.city || '',
+          state: customerDetails?.address?.state || '',
+          postal_code: customerDetails?.address?.postal_code || '',
+          country: customerDetails?.address?.country || '',
+        },
+      };
+
+      // Create order (no transactions for standalone MongoDB)
+      const order = await Order.create({
         sessionId,
         items: cart.items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
           price: item.price,
         })),
-        total,
+        subtotal,
+        shipping,
+        total: subtotal + shipping,
         status: 'paid',
         stripePaymentIntentId: stripeSession.payment_intent as string,
-      }], { session: mongoSession });
+        shippingDetails,
+      });
 
-      // Deduct stock from products atomically
+      // Deduct stock from products
       await Promise.all(
         cart.items.map(item =>
           Product.findByIdAndUpdate(
             item.productId,
-            { $inc: { stock: -item.quantity } },
-            { session: mongoSession }
+            { $inc: { stock: -item.quantity } }
           )
         )
       );
@@ -185,13 +200,15 @@ router.post('/webhook', async (req: Request, res: Response) => {
       // Mark cart as converted
       await markCartAsConverted(sessionId);
 
-      await mongoSession.commitTransaction();
-      mongoSession.endSession();
+      console.log(`Order ${order._id} created from session ${stripeSession.id}`);
 
-      console.log(`Order ${order[0]._id} created from session ${stripeSession.id}`);
+      // Send order confirmation email
+      try {
+        await sendOrderConfirmationEmail(order, (order._id as any).toString());
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+      }
     } catch (error) {
-      await mongoSession.abortTransaction();
-      mongoSession.endSession();
       console.error('Error creating order from webhook:', error);
     }
   } else if (event.type === 'checkout.session.expired') {

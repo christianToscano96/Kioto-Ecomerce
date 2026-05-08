@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Order from '../models/Order';
 import Product from '../models/Product';
+import { resendOrderConfirmationEmail } from '../services/email';
 
 const router = Router();
 
@@ -76,17 +77,30 @@ router.patch('/:id/status', async (req, res) => {
   }
 });
 
+// Resend order confirmation email
+router.post('/:id/resend-email', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate('items.productId', 'name price');
+    
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    await resendOrderConfirmationEmail(order, (order._id as any).toString());
+    
+    res.json({ success: true, message: 'Email sent successfully' });
+  } catch (error) {
+    console.error('Resend email error:', error);
+    res.status(500).json({ error: 'Failed to resend email' });
+  }
+});
+
 // Create manual order (admin only)
 router.post('/manual', async (req, res) => {
-  const session = await Order.startSession();
-  session.startTransaction();
-
   try {
     const { customerEmail, customerName, items } = req.body;
 
     if (!items || items.length === 0) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({ error: 'Items are required' });
     }
 
@@ -97,13 +111,9 @@ router.post('/manual', async (req, res) => {
     for (const item of items) {
       const product = await Product.findById(item.productId);
       if (!product) {
-        await session.abortTransaction();
-        session.endSession();
         return res.status(400).json({ error: `Product ${item.productId} not found` });
       }
       if (product.stock < item.quantity) {
-        await session.abortTransaction();
-        session.endSession();
         return res.status(400).json({ error: `Insufficient stock for ${product.name}` });
       }
 
@@ -117,12 +127,11 @@ router.post('/manual', async (req, res) => {
       // Deduct stock
       await Product.findByIdAndUpdate(
         product._id,
-        { $inc: { stock: -item.quantity } },
-        { session }
+        { $inc: { stock: -item.quantity } }
       );
     }
 
-    const order = await Order.create([{
+    const order = await Order.create({
       items: orderItems,
       total,
       status: 'paid',
@@ -131,15 +140,10 @@ router.post('/manual', async (req, res) => {
         email: customerEmail,
         address: {},
       },
-    }], { session });
+    });
 
-    await session.commitTransaction();
-    session.endSession();
-
-    res.status(201).json(order[0]);
+    res.status(201).json(order);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error('Manual order error:', error);
     res.status(500).json({ error: 'Failed to create manual order' });
   }

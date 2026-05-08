@@ -15,6 +15,11 @@ interface Settings {
       freeShippingOver?: number;
     };
   };
+  email?: {
+    user?: string;
+    pass?: string;
+    from?: string;
+  };
   payments?: {
     stripe?: {
       testMode?: boolean;
@@ -61,6 +66,11 @@ const defaultSettings: Settings = {
       flatRate: 500,
       freeShippingOver: 5000,
     },
+  },
+  email: {
+    user: '',
+    pass: '',
+    from: '',
   },
   payments: {
     stripe: {
