@@ -441,22 +441,165 @@ export function DashboardOverview() {
 
       {/* Low Stock Alert */}
       {stats.lowStockProducts && stats.lowStockProducts.length > 0 && (
-        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg p-6 mb-12">
-          <h3 className="font-serif text-xl font-bold mb-2 text-red-700 dark:text-red-400">
-            ⚠️ Productos con Stock Bajo
-          </h3>
-          <p className="text-sm text-red-600 dark:text-red-300 mb-4">
-            Los siguientes productos tienen menos de 5 unidades:
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {stats.lowStockProducts.map((product, idx) => (
-              <div key={idx} className="bg-white dark:bg-surface-container p-4 rounded-lg border border-red-200 dark:border-red-800">
-                <p className="font-semibold text-on-surface">{product.name}</p>
-                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  {product.stock} {product.stock === 1 ? 'unidad' : 'unidades'}
+        <div className="bg-surface-container-low rounded-lg p-6 mb-12 border-l-4 border-warning">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
+                <span className="material-symbols-outlined text-warning">warning</span>
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-on-surface">
+                  ⚠️ Productos con Stock Bajo
+                </h3>
+                <p className="text-sm text-on-surface-variant">
+                  {stats.lowStockProducts.length} productos necesitan reposición inmediata
                 </p>
               </div>
-            ))}
+            </div>
+            <button
+              onClick={() => window.location.href = '/admin/products'}
+              className="font-bold text-xs uppercase tracking-widest px-4 py-2 bg-surface-container border border-outline-variant/40 rounded hover:bg-surface transition-colors"
+            >
+              Ver Productos
+            </button>
+          </div>
+
+          {/* Table - Desktop */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-outline-variant/20">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-on-surface-variant uppercase tracking-wider">
+                    Producto
+                  </th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-on-surface-variant uppercase tracking-wider">
+                    Stock
+                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-on-surface-variant uppercase tracking-wider">
+                    Nivel
+                  </th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-on-surface-variant uppercase tracking-wider">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.lowStockProducts.map((product, idx) => {
+                  const stockPercent = Math.max(0, Math.min(100, (product.stock / 5) * 100));
+                  const urgencyLevel = product.stock <= 0 ? 'critical' : product.stock <= 2 ? 'high' : 'medium';
+                  
+                  return (
+                    <tr 
+                      key={idx} 
+                      className="border-b border-outline-variant/10 hover:bg-surface-container-low/50 transition-colors"
+                    >
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-surface-container border border-outline-variant/30 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-on-surface-variant">inventory</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-on-surface">{product.name}</p>
+                            <p className="text-xs text-on-surface-variant">ID: {idx + 1}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-12 h-8 rounded-full text-sm font-bold ${
+                          product.stock === 0 ? 'bg-error-container text-error' :
+                          product.stock <= 2 ? 'bg-warning-container text-warning' :
+                          'bg-surface-container text-on-surface'
+                        }`}>
+                          {product.stock}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-2 bg-surface-container rounded-full overflow-hidden max-w-[120px]">
+                            <div 
+                              className={`h-full transition-all ${
+                                urgencyLevel === 'critical' ? 'bg-error' :
+                                urgencyLevel === 'high' ? 'bg-warning' : 'bg-secondary'
+                              }`}
+                              style={{ width: `${stockPercent}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-on-surface-variant w-16">
+                            {stockPercent.toFixed(0)}%
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => {
+                              // Navigate to product edit
+                              window.location.href = `/admin/products`;
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded hover:bg-primary/5 transition-colors"
+                          >
+                            Editar Stock
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-3">
+            {stats.lowStockProducts.map((product, idx) => {
+              const stockPercent = Math.max(0, Math.min(100, (product.stock / 5) * 100));
+              
+              return (
+                <div 
+                  key={idx} 
+                  className="bg-surface-container rounded-lg p-4 border border-outline-variant/20"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-surface border border-outline-variant/30 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-on-surface-variant">inventory</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-on-surface text-sm">{product.name}</p>
+                        <p className="text-xs text-on-surface-variant">Stock: {product.stock} unidades</p>
+                      </div>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                      product.stock === 0 ? 'bg-error-container text-error' :
+                      'bg-warning-container text-warning'
+                    }`}>
+                      {product.stock === 0 ? 'Sin Stock' : 'Bajo'}
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mb-3">
+                    <div className="flex justify-between text-xs text-on-surface-variant mb-1">
+                      <span>Nivel de inventario</span>
+                      <span>{stockPercent.toFixed(0)}%</span>
+                    </div>
+                    <div className="h-2 bg-surface-container-highest rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${product.stock === 0 ? 'bg-error' : 'bg-warning'}`}
+                        style={{ width: `${stockPercent}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => window.location.href = '/admin/products'}
+                    className="w-full py-2 text-xs font-medium text-primary border border-primary/30 rounded hover:bg-primary/5 transition-colors"
+                  >
+                    Ir a Productos
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
