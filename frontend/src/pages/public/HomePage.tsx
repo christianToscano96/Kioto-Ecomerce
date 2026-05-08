@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useProductsStore } from "@/store/products";
 import { useCategoriesStore } from "@/store/categories";
+import { useCartStore } from "@/store/cart";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -16,6 +17,7 @@ const FlashIcon = () => (
 export function HomePage() {
   const { products, isLoading, fetchProducts } = useProductsStore();
   const { categories, fetchCategories } = useCategoriesStore();
+  const addToCart = useCartStore((state) => state.addToCart);
 
   useEffect(() => {
     fetchProducts();
@@ -209,11 +211,11 @@ export function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {newProducts.map((product, index) => (
+            {newProducts.map((product) => (
               <ProductCardGeneric
                 key={product._id}
                 product={product}
-                onQuickAdd={() => {}}
+                onQuickAdd={(_productId, options) => addToCart(product, options?.quantity || 1, options?.size)}
               />
             ))}
           </div>
