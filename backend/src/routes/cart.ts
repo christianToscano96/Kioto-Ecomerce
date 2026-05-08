@@ -1,9 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { Types } from 'mongoose';
 import Product from '../models/Product';
+import Cart from '../models/Cart';
 import { validate } from '../middleware/validation';
 import { addToCartSchema, updateCartItemSchema, removeCartItemSchema } from '../schemas/cart';
-import { getOrCreateCart, addToCart, updateCartItem, removeFromCart, clearCart, calculateCartTotal } from '../utils/cart';
+import { getOrCreateCart, addToCart, updateCartItem, removeFromCart, clearCart, calculateCartTotal, markCartAsConverted } from '../utils/cart';
 
 const router = Router();
 
@@ -167,6 +168,25 @@ router.delete('/', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Clear cart error:', error);
     res.status(500).json({ error: 'Failed to clear cart' });
+  }
+});
+
+// GET /api/cart/stats - Get cart conversion stats (admin only)
+router.get('/stats', async (req, res) => {
+  try {
+    const totalCarts = await Cart.countDocuments();
+    const abandonedCarts = await Cart.countDocuments({ converted: false });
+    const convertedCarts = await Cart.countDocuments({ converted: true });
+
+    res.json({
+      totalCarts,
+      abandonedCarts,
+      convertedCarts,
+      conversionRate: totalCarts > 0 ? ((convertedCarts / totalCarts) * 100).toFixed(2) : 0,
+    });
+  } catch (error) {
+    console.error('Cart stats error:', error);
+    res.status(500).json({ error: 'Failed to get cart stats' });
   }
 });
 

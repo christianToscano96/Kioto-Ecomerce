@@ -118,6 +118,9 @@ export const cartApi = {
     api.delete<Cart>(`/cart/items/${itemId}`),
 
   clear: () => api.delete('/cart'),
+
+  getStats: () => 
+    api.get<{ totalCarts: number; abandonedCarts: number; convertedCarts: number; conversionRate: string }>('/cart/stats'),
 };
 
 // Checkout API

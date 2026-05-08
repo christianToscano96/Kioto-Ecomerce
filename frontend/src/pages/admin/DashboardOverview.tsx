@@ -3,7 +3,7 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DataTable, StatusBadge } from "@/components/ui/DataTable";
 import { formatPrice } from "@/lib/utils";
-import { ordersApi, adminProductsApi } from "@/lib/api";
+import { ordersApi, adminProductsApi, cartApi } from "@/lib/api";
 import type { Order, Product } from "../../../../shared/src";
 import {
   AreaChart,
@@ -34,8 +34,13 @@ interface DashboardStats {
   orderTrend?: { date: string; orders: number }[];
   funnelData?: { stage: string; value: number; fill: string }[];
   topProducts?: { name: string; sales: number }[];
-  categorySales?: { category: string; sales: number }[];
   lowStockProducts?: { name: string; stock: number }[];
+  cartStats?: {
+    totalCarts: number;
+    abandonedCarts: number;
+    convertedCarts: number;
+    conversionRate: string;
+  };
 }
 
 interface RecentOrder {
@@ -72,13 +77,15 @@ export function DashboardOverview() {
         params.days = daysMap[timeRange];
       }
 
-      const [ordersResponse, productsResponse] = await Promise.all([
+      const [ordersResponse, productsResponse, cartStatsResponse] = await Promise.all([
         ordersApi.list(params),
         adminProductsApi.list(),
+        cartApi.getStats(),
       ]);
       
       const orders = ordersResponse;
       const products = productsResponse;
+      const cartStats = cartStatsResponse.data;
       
        // Calculate stats from real orders
        const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
@@ -104,13 +111,6 @@ export function DashboardOverview() {
         value: count,
       }));
       
-      // Funnel data - conversion stages
-      const funnelData = [
-        { stage: "Carritos", value: orders.length + 15, fill: "#3b82f6" },
-        { stage: "Checkout", value: orders.length + 5, fill: "#f59e0b" },
-        { stage: "Pagado", value: orders.filter(o => ["paid", "shipped", "delivered"].includes(o.status)).length, fill: "#10b981" },
-        { stage: "Enviado", value: orders.filter(o => ["shipped", "delivered"].includes(o.status)).length, fill: "#8b5cf6" },
-      ];
       
       // Top products from order items
       const productSales: Record<string, { name: string; sales: number }> = {};
@@ -160,9 +160,15 @@ export function DashboardOverview() {
         salesData,
         statusDistribution,
         orderTrend,
-        funnelData,
         topProducts,
         lowStockProducts,
+        cartStats,
+        funnelData: cartStats ? [
+          { stage: "Carritos", value: cartStats.totalCarts, fill: "#3b82f6" },
+          { stage: "Abandonados", value: cartStats.abandonedCarts, fill: "#ef4444" },
+          { stage: "Convertidos", value: cartStats.convertedCarts, fill: "#10b981" },
+          { stage: "Pedidos", value: ordersCount, fill: "#8b5cf6" },
+        ] : undefined,
       });
 
       // Paginate recent orders
