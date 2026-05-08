@@ -27,7 +27,9 @@ router.get('/', async (req, res) => {
       }
     }
 
-    const orders = await Order.find(query).sort({ createdAt: -1 });
+    const orders = await Order.find(query)
+      .populate('items.productId', 'name')
+      .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch orders' });
@@ -37,7 +39,8 @@ router.get('/', async (req, res) => {
 // Get single order
 router.get('/:id', async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id)
+      .populate('items.productId', 'name');
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }

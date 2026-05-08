@@ -117,9 +117,11 @@ export function DashboardOverview() {
       orders.forEach((o: Order) => {
         o.items.forEach((item: any) => {
           const pid = item.productId as any;
-          const name = typeof pid === "string" ? pid : (pid?.name || "Producto");
-          if (!productSales[name]) productSales[name] = { name, sales: 0 };
-          productSales[name].sales += item.quantity;
+          // Use product _id as key to avoid collisions, name as display
+          const key = typeof pid === "string" ? pid : (pid?._id?.toString() || pid?.name || "unknown");
+          const name = pid?.name || (typeof pid === "string" ? pid : "Producto");
+          if (!productSales[key]) productSales[key] = { name, sales: 0 };
+          productSales[key].sales += item.quantity;
         });
       });
       
