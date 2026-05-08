@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrdersStore } from '@/store/orders';
+import { toast } from 'sonner';
 import type { Order } from '../../../../shared/src';
 
 interface OrderActionsProps {
@@ -11,6 +12,7 @@ interface OrderActionsProps {
 
 export function OrderActions({ orderId, status, onPrintLabel }: OrderActionsProps) {
   const [open, setOpen] = useState(false);
+  const [resending, setResending] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const updateOrderStatus = useOrdersStore((state) => state.updateOrderStatus);
@@ -34,6 +36,27 @@ export function OrderActions({ orderId, status, onPrintLabel }: OrderActionsProp
   const handleChangeStatus = async (newStatus: Order['status']) => {
     await updateOrderStatus(orderId, newStatus);
     setOpen(false);
+  };
+
+  const handleResendEmail = async () => {
+    try {
+      setResending(true);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/orders/${orderId}/resend-email`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        toast.success('Email reenviado correctamente');
+      } else {
+        toast.error('Error al reenviar email');
+      }
+    } catch (error) {
+      toast.error('Error al reenviar email');
+    } finally {
+      setResending(false);
+      setOpen(false);
+    }
   };
 
   const nextStatus = (): Order['status'] | null => {
@@ -71,6 +94,15 @@ export function OrderActions({ orderId, status, onPrintLabel }: OrderActionsProp
               Imprimir Etiqueta
             </button>
           )}
+          
+          <button
+            onClick={handleResendEmail}
+            disabled={resending}
+            className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-sm">mail</span>
+            {resending ? 'Enviando...' : 'Reenviar Email'}
+          </button>
           
           {status !== 'delivered' && status !== 'cancelled' && nextStatus() && (
             <button

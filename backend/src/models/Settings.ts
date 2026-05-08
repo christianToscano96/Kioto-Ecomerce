@@ -20,6 +20,11 @@ const SettingsSchema = new mongoose.Schema({
       secretKey: String,
     },
   },
+  email: {
+    user: String,
+    pass: String,
+    from: String,
+  },
   notifications: {
     orderEmails: Boolean,
     lowStockEmails: Boolean,

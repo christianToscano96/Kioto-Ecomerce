@@ -149,7 +149,7 @@ export const settingsApi = {
     api.get<Settings>('/settings'),
 
   update: (settings: Settings) =>
-    api.put<Settings>('/settings', settings),
+    api.put<{ settings: Settings }>('/settings', { settings }),
 };
 
 // Profile API

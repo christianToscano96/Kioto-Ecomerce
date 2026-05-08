@@ -149,6 +149,11 @@ export interface Settings {
       freeShippingOver?: number;
     };
   };
+  email?: {
+    user?: string;
+    pass?: string;
+    from?: string;
+  };
   payments?: {
     stripe?: {
       testMode?: boolean;
