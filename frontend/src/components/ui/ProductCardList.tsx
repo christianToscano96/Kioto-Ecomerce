@@ -45,22 +45,32 @@ export function ProductCardList({ product, onQuickAdd }: ProductCardListProps) {
     <div className="group bg-surface-container-low rounded-lg overflow-hidden border border-outline-variant/40 hover:shadow-lg transition-shadow">
       <div className="flex flex-col sm:flex-row">
         {/* Image */}
-        <Link to={`/products/${product._id}`} className="block sm:w-48 flex-shrink-0">
-          <div className="aspect-[3/4] sm:aspect-square bg-surface-container rounded-lg overflow-hidden relative">
-            {product.images?.[0] ? (
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-                Sin imagen
-              </div>
-            )}
-            <ProductBadges isNew stock={product.stock} />
-          </div>
-        </Link>
+<Link to={`/products/${product._id}`} className="block sm:w-48 flex-shrink-0">
+           <div className="aspect-[3/4] sm:aspect-square bg-surface-container rounded-lg overflow-hidden relative">
+             {product.images?.[0] ? (
+               <img
+                 src={product.images[0]}
+                 alt={product.name}
+                 className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${
+                   product.stock === 0 ? "grayscale opacity-60" : ""
+                 }`}
+               />
+             ) : (
+               <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+                 Sin imagen
+               </div>
+             )}
+             <ProductBadges isNew={false} stock={product.stock} />
+             {/* Sold Out Overlay */}
+             {product.stock === 0 && (
+               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                 <span className="font-label text-xs uppercase tracking-widest text-white bg-error/90 px-3 py-1.5 rounded">
+                   Agotado
+                 </span>
+               </div>
+             )}
+           </div>
+         </Link>
 
         {/* Content */}
         <div className="flex-1 p-4 flex flex-col justify-between">

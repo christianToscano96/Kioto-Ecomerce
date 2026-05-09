@@ -48,13 +48,19 @@ export function OrderSummary({ items, subtotal, shipping, total }: OrderSummaryP
     : 'Calculado en el siguiente paso';
     
   return (
-    <aside className="lg:col-span-5 sticky top-32">
+    <aside className="lg:col-span-5 sticky top-32 animate-fade-in" style={{ animationDelay: '200ms' }}>
       <div className="bg-surface-container p-8 lg:p-10 border-l border-outline-variant/40">
         <h2 className="font-serif text-2xl mb-10">Resumen del Pedido</h2>
         
         <div className="space-y-8 mb-12">
-          {items.map((item) => (
-            <OrderItem key={item._id || item.product?._id} item={item} />
+          {items.map((item, index) => (
+            <div
+              key={item._id || item.product?._id}
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <OrderItem item={item} />
+            </div>
           ))}
         </div>
 

@@ -86,21 +86,25 @@ const AccordionSection = ({
 
 // Related Product Card Component
 const RelatedProductCard = ({ product }: { product: Product }) => (
-  <div className="min-w-[280px] bg-surface-container-highest p-4 snap-start group">
-    <div className="aspect-[3/4] overflow-hidden mb-4 rounded">
+  <div className="min-w-[280px] bg-surface-container-highest rounded-xl p-4 snap-start group transition-all duration-300 hover:shadow-lg">
+    <div className="aspect-[3/4] overflow-hidden mb-4 rounded-lg relative">
       <img
         src={
           product.images?.[0] ||
           "https://placehold.co/400x500/fdfae9/99452c?text=Product"
         }
         alt={product.name}
-        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+        className={`w-full h-full object-cover transition-all duration-700 ${
+          product.stock === 0 ? "grayscale opacity-60" : ""
+        }`}
       />
+      {product.stock === 0 && (
+        <div className="absolute top-2 right-2 bg-error text-on-primary text-[10px] uppercase tracking-widest px-2 py-1 rounded-full font-label">
+          Agotado
+        </div>
+      )}
     </div>
-    <p className="text-[10px] uppercase tracking-[0.2em] text-primary mb-1 font-label">
-      Earthbound Essentials
-    </p>
-    <h3 className="text-lg font-serif">{product.name}</h3>
+    <h3 className="text-lg font-serif text-on-surface line-clamp-1">{product.name}</h3>
     <p className="text-sm mt-1 text-on-surface-variant font-serif">
       ${product.price.toFixed(2)}
     </p>
@@ -110,6 +114,8 @@ const RelatedProductCard = ({ product }: { product: Product }) => (
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const product = useProductsStore((state) => state.product);
@@ -134,16 +140,16 @@ export function ProductDetailPage() {
   const sizes = product?.sizes || ["S", "M", "L"];
 
 const handleAddToCart = async () => {
-     if (!product || !selectedSize || isAddingToCart || isSyncing) return;
-     setIsAddingToCart(true);
-     try {
-       await addToCart(product, 1, selectedSize);
-     } catch (err) {
-       console.error("Failed to add to cart:", err);
-     } finally {
-       setIsAddingToCart(false);
-     }
-   };
+    if (!product || !selectedSize || isAddingToCart || isSyncing) return;
+    setIsAddingToCart(true);
+    try {
+      await addToCart(product, quantity, selectedSize);
+    } catch (err) {
+      console.error("Failed to add to cart:", err);
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -245,25 +251,100 @@ const handleAddToCart = async () => {
 
             {/* Selectors & Add to Cart */}
             <div className="space-y-8 mb-12">
-              <SizeSelector
-                sizes={sizes}
-                selectedSize={selectedSize}
-                onSelectSize={setSelectedSize}
-              />
+{/* Stock Indicator */}
+            {product.stock === 0 && (
+              <p className="text-sm text-error font-medium mb-4">
+                Agotado - Próximamente disponible
+              </p>
+            )}
+            {product.stock > 0 && product.stock <= 5 && (
+              <p className="text-sm text-verde-bosque-600 font-medium mb-4">
+                ¡Últimas {product.stock} unidades disponibles!
+              </p>
+            )}
 
-<button
-                 onClick={handleAddToCart}
-                 disabled={!selectedSize || isSyncing || isAddingToCart}
-                 className="w-full bg-primary-container text-on-primary-container py-5 rounded-lg font-bold uppercase tracking-widest font-label hover:bg-primary transition-all duration-300 shadow-md disabled:opacity-50"
-               >
-                 {isSyncing || isAddingToCart
-                   ? "Añadiendo..."
-                   : "Añadir al Carrito"}
-               </button>
+            {/* Size Selector */}
+            <SizeSelector
+              sizes={sizes}
+              selectedSize={selectedSize}
+              onSelectSize={setSelectedSize}
+            />
+
+            {/* Color Selector */}
+            {product.colors && product.colors.length > 0 && (
+              <div className="mt-8">
+                <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-label">
+                  Seleccionar Color
+                </span>
+                <div className="flex gap-4 mt-4">
+                  {product.colors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`w-12 h-12 rounded-full border-2 transition-all ${
+                        selectedColor === color
+                          ? "border-primary"
+                          : "border-outline-variant hover:border-primary"
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity Selector */}
+            <div className="mt-8">
+              <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-label">
+                Cantidad
+              </span>
+              <div className="flex items-center gap-4 mt-4">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={product.stock === 0}
+                  className="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-sm">remove</span>
+                </button>
+                <span className="text-xl font-serif">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  disabled={product.stock === 0}
+                  className="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-sm">add</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Add to Cart Button */}
+            <button
+              onClick={handleAddToCart}
+              disabled={!selectedSize || isSyncing || isAddingToCart || product.stock === 0}
+              className="w-full bg-primary-container text-on-primary-container py-5 rounded-lg font-bold uppercase tracking-widest font-label hover:bg-primary transition-all duration-300 shadow-md disabled:opacity-50 mt-8"
+            >
+              {product.stock === 0
+                ? "Agotado"
+                : isSyncing || isAddingToCart
+                ? "Añadiendo..."
+                : "Añadir al Carrito"}
+            </button>
+            </div>
+
+            {/* Social & Wishlist */}
+            <div className="flex items-center gap-6 pt-8 border-t border-dashed border-outline-variant/40">
+              <button className="flex items-center gap-2 text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors">
+                <span className="material-symbols-outlined text-base">favorite_border</span>
+                Guardar en favoritos
+              </button>
+              <button className="flex items-center gap-2 text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors">
+                <span className="material-symbols-outlined text-base">share</span>
+                Compartir
+              </button>
             </div>
 
             {/* Accordions */}
-            <div className="space-y-0 border-t border-dashed border-outline-variant/40">
+            <div className="space-y-0 border-t border-dashed border-outline-variant/40 pt-8">
               <AccordionSection title="Material & Cuidado">
                 <p>
                   {product.materials ||

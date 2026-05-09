@@ -44,6 +44,7 @@ export function Header() {
               src={storeLogo || logoK} 
               alt="Store Logo" 
               className="h-40 w-auto -mt-2 object-contain "
+              style={{marginLeft: '-30px'}}
             />
           </div>
           </NavLink>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useToast } from "./Toast";
 import { ProductBadges } from "./ProductBadges";
 import type { Product } from "../../../../shared/src";
 
@@ -41,6 +42,7 @@ export function ProductCardGeneric({
   onQuickAdd,
   showQuickActions = true,
 }: ProductCardGenericProps) {
+  const { addToast } = useToast();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showCartPanel, setShowCartPanel] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("");
@@ -69,6 +71,12 @@ export function ProductCardGeneric({
         size: selectedSize || availableSizes[0],
         color: selectedColor || availableColors[0],
         quantity,
+      });
+      // Show toast
+      addToast({
+        type: 'success',
+        title: '¡Agregado!',
+        message: `${product.name} fue agregado al carrito`,
       });
     }
   };

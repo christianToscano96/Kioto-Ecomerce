@@ -13,6 +13,7 @@ import {
   ActiveFilters,
   type ActiveFilter,
 } from "@/components/ui/ActiveFilters";
+import { useToast } from "@/components/ui/Toast";
 import { SortDropdown, type SortOption } from "@/components/ui/SortDropdown";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { PriceRangeFilter } from "@/components/ui/PriceRangeFilter";
@@ -57,6 +58,7 @@ export function ProductsListPage() {
   const fetchProducts = useProductsStore.getState().fetchProducts;
   const addToCart = useCartStore.getState().addToCart;
   const { categories: allCategories, fetchCategories } = useCategoriesStore();
+  const { addToast } = useToast();
 
   // Fetch categories on mount
   useEffect(() => {
@@ -214,6 +216,12 @@ export function ProductsListPage() {
     if (product) {
       try {
         await addToCart(product, 1);
+        // Show toast
+        addToast({
+          type: 'success',
+          title: '¡Agregado!',
+          message: `${product.name} fue agregado al carrito`,
+        });
       } catch (error) {
         console.error("Error al agregar al carrito:", error);
       }
