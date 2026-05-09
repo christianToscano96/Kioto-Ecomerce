@@ -237,7 +237,7 @@ export function OrdersList() {
             }},
           ]}
           data={paginatedOrders}
-          actions={(row) => <OrderActions orderId={row._id} status={row.status} onPrintLabel={handlePrintLabel} />}
+          actions={(row) => <OrderActions orderId={row._id} status={row.status} galioPaymentId={row.galioPaymentId} onPrintLabel={handlePrintLabel} />}
         />
       </div>
 

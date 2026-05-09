@@ -7,6 +7,7 @@ import Cart from '../models/Cart';
 import Order from '../models/Order';
 import Product from '../models/Product';
 import { sendOrderConfirmationEmail, sendAdminNotificationEmail } from '../services/email';
+import { createPaymentLink } from '../services/galio';
 
 const router = Router();
 
@@ -48,7 +49,7 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
     const shipping = calculateShipping(req.body.shippingDetails?.address?.postal_code || '');
     const total = subtotal + shipping;
 
-    // FAKE CHECKOUT: Create order directly without Stripe (no transactions for standalone MongoDB)
+// FAKE CHECKOUT: Create order directly without Stripe (no transactions for standalone MongoDB)
     const order = await Order.create({
       sessionId,
       items: cart.items.map(item => ({
@@ -76,18 +77,47 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
     // Mark cart as converted (customer completed purchase)
     await markCartAsConverted(sessionId);
 
-// Send order confirmation email
-     try {
-       await sendOrderConfirmationEmail(order, (order._id as any).toString());
-       // Send admin notification
-       try {
-         await sendAdminNotificationEmail(order, (order._id as any).toString(), order.shippingDetails?.name || 'Cliente');
-       } catch (adminEmailError) {
-         console.error('Failed to send admin notification email:', adminEmailError);
-       }
-     } catch (emailError) {
+    // Create GalioPay payment link
+    let paymentUrl = null;
+    try {
+      const galioItems = cart.items.map(item => ({
+        title: (item.productId as any)?.name || 'Product',
+        quantity: item.quantity,
+        unitPrice: item.price,
+        currencyId: 'ARS',
+      }));
+
+      const galioLink = await createPaymentLink({
+        items: galioItems,
+        referenceId: order._id.toString(),
+        backUrl: {
+          success: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success?orderId=${order._id}`,
+          failure: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/cancel`,
+        },
+        notificationUrl: `${process.env.PUBLIC_API_URL || 'http://localhost:4000'}/api/webhooks/galio`,
+        sandbox: process.env.GALIO_SANDBOX === 'true',
+      });
+      paymentUrl = galioLink.url;
+
+      // Save GalioPay payment ID to order
+      order.galioPaymentId = galioLink.referenceId;
+      await order.save();
+    } catch (galioError) {
+      console.error('GalioPay error:', galioError);
+      // Continue without GalioPay link - order still created
+    }
+
+    // Send order confirmation email
+    try {
+      await sendOrderConfirmationEmail(order, (order._id as any).toString());
+      // Send admin notification
+      try {
+        await sendAdminNotificationEmail(order, (order._id as any).toString(), order.shippingDetails?.name || 'Cliente');
+      } catch (adminEmailError) {
+        console.error('Failed to send admin notification email:', adminEmailError);
+      }
+    } catch (emailError) {
       console.error('Failed to send confirmation email:', emailError);
-      // Don't fail the order if email fails
     }
 
     res.status(200).json({
@@ -96,6 +126,7 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
       success: true,
       message: 'Order created successfully',
       shipping: shipping,
+      paymentUrl, // GalioPay payment URL
     });
   } catch (error) {
     console.error('Checkout error:', error);

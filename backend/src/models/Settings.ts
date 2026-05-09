@@ -19,6 +19,10 @@ const SettingsSchema = new mongoose.Schema({
       publishableKey: String,
       secretKey: String,
     },
+    galio: {
+      apiKey: String,
+      clientId: String,
+    },
   },
   email: {
     user: String,
