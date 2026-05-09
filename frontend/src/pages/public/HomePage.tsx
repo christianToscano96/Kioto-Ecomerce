@@ -103,7 +103,7 @@ export function HomePage() {
                 <span>Oferta Flash: 50% OFF en productos seleccionados</span>
               </div>
               <span className="hidden sm:inline">|</span>
-              <span>Envío gratis en pedidos +$30.000</span>
+              <span>Envío gratis en pedidos +$60.000</span>
               <span className="hidden sm:inline">|</span>
               <span>Promos Imperdibles</span>
             </div>

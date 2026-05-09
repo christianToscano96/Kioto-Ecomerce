@@ -67,6 +67,15 @@ export function CartPage() {
           <div className="p-4 bg-primary-container text-on-primary rounded-lg text-center">
             Error al cargar el carrito. Por favor, intenta de nuevo.
           </div>
+          <div className="text-center mt-6">
+            <Link 
+              to="/" 
+              className="text-sm uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors font-label flex items-center gap-1 justify-center"
+            >
+              <span className="material-symbols-outlined text-base">home</span>
+              Volver al inicio
+            </Link>
+          </div>
         </div>
       </>
     );
@@ -78,9 +87,18 @@ export function CartPage() {
         <Header />
         <main className="max-w-7xl mx-auto px-8 py-16 ">
           <header className="mb-12 ">
-            <h1 className="font-serif text-5xl font-bold tracking-tight mb-2 mt-10">
-              Canasta
-            </h1>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="font-serif text-5xl font-bold tracking-tight mt-10">
+                Canasta
+              </h1>
+              <Link 
+                to="/" 
+                className="text-sm uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors font-label flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-base">home</span>
+                Volver al inicio
+              </Link>
+            </div>
             <p className="font-label text-sm uppercase tracking-[0.2em] text-on-surface-variant">
               Tu carrito está vacía
             </p>
@@ -109,15 +127,24 @@ return (
         {/* Spacer for fixed header */}
         <div className="h-20 lg:h-24"></div>
        
-        <header className="mb-12">
-          <h1 className="font-serif text-5xl font-bold tracking-tight mb-2 animate-fade-in">
-            Canasta
-          </h1>
-          <p className="font-label text-sm uppercase tracking-[0.2em] text-on-surface-variant animate-fade-in" style={{ animationDelay: '100ms' }}>
-            {cartItemCount} {cartItemCount === 1 ? "artículo" : "artículos"} en
-            tu carrito
-          </p>
-        </header>
+<header className="mb-12">
+           <div className="flex items-center justify-between mb-4">
+             <h1 className="font-serif text-5xl font-bold tracking-tight animate-fade-in">
+               Canasta
+             </h1>
+             <Link 
+               to="/" 
+               className="text-sm uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors font-label flex items-center gap-1"
+             >
+               <span className="material-symbols-outlined text-base">home</span>
+               Volver al inicio
+             </Link>
+           </div>
+           <p className="font-label text-sm uppercase tracking-[0.2em] text-on-surface-variant animate-fade-in" style={{ animationDelay: '100ms' }}>
+             {cartItemCount} {cartItemCount === 1 ? "artículo" : "artículos"} en
+             tu carrito
+           </p>
+         </header>
 
 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
             {/* Cart Items List */}
