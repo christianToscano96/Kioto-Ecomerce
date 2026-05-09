@@ -65,6 +65,14 @@ export function OrdersList() {
     fetchOrders();
   }, [fetchOrders]);
 
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchOrders]);
+
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
     return orders.filter((order) => {
@@ -237,7 +245,7 @@ export function OrdersList() {
             }},
           ]}
           data={paginatedOrders}
-          actions={(row) => <OrderActions orderId={row._id} status={row.status} onPrintLabel={handlePrintLabel} />}
+          actions={(row) => <OrderActions orderId={row._id} status={row.status} galioPaymentId={row.galioPaymentId} onPrintLabel={handlePrintLabel} />}
         />
       </div>
 

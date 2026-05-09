@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Order from '../models/Order';
 import Product from '../models/Product';
 import { resendOrderConfirmationEmail } from '../services/email';
+import { getPayment, refundPayment } from '../services/galio';
 
 const router = Router();
 
@@ -92,6 +93,55 @@ router.post('/:id/resend-email', async (req, res) => {
   } catch (error) {
     console.error('Resend email error:', error);
     res.status(500).json({ error: 'Failed to resend email' });
+  }
+});
+
+// Get GalioPay payment status
+router.get('/:id/galio-payment', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    if (!order.galioPaymentId) {
+      return res.status(400).json({ error: 'No GalioPay payment ID' });
+    }
+
+    const payment = await getPayment(order.galioPaymentId);
+    res.json(payment);
+  } catch (error) {
+    console.error('GalioPay payment fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch GalioPay payment' });
+  }
+});
+
+// Refund GalioPay payment
+router.post('/:id/refund-galio', async (req, res) => {
+  try {
+    const { reason, refundType } = req.body;
+    const order = await Order.findById(req.params.id);
+    
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    if (!order.galioPaymentId) {
+      return res.status(400).json({ error: 'No GalioPay payment ID' });
+    }
+
+    const result = await refundPayment(order.galioPaymentId, { reason, refundType });
+    
+    if (result.success) {
+      order.status = 'cancelled';
+      await order.save();
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('GalioPay refund error:', error);
+    res.status(500).json({ error: 'Failed to refund GalioPay payment' });
   }
 });
 

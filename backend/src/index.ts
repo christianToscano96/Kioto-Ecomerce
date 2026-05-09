@@ -16,6 +16,7 @@ import orderRoutes from "./routes/orders";
 import apiDocsRoutes from "./routes/api-docs";
 import uploadRoutes from "./routes/upload";
 import settingsRoutes from "./routes/settings";
+import webhookRoutes from "./routes/webhook";
 
 dotenv.config();
 
@@ -89,6 +90,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/docs", apiDocsRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/webhooks", webhookRoutes);
 
 // Error handling middleware
 app.use(

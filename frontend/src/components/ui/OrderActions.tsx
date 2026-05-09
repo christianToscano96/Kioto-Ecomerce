@@ -7,12 +7,15 @@ import type { Order } from '../../../../shared/src';
 interface OrderActionsProps {
   orderId: string;
   status: Order['status'];
+  galioPaymentId?: string;
   onPrintLabel?: (orderId: string) => void;
 }
 
-export function OrderActions({ orderId, status, onPrintLabel }: OrderActionsProps) {
+export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: OrderActionsProps) {
   const [open, setOpen] = useState(false);
   const [resending, setResending] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const [refunding, setRefunding] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const updateOrderStatus = useOrdersStore((state) => state.updateOrderStatus);
@@ -59,6 +62,60 @@ export function OrderActions({ orderId, status, onPrintLabel }: OrderActionsProp
     }
   };
 
+  const handleCheckGalioPayment = async () => {
+    if (!galioPaymentId) return;
+    
+    try {
+      setCheckingPayment(true);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/orders/${orderId}/galio-payment`,
+        { method: 'GET', credentials: 'include' }
+      );
+      
+      if (response.ok) {
+        const payment = await response.json();
+        toast.success(`Pago ${payment.status}`);
+      } else {
+        toast.error('No se pudo verificar el pago');
+      }
+    } catch (error) {
+      toast.error('Error al verificar pago');
+    } finally {
+      setCheckingPayment(false);
+      setOpen(false);
+    }
+  };
+
+  const handleRefundGalioPayment = async () => {
+    if (!galioPaymentId) return;
+    
+    if (!confirm('¿Reembolsar este pago?')) return;
+    
+    try {
+      setRefunding(true);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/orders/${orderId}/refund-galio`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: 'Reembolso administrativo', refundType: 'total' }),
+        }
+      );
+      
+      if (response.ok) {
+        toast.success('Reembolso procesado');
+      } else {
+        toast.error('Error al reembolsar');
+      }
+    } catch (error) {
+      toast.error('Error al reembolsar');
+    } finally {
+      setRefunding(false);
+      setOpen(false);
+    }
+  };
+
   const nextStatus = (): Order['status'] | null => {
     const flow: Order['status'][] = ['pending', 'paid', 'processing', 'shipped', 'delivered'];
     const idx = flow.indexOf(status);
@@ -93,6 +150,35 @@ export function OrderActions({ orderId, status, onPrintLabel }: OrderActionsProp
               <span className="material-symbols-outlined text-sm">print</span>
               Imprimir Etiqueta
             </button>
+          )}
+          
+          {/* GalioPay actions */}
+          {galioPaymentId && (
+            <>
+              <button
+                onClick={handleCheckGalioPayment}
+                disabled={checkingPayment}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-sm">credit_card</span>
+                {checkingPayment ? 'Verificando...' : 'Verificar Pago'}
+              </button>
+              
+              {status === 'paid' && (
+                <button
+                  onClick={handleRefundGalioPayment}
+                  disabled={refunding}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors text-terracota-600 flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-sm">undo</span>
+                  {refunding ? 'Reembolsando...' : 'Reembolsar'}
+                </button>
+              )}
+            </>
+          )}
+          
+          {!open && resending && (
+            <div className="border-t border-outline-variant my-1" />
           )}
           
           <button

@@ -84,12 +84,17 @@ export function CheckoutPage() {
     }).catch(() => {});
   }, []);
 
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "transfer">("card");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const [paymentMethod] = useState<"transfer">("transfer"); // Only Galio Pay transfer
   const [error, setError] = useState<string | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [storeTerms, setStoreTerms] = useState<string>("");
   const [showTerms, setShowTerms] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'creating' | 'redirecting'>('idle');
 
   const handleInputChange = (field: string, value: string) => {
     if (field.startsWith("address.")) {
@@ -106,16 +111,20 @@ export function CheckoutPage() {
   const handleNext = () => {
     if (step === "shipping") setStep("payment");
     else if (step === "payment") setStep("review");
+    // Scroll to top when changing steps
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBack = () => {
     if (step === "payment") setStep("shipping");
     else if (step === "review") setStep("payment");
+    // Scroll to top when changing steps
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setSubmitStatus('creating');
     setError(null);
 
     try {
@@ -136,13 +145,20 @@ export function CheckoutPage() {
         throw new Error(data.error || "Error al crear sesión de checkout");
       }
 
-      // Fake checkout - redirect to success page
+      // GalioPay checkout - redirect to payment page
       if (data.success) {
-        navigate(`/checkout/success?orderId=${data.orderId}`);
+        if (data.paymentUrl) {
+          setSubmitStatus('redirecting');
+          // Redirigir a GalioPay
+          window.location.href = data.paymentUrl;
+        } else {
+          // Fallback sin GalioPay
+          navigate(`/checkout/success?orderId=${data.orderId}`);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ocurrió un error");
-      setIsSubmitting(false);
+      setSubmitStatus('idle');
     }
   };
 
@@ -268,35 +284,22 @@ export function CheckoutPage() {
               </form>
             )}
 
-            {/* Step 2: Payment Method */}
+            {/* Step 2: Payment Method - Galio Pay Only */}
             {step === "payment" && (
               <form onSubmit={(e) => e.preventDefault()}>
                 <FormSection title="Método de Pago">
                   <div className="space-y-4">
-                    <label className="flex items-center gap-3 p-4 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="card"
-                        checked={paymentMethod === "card"}
-                        onChange={() => setPaymentMethod("card")}
-                        className="w-5 h-5"
-                      />
-                      <span className="material-symbols-outlined">credit_card</span>
-                      <span>Tarjeta de Crédito/Débito</span>
-                    </label>
-                    <label className="flex items-center gap-3 p-4 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="transfer"
-                        checked={paymentMethod === "transfer"}
-                        onChange={() => setPaymentMethod("transfer")}
-                        className="w-5 h-5"
-                      />
-                      <span className="material-symbols-outlined">account_balance</span>
-                      <span>Transferencia Bancaria</span>
-                    </label>
+                    <div className="p-6 border border-primary rounded-lg bg-primary-container/10">
+                      <div className="flex items-center gap-4">
+                        <span className="material-symbols-outlined text-3xl text-primary">account_balance</span>
+                        <div>
+                          <h3 className="font-serif text-lg font-bold text-on-surface">Transferencia Bancaria</h3>
+                          <p className="text-sm text-on-surface-variant">
+                            Pago seguro vía GalioPay. Recibirás las instrucciones al confirmar.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </FormSection>
 
@@ -372,8 +375,8 @@ export function CheckoutPage() {
                   >
                     Volver
                   </button>
-                  <PrimaryButton type="submit" disabled={isSubmitting || !termsAccepted}>
-                    {isSubmitting ? "Procesando..." : "Confirmar Pedido"}
+                  <PrimaryButton type="submit" disabled={submitStatus !== 'idle' || !termsAccepted}>
+                    {submitStatus === 'creating' ? "Creando orden..." : submitStatus === 'redirecting' ? "Redirigiendo a GalioPay..." : "Confirmar Pedido"}
                   </PrimaryButton>
                 </section>
               </form>

@@ -11,6 +11,7 @@ export interface IOrder extends Document {
   total: number;
   status: OrderStatus;
   stripePaymentIntentId?: string;
+  galioPaymentId?: string;
   shippingDetails?: {
     name: string;
     email: string;
@@ -78,6 +79,9 @@ const orderSchema = new Schema<IOrder>(
       default: 'pending',
     },
     stripePaymentIntentId: {
+      type: String,
+    },
+    galioPaymentId: {
       type: String,
     },
     shippingDetails: {

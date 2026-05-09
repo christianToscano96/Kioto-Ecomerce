@@ -92,6 +92,7 @@ export interface Order {
   total: number;
   status: OrderStatus;
   stripePaymentIntentId?: string;
+  galioPaymentId?: string;
   shippingDetails?: {
     name?: string;
     email?: string;
@@ -159,6 +160,10 @@ export interface Settings {
       testMode?: boolean;
       publishableKey?: string;
       secretKey?: string;
+    };
+    galio?: {
+      apiKey?: string;
+      clientId?: string;
     };
   };
   notifications?: {
