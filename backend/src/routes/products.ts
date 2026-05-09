@@ -22,7 +22,7 @@ router.get('/public', async (req: Request, res: Response) => {
 // POST /api/products/public - Create product (no auth)
 router.post('/public', async (req: Request, res: Response) => {
   try {
-    const { name, price, images, description, stock, published, materials, sizes, colors } = req.body;
+    const { name, price, images, description, stock, published, materials, sizes, colors, variants } = req.body;
     
     const product = await Product.create({
       name,
@@ -34,6 +34,7 @@ router.post('/public', async (req: Request, res: Response) => {
       materials,
       sizes: sizes || [],
       colors: colors || [],
+      variants: variants || [],
     });
     
     res.status(201).json(product);
@@ -60,7 +61,7 @@ router.get('/', async (req: Request, res: Response) => {
 // POST /api/products - Create product (admin only)
 router.post('/', validate(createProductSchema), async (req: Request, res: Response) => {
   try {
-    const { name, price, images, description, stock, published, materials, sizes, colors, category } = req.body;
+    const { name, price, images, description, stock, published, materials, sizes, colors, category, variants } = req.body;
 
     // Create product - slug is auto-generated from name by pre-save hook
     const product = await Product.create({
@@ -74,6 +75,7 @@ router.post('/', validate(createProductSchema), async (req: Request, res: Respon
       sizes: sizes || [],
       colors: colors || [],
       category,
+      variants: variants || [],
     });
 
     res.status(201).json({ product });

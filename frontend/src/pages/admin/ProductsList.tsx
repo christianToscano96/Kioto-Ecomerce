@@ -126,22 +126,32 @@ export function ProductsList() {
   const filteredProducts = useMemo(() => {
     if (!products) return [];
 
-    return products.filter((product) => {
-      // Search
-      if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return false;
-      }
+// Stock filter - use totalStock (sum of variants or base stock)
+      const getProductTotalStock = (p: any) => {
+        if (p.variants && p.variants.length > 0) {
+          return p.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+        }
+        return p.stock || 0;
+      };
 
-      // Stock filter
-      if (stockFilter === "low" && product.stock > 5) return false;
-      if (stockFilter === "out" && product.stock !== 0) return false;
+      return products.filter((product) => {
+        // Search
+        if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+          return false;
+        }
 
-      // Published filter
-      if (publishedFilter === "published" && !product.published) return false;
-      if (publishedFilter === "draft" && product.published) return false;
+        const totalStock = getProductTotalStock(product);
 
-      return true;
-    });
+        // Stock filter
+        if (stockFilter === "low" && totalStock > 5) return false;
+        if (stockFilter === "out" && totalStock !== 0) return false;
+
+        // Published filter
+        if (publishedFilter === "published" && !product.published) return false;
+        if (publishedFilter === "draft" && product.published) return false;
+
+        return true;
+      });
   }, [products, searchTerm, stockFilter, publishedFilter]);
 
   // Sort products
@@ -222,7 +232,12 @@ export function ProductsList() {
 
   // Calculate metrics
   const totalItems = products?.length || 0;
-  const lowStock = products?.filter((p) => p.stock <= 5).length || 0;
+  const lowStock = products?.filter((p) => {
+    const totalStock = p.variants && p.variants.length > 0
+      ? p.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
+      : p.stock;
+    return totalStock <= 5;
+  }).length || 0;
   const categories =
     new Set(products?.map((p) => p.slug?.split("-")[0])).size || 0;
   const activeSales = products?.filter((p) => p.published).length || 0;
@@ -436,11 +451,18 @@ export function ProductsList() {
                 <td className="px-6 py-4 text-on-surface">
                   ${product.price.toFixed(2)}
                 </td>
-                <td className="px-6 py-4">
-                  <Badge variant={product.stock > 5 ? "default" : "destructive"}>
-                    {product.stock} disponibles
-                  </Badge>
-                </td>
+<td className="px-6 py-4">
+                   {(() => {
+                     const totalStock = product.variants && product.variants.length > 0
+                       ? product.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
+                       : product.stock;
+                     return (
+                       <Badge variant={totalStock > 5 ? "default" : totalStock === 0 ? "outline" : "destructive"}>
+                         {totalStock} disponibles
+                       </Badge>
+                     );
+                   })()}
+                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
                     <Link to={`/admin/products/${product._id}/edit`}>

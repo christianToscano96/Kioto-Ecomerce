@@ -67,13 +67,13 @@ export function CartItemCard({ item }: CartItemCardProps) {
     }
   };
 
-  // Get product info - backend populates 'productId' field
-  const product = (item as any).productId || item.product;
-  const name = product?.name || "Product";
-  const price = item.price || product?.price || 0;
-  const images = product?.images;
-  const image = images && images.length > 0 ? images[0] : null;
-  const description = product?.description || "";
+// Get product info - backend now populates 'product' field
+   const product = item.product;
+   const name = product?.name || "Product";
+   const price = item.price || product?.price || 0;
+   const images = product?.images;
+   const image = images && images.length > 0 ? images[0] : null;
+   const description = product?.description || "";
 
   return (
     <div className="flex flex-col md:flex-row gap-8 pb-12 border-b border-dashed border-outline-variant/40">

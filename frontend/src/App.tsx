@@ -19,44 +19,47 @@ import { CheckoutCancelPage } from '@/pages/public/CheckoutCancelPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { DashboardOverview } from '@/pages/admin/DashboardOverview';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ToastProvider } from '@/components/ui/Toast';
 
 function App() {
   return (
-    <div className="min-h-screen bg-background">
-      <ErrorBoundary>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/products" element={<ProductsListPage />} />
-          <Route path="/products/:id" element={<ProductDetailPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
-          <Route path="/checkout/cancel" element={<CheckoutCancelPage />} />
+    <ToastProvider>
+      <div className="min-h-screen bg-background">
+        <ErrorBoundary>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/products" element={<ProductsListPage />} />
+            <Route path="/products/:id" element={<ProductDetailPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+            <Route path="/checkout/cancel" element={<CheckoutCancelPage />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin" element={<DashboardLayout />}>
-            <Route index element={<DashboardOverview />} />
-            <Route path="products" element={<ProductsList />} />
-            <Route path="products/new" element={<ProductForm />} />
-            <Route path="products/:id/edit" element={<ProductForm />} />
-            <Route path="categories" element={<CategoriesList />} />
-            <Route path="categories/new" element={<CategoryForm />} />
-            <Route path="categories/:id/edit" element={<CategoryForm />} />
-            <Route path="orders" element={<OrdersList />} />
-            <Route path="orders/:id" element={<OrderDetailsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
+            {/* Admin Routes */}
+            <Route path="/admin" element={<DashboardLayout />}>
+              <Route index element={<DashboardOverview />} />
+              <Route path="products" element={<ProductsList />} />
+              <Route path="products/new" element={<ProductForm />} />
+              <Route path="products/:id/edit" element={<ProductForm />} />
+              <Route path="categories" element={<CategoriesList />} />
+              <Route path="categories/new" element={<CategoryForm />} />
+              <Route path="categories/:id/edit" element={<CategoryForm />} />
+              <Route path="orders" element={<OrdersList />} />
+              <Route path="orders/:id" element={<OrderDetailsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
 
-          {/* Auth Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          
-          {/* 404 Route */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </ErrorBoundary>
-    </div>
+            {/* Auth Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            
+            {/* 404 Route */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </ErrorBoundary>
+      </div>
+    </ToastProvider>
   );
 }
 

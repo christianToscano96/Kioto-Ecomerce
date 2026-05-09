@@ -56,14 +56,14 @@ export function OrderDetailsPage() {
     );
   }
 
-  return (
+return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <PageHeader
-          title={`Pedido #${order._id.slice(-8)}`}
-          description="Detalle completo del pedido"
-          eyebrow="Panel de Administración"
-        />
+ <PageHeader
+            title={`Pedido #${order._id ? order._id.toString().slice(-8) : 'N/A'}`}
+            description="Detalle completo del pedido"
+            eyebrow="Panel de Administración"
+          />
         <Button variant="ghost" onClick={() => navigate('/admin/orders')}>
           Volver
         </Button>
@@ -114,24 +114,36 @@ export function OrderDetailsPage() {
         </div>
       </div>
 
-      {/* Items */}
-      <div className="bg-surface-container-low rounded-xl p-5 border border-outline-variant/40">
-        <h3 className="font-serif font-bold text-on-surface mb-4">Productos</h3>
-        <div className="space-y-3">
-          {order.items.map((item, idx) => (
-            <div key={idx} className="flex items-center justify-between py-2 border-b border-outline-variant/20 last:border-0">
-              <div>
-                <p className="font-medium text-on-surface">Producto {idx + 1}</p>
-                <p className="text-xs text-on-surface-variant">ID: {item.productId.slice(-8)}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-semibold">${item.price.toFixed(2)} x {item.quantity}</p>
-                <p className="text-xs text-on-surface-variant">${(item.price * item.quantity).toFixed(2)}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+{/* Items */}
+       <div className="bg-surface-container-low rounded-xl p-5 border border-outline-variant/40">
+         <h3 className="font-serif font-bold text-on-surface mb-4">Productos</h3>
+         <div className="space-y-3">
+           {order.items?.map((item, idx) => {
+              // Handle both populated product objects and raw productIds
+              const product = item.productId as any;
+              const productIdStr = typeof product === 'object' && product._id
+                ? String(product._id).slice(-8)
+                : product
+                ? String(product).slice(-8)
+                : 'N/A';
+                
+              return (
+                <div key={idx} className="flex items-center justify-between py-2 border-b border-outline-variant/20 last:border-0">
+                  <div>
+                    <p className="font-medium text-on-surface">
+                      {typeof product === 'object' && product?.name ? product.name : `Producto ${idx + 1}`}
+                    </p>
+                    <p className="text-xs text-on-surface-variant">ID: {productIdStr}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">${item.price.toFixed(2)} x {item.quantity}</p>
+                    <p className="text-xs text-on-surface-variant">${(item.price * item.quantity).toFixed(2)}</p>
+                  </div>
+                </div>
+              );
+            })}
+         </div>
+       </div>
     </div>
   );
 }

@@ -13,22 +13,49 @@ const getSessionId = (req: Request): string => {
   return req.cookies?.sessionId || req.headers['x-session-id'] as string || 'anonymous';
 };
 
+// Transform cart items to match frontend expected structure
+const transformCartItems = (items: any[]) => {
+  return items.map(item => {
+    const productId = item.productId;
+    const populatedProduct = typeof productId === 'object' ? productId : null;
+    
+    return {
+      _id: item._id?.toString(),
+      productId: populatedProduct ? populatedProduct._id?.toString() : productId?.toString(),
+      quantity: item.quantity,
+      price: item.price,
+      size: item.size,
+      color: item.color,
+      product: populatedProduct ? {
+        _id: populatedProduct._id?.toString(),
+        name: populatedProduct.name,
+        price: populatedProduct.price,
+        images: populatedProduct.images || [],
+        description: populatedProduct.description
+      } : undefined
+    };
+  });
+};
+
 // GET /api/cart - Get current cart
 router.get('/', async (req: Request, res: Response) => {
   try {
     const sessionId = getSessionId(req);
     const cart = await getOrCreateCart(sessionId);
 
-    // Populate product details for cart items (include description)
-    const populatedCart = await cart.populate('items.productId', 'name price images description');
+    // Populate product details for cart items
+    await cart.populate('items.productId', 'name price images description');
 
-    const total = calculateCartTotal(cart.items);
+    const items = transformCartItems(cart.items);
+    const total = calculateCartTotal(items as any);
 
     res.status(200).json({
       cart: {
-        ...populatedCart.toObject(),
+        _id: cart._id?.toString(),
+        sessionId: cart.sessionId,
+        items,
         total,
-        itemCount: cart.items.reduce((acc, item) => acc + item.quantity, 0),
+        itemCount: items.reduce((acc: number, item: any) => acc + item.quantity, 0),
       },
     });
   } catch (error) {
@@ -54,11 +81,27 @@ router.post('/items', validate(addToCartSchema), async (req: Request, res: Respo
       return;
     }
 
-    // Check stock availability
-    if (product.stock < quantity) {
-      res.status(400).json({ error: 'Requested quantity exceeds available stock' });
-      return;
-    }
+// Check stock availability - support variants (size-based stock)
+     let availableStock = product.stock;
+     if (product.variants && size && size !== "") {
+       const variant = product.variants.find((v: any) => v.size === size);
+       if (!variant) {
+         res.status(400).json({ error: `Size ${size} not available for this product` });
+         return;
+       }
+       availableStock = variant.stock;
+     }
+
+     // If product has variants but no size selected, reject
+     if (product.variants && product.variants.length > 0 && (!size || size === "")) {
+       res.status(400).json({ error: 'Size is required for this product' });
+       return;
+     }
+
+     if (availableStock < quantity) {
+       res.status(400).json({ error: 'Requested quantity exceeds available stock' });
+       return;
+     }
 
     const cart = await addToCart(
       sessionId,
@@ -75,18 +118,22 @@ router.post('/items', validate(addToCartSchema), async (req: Request, res: Respo
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict' as const,
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        maxAge: 30 * 24 * 60 * 60 * 1000,
         path: '/',
       });
     }
 
-    const total = calculateCartTotal(cart.items);
+    await cart.populate('items.productId', 'name price images description');
+    const items = transformCartItems(cart.items);
+    const total = calculateCartTotal(items as any);
 
     res.status(200).json({
       cart: {
-        ...cart.toObject(),
+        _id: cart._id?.toString(),
+        sessionId: cart.sessionId,
+        items,
         total,
-        itemCount: cart.items.reduce((acc, item) => acc + item.quantity, 0),
+        itemCount: items.reduce((acc: number, item: any) => acc + item.quantity, 0),
       },
     });
   } catch (error) {
@@ -108,13 +155,17 @@ router.put('/items/:itemId', validate(updateCartItemSchema), async (req: Request
       quantity
     );
 
-    const total = calculateCartTotal(cart.items);
+    await cart.populate('items.productId', 'name price images description');
+    const items = transformCartItems(cart.items);
+    const total = calculateCartTotal(items as any);
 
     res.status(200).json({
       cart: {
-        ...cart.toObject(),
+        _id: cart._id?.toString(),
+        sessionId: cart.sessionId,
+        items,
         total,
-        itemCount: cart.items.reduce((acc, item) => acc + item.quantity, 0),
+        itemCount: items.reduce((acc: number, item: any) => acc + item.quantity, 0),
       },
     });
   } catch (error) {
@@ -139,13 +190,17 @@ router.delete('/items/:itemId', validate(removeCartItemSchema), async (req: Requ
 
     const cart = await removeFromCart(sessionId, new Types.ObjectId(itemId));
 
-    const total = calculateCartTotal(cart.items);
+    await cart.populate('items.productId', 'name price images description');
+    const items = transformCartItems(cart.items);
+    const total = calculateCartTotal(items as any);
 
     res.status(200).json({
       cart: {
-        ...cart.toObject(),
+        _id: cart._id?.toString(),
+        sessionId: cart.sessionId,
+        items,
         total,
-        itemCount: cart.items.reduce((acc, item) => acc + item.quantity, 0),
+        itemCount: items.reduce((acc: number, item: any) => acc + item.quantity, 0),
       },
     });
   } catch (error) {

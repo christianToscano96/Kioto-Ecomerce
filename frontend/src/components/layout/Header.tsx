@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCartItemCount } from "@/store/cart";
+import { useCategoriesStore } from "@/store/categories";
 import { api } from "@/lib/api";
 import logoK from '../../../assets/logo.png';
 
@@ -12,6 +13,9 @@ export function Header() {
   const cartItemCount = useCartItemCount();
   const [searchQuery, setSearchQuery] = useState("");
   const [storeLogo, setStoreLogo] = useState<string | null>(null);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [closeTimeout, setCloseTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const { categories, fetchCategories } = useCategoriesStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +26,13 @@ export function Header() {
       }
     }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    fetchCategories();
+    return () => {
+      if (closeTimeout) clearTimeout(closeTimeout);
+    };
+  }, [fetchCategories, closeTimeout]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,18 +55,34 @@ export function Header() {
               src={storeLogo || logoK} 
               alt="Store Logo" 
               className="h-40 w-auto -mt-2 object-contain "
+              style={{marginLeft: '-30px'}}
             />
           </div>
           </NavLink>
           <div className="hidden md:flex items-center gap-8 font-serif text-lg tracking-tight">
             {navItems.map((item) => (
-              <NavLink
+              <div
                 key={item.to}
-                to={item.to}
-                className="text-on-surface/80 hover:text-primary transition-colors duration-300"
+                className="relative"
+                onMouseEnter={() => {
+                  if (closeTimeout) clearTimeout(closeTimeout);
+                  item.to === "/products" && setShowCategoryDropdown(true);
+                }}
+                onMouseLeave={() => {
+                  const timeout = setTimeout(() => setShowCategoryDropdown(false), 300);
+                  setCloseTimeout(timeout);
+                }}
               >
-                {item.label}
-              </NavLink>
+                <NavLink
+                  to={item.to}
+                  className="text-on-surface/80 hover:text-primary transition-colors duration-300 flex items-center gap-1"
+                >
+                  {item.label}
+                  {item.to === "/products" && (
+                    <span className="material-symbols-outlined text-xs">expand_more</span>
+                  )}
+                </NavLink>
+              </div>
             ))}
           </div>
         </div>
@@ -98,6 +125,51 @@ export function Header() {
           </NavLink>
         </div>
       </div>
+
+      {/* Category Dropdown Mega Menu */}
+      {showCategoryDropdown && categories && categories.length > 0 && (
+        <div 
+          className="absolute top-full left-0 w-full bg-background/95 backdrop-blur-xl border-b border-outline-variant/40 shadow-lg"
+          onMouseEnter={() => {
+            if (closeTimeout) clearTimeout(closeTimeout);
+            setShowCategoryDropdown(true);
+          }}
+          onMouseLeave={() => {
+            const timeout = setTimeout(() => setShowCategoryDropdown(false), 300);
+            setCloseTimeout(timeout);
+          }}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-8 gap-4 max-h-80 overflow-y-auto scrollbar-hide pr-2">
+              {categories.map((category) => (
+                <NavLink
+                  key={category._id}
+                  to={`/products?category=${encodeURIComponent(category.name)}`}
+                  className="group block"
+                  onClick={() => setShowCategoryDropdown(false)}
+                >
+                  <div className="w-16 h-16 bg-surface-container rounded-full overflow-hidden mb-2 group-hover:shadow-md transition-shadow mx-auto">
+                    {category.imageUrl ? (
+                      <img
+                        src={category.imageUrl}
+                        alt={category.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+                        <span className="material-symbols-outlined text-xl">{category.name.charAt(0)}</span>
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-xs font-medium text-on-surface group-hover:text-primary transition-colors text-center block truncate">
+                    {category.name}
+                  </span>
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

@@ -211,11 +211,13 @@ export function CheckoutPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         {/* Checkout Process Indicator */}
-        <div className="mb-16 mt-8">
+        <div className="mb-16 mt-8 animate-fade-in">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight mb-12">
             Finalizar Compra
           </h1>
-          <Stepper steps={steps} />
+          <div style={{ animationDelay: '100ms' }}>
+            <Stepper steps={steps} />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
@@ -223,9 +225,9 @@ export function CheckoutPage() {
           <div className="lg:col-span-7 space-y-12">
             {/* Step 1: Shipping Form */}
             {step === "shipping" && (
-              <form onSubmit={(e) => e.preventDefault()}>
+              <form onSubmit={(e) => e.preventDefault()} className="animate-fade-in">
                 <FormSection title="Información de Contacto">
-                  <div className="space-y-6">
+                  <div className="space-y-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
                     <FloatingLabelInput
                       label="Correo Electrónico"
                       type="email"
@@ -236,8 +238,8 @@ export function CheckoutPage() {
                   </div>
                 </FormSection>
 
-                <FormSection title="Dirección de Envío">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormSection title="Dirección de Envío" className="mt-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
                     <FloatingLabelInput
                       label="Nombre Completo"
                       value={formData.name}
@@ -269,7 +271,7 @@ export function CheckoutPage() {
                   </div>
                 </FormSection>
 
-                <section className="pt-8 flex gap-4">
+                <section className="pt-8 flex gap-4 animate-fade-in" style={{ animationDelay: '300ms' }}>
                   <button
                     type="button"
                     onClick={() => navigate("/cart")}
@@ -286,9 +288,9 @@ export function CheckoutPage() {
 
             {/* Step 2: Payment Method - Galio Pay Only */}
             {step === "payment" && (
-              <form onSubmit={(e) => e.preventDefault()}>
+              <form onSubmit={(e) => e.preventDefault()} className="animate-fade-in">
                 <FormSection title="Método de Pago">
-                  <div className="space-y-4">
+                  <div className="space-y-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
                     <div className="p-6 border border-primary rounded-lg bg-primary-container/10">
                       <div className="flex items-center gap-4">
                         <span className="material-symbols-outlined text-3xl text-primary">account_balance</span>
@@ -303,7 +305,7 @@ export function CheckoutPage() {
                   </div>
                 </FormSection>
 
-                <section className="pt-8 flex gap-4">
+                <section className="pt-8 flex gap-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
                   <button
                     type="button"
                     onClick={handleBack}
@@ -320,9 +322,9 @@ export function CheckoutPage() {
 
             {/* Step 3: Review */}
             {step === "review" && (
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="animate-fade-in">
                 <FormSection title="Resumen del Pedido">
-                  <div className="space-y-4">
+                  <div className="space-y-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
                     <div className="flex justify-between py-2 border-b border-outline-variant">
                       <span>Subtotal</span>
                       <span>${cartTotal.toFixed(2)}</span>
@@ -339,7 +341,7 @@ export function CheckoutPage() {
                 </FormSection>
 
                 {/* Terms Agreement */}
-                <div className="mt-6 p-4 bg-surface-container rounded-lg border border-outline-variant/30">
+                <div className="mt-6 p-4 bg-surface-container rounded-lg border border-outline-variant/30 animate-fade-in" style={{ animationDelay: '200ms' }}>
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -362,12 +364,12 @@ export function CheckoutPage() {
                 </div>
 
                 {error && (
-                  <div className="p-4 bg-red-50 text-red-600 rounded-lg mb-4">
+                  <div className="p-4 bg-red-50 text-red-600 rounded-lg mb-4 animate-fade-in" style={{ animationDelay: '250ms' }}>
                     {error}
                   </div>
                 )}
 
-                <section className="pt-8 flex gap-4">
+                <section className="pt-8 flex gap-4 animate-fade-in" style={{ animationDelay: '300ms' }}>
                   <button
                     type="button"
                     onClick={handleBack}
@@ -390,37 +392,37 @@ export function CheckoutPage() {
 <SecurityBadge message="Tu conexión está encriptada y tus datos son manejados con cuidado artesanal." />
        </main>
 
-       {/* Terms Modal */}
-       {showTerms && (
-         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-           <div className="bg-background rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
-             <div className="flex justify-between items-center mb-4">
-               <h2 className="text-xl font-bold">Términos y Condiciones</h2>
-               <button
-                 onClick={() => setShowTerms(false)}
-                 className="text-on-surface hover:text-primary"
-               >
-                 <span className="material-symbols-outlined">close</span>
-               </button>
-             </div>
-             <div className="prose prose-sm max-w-none text-on-surface">
-               {storeTerms ? (
-                 <p className="whitespace-pre-wrap">{storeTerms}</p>
-               ) : (
-                 <p>Términos y condiciones no configurados.</p>
-               )}
-             </div>
-             <div className="mt-6 flex justify-end">
-               <button
-                 onClick={() => setShowTerms(false)}
-                 className="px-4 py-2 bg-primary text-on-primary rounded-lg"
-               >
-                 Cerrar
-               </button>
-             </div>
-           </div>
-         </div>
-       )}
+{/* Terms Modal */}
+        {showTerms && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-background rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 animate-fade-in">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Términos y Condiciones</h2>
+                <button
+                  onClick={() => setShowTerms(false)}
+                  className="text-on-surface hover:text-primary"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              <div className="prose prose-sm max-w-none text-on-surface">
+                {storeTerms ? (
+                  <p className="whitespace-pre-wrap animate-fade-in" style={{ animationDelay: '100ms' }}>{storeTerms}</p>
+                ) : (
+                  <p>Términos y condiciones no configurados.</p>
+                )}
+              </div>
+              <div className="mt-6 flex justify-end animate-fade-in" style={{ animationDelay: '200ms' }}>
+                <button
+                  onClick={() => setShowTerms(false)}
+                  className="px-4 py-2 bg-primary text-on-primary rounded-lg"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
        <Footer />
     </>
