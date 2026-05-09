@@ -77,7 +77,7 @@ export function ProductForm() {
       if (isEdit && product) {
         // Check if product has variants (size-based stock) or simple stock
         const hasSizes = product.variants && product.variants.length > 0;
-        const sizeStock = hasSizes 
+        const sizeStock = hasSizes && product.variants
           ? product.variants.reduce((acc: Record<string, number>, v: any) => {
               acc[v.size] = v.stock || 0;
               return acc;

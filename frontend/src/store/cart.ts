@@ -15,7 +15,7 @@ interface CartState {
 interface CartActions {
   // Async actions
   fetchCart: () => Promise<void>;
-  addToCart: (product: Product, quantity: number, size?: string) => Promise<void>;
+  addToCart: (product: Product, quantity: number, size?: string, color?: string) => Promise<void>;
   updateCartItem: (itemId: string, quantity: number) => Promise<void>;
   removeCartItem: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;

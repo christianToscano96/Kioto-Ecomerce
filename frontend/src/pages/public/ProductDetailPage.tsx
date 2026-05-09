@@ -5,6 +5,7 @@ import { useProductsStore, useProductsError } from "@/store/products";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { SizeSelector } from "@/components/ui/SizeSelector";
 import type { Product } from "../../../../shared/src/index";
 
 const LoaderIcon = () => (
@@ -26,65 +27,8 @@ const LoaderIcon = () => (
       fill="currentColor"
       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
     />
-  </svg>
+</svg>
 );
-
-// Size Selector Component
-const SizeSelector = ({
-  sizes,
-  selectedSize,
-  onSelectSize,
-  variants,
-}: {
-  sizes: string[];
-  selectedSize: string | null;
-  onSelectSize: (size: string) => void;
-  variants?: { size: string; stock: number }[];
-}) => {
-  const getSizeStock = (size: string) => {
-    if (!variants) return null;
-    const variant = variants.find(v => v.size === size);
-    return variant?.stock ?? 0;
-  };
-
-  return (
-    <div>
-      <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-label">
-        Seleccionar Talla
-      </span>
-      <div className="flex gap-4 mt-4">
-        {sizes.map((size) => {
-          const sizeStock = getSizeStock(size);
-          const isOutOfStock = sizeStock === 0;
-          return (
-            <button
-              key={size}
-              onClick={() => !isOutOfStock && onSelectSize(size)}
-              disabled={isOutOfStock}
-              className={`w-12 h-12 flex items-center justify-center border transition-colors text-sm font-medium relative ${
-                selectedSize === size
-                  ? "border-2 border-primary text-primary"
-                  : isOutOfStock
-                  ? "border border-outline-variant opacity-40 cursor-not-allowed"
-                  : "border border-outline-variant hover:border-primary"
-              }`}
-            >
-              {size}
-              {isOutOfStock && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-error rounded-full" />
-              )}
-            </button>
-          );
-        })}
-      </div>
-      {selectedSize && variants && (
-        <p className="text-xs text-on-surface-variant mt-2">
-          Stock: {getSizeStock(selectedSize)} unidades
-        </p>
-      )}
-    </div>
-  );
-};
 
 // Accordion Section Component
 const AccordionSection = ({
@@ -111,9 +55,9 @@ const AccordionSection = ({
 
 // Related Product Card Component
 const RelatedProductCard = ({ product }: { product: Product }) => {
-  const totalStock = product.variants?.length > 0
-    ? product.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
-    : product.stock;
+   const totalStock = product.variants && product.variants.length > 0
+     ? product.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
+     : product.stock;
 
   return (
     <div className="min-w-[280px] bg-surface-container-highest rounded-xl p-4 snap-start group transition-all duration-300 hover:shadow-lg">
@@ -168,30 +112,31 @@ export function ProductDetailPage() {
   }, []);
 
 // Default sizes if not provided by product - only use variants or original sizes
-   const sizes = product?.variants?.map(v => v.size) || product?.sizes || [];
-   
-   // Calculate total stock
-   const totalStock = product?.variants?.length > 0
-     ? product.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
-     : product?.stock ?? 0;
-
-    // Get stock for selected size
-   const getSelectedSizeStock = () => {
-     if (!selectedSize) {
-       // If no size selected and no variants, return base stock
-       if (!product?.variants || product.variants.length === 0) {
-         return product?.stock ?? 0;
+     const sizes = product?.variants?.map(v => v.size) || product?.sizes || [];
+     
+     // Calculate total stock
+     const totalStock = product?.variants && product.variants.length > 0
+       ? product.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
+       : product?.stock ?? 0;
+     
+     // Get stock for selected size
+     const getSelectedSizeStock = () => {
+       if (!selectedSize) {
+         // If no size selected and no variants, return base stock
+         if (!product?.variants || product.variants.length === 0) {
+           return product?.stock ?? 0;
+         }
+         return 0;
        }
-       return 0;
-     }
-     if (product?.variants) {
-       const variant = product.variants.find(v => v.size === selectedSize);
-       return variant?.stock ?? 0;
-     }
-     return product?.stock ?? 0;
-   };
-
-   const selectedSizeStock = getSelectedSizeStock();
+       if (product?.variants) {
+         const variant = product.variants.find(v => v.size === selectedSize);
+         return variant?.stock ?? 0;
+       }
+       return product?.stock ?? 0;
+     };
+     
+     const selectedSizeStock = getSelectedSizeStock();
+     const availableStock = product?.variants && product.variants.length > 0 ? selectedSizeStock : totalStock;
 
 const handleAddToCart = async () => {
      if (!product || isAddingToCart || isSyncing) return;
@@ -201,7 +146,7 @@ const handleAddToCart = async () => {
        // Size-based product: require selected size
        if (!selectedSize) return;
        const selectedVariant = product.variants.find(v => v.size === selectedSize);
-       if (!selectedVariant || selectedVariant.stock < quantity) {
+       if (!selectedVariant || (selectedVariant.stock ?? 0) < quantity) {
          return;
        }
      } else if (product.stock < quantity) {
@@ -209,10 +154,10 @@ const handleAddToCart = async () => {
        return;
      }
     
-    setIsAddingToCart(true);
-    try {
-      await addToCart(product, quantity, selectedSize, selectedColor);
-    } catch (err) {
+setIsAddingToCart(true);
+     try {
+       await addToCart(product, quantity, selectedSize || undefined, selectedColor || undefined);
+     } catch (err) {
       console.error("Failed to add to cart:", err);
     } finally {
       setIsAddingToCart(false);
@@ -370,42 +315,42 @@ const handleAddToCart = async () => {
                 </div>
               )}
 
-              {/* Quantity Selector */}
-              <div className="mt-8">
-                <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-label">
-                  Cantidad
-                </span>
-                <div className="flex items-center gap-4 mt-4">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    disabled={totalStock === 0}
-                    className="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary disabled:opacity-50"
-                  >
-                    <span className="material-symbols-outlined text-sm">remove</span>
-                  </button>
-                  <span className="text-xl font-serif">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    disabled={totalStock === 0}
-                    className="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary disabled:opacity-50"
-                  >
-                    <span className="material-symbols-outlined text-sm">add</span>
-                  </button>
-                </div>
-              </div>
+{/* Quantity Selector */}
+               <div className="mt-8">
+                 <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-label">
+                   Cantidad
+                 </span>
+                 <div className="flex items-center gap-4 mt-4">
+                   <button
+                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                     disabled={availableStock === 0}
+                     className="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary disabled:opacity-50"
+                   >
+                     <span className="material-symbols-outlined text-sm">remove</span>
+                   </button>
+                   <span className="text-xl font-serif">{quantity}</span>
+                   <button
+                     onClick={() => setQuantity(Math.min(quantity + 1, availableStock))}
+                     disabled={quantity >= availableStock || availableStock === 0}
+                     className="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary disabled:opacity-50"
+                   >
+                     <span className="material-symbols-outlined text-sm">add</span>
+                   </button>
+                 </div>
+               </div>
 
 {/* Add to Cart Button */}
-               <button
-                 onClick={handleAddToCart}
-                 disabled={(sizes.length > 0 && !selectedSize) || isSyncing || isAddingToCart || totalStock === 0}
-                 className="w-full bg-primary-container text-on-primary-container py-5 rounded-lg font-bold uppercase tracking-widest font-label hover:bg-primary transition-all duration-300 shadow-md disabled:opacity-50 mt-8"
-             >
-               {totalStock === 0
-                 ? "Agotado"
-                 : isSyncing || isAddingToCart
-                 ? "Añadiendo..."
-                 : "Añadir al Carrito"}
-             </button>
+                <button
+                  onClick={handleAddToCart}
+                  disabled={(sizes.length > 0 && !selectedSize) || isSyncing || isAddingToCart || availableStock === 0}
+                  className="w-full bg-primary-container text-on-primary-container py-5 rounded-lg font-bold uppercase tracking-widest font-label hover:bg-primary transition-all duration-300 shadow-md disabled:opacity-50 mt-8"
+              >
+                {availableStock === 0
+                  ? "Agotado"
+                  : isSyncing || isAddingToCart
+                  ? "Añadiendo..."
+                  : "Añadir al Carrito"}
+              </button>
              </div>
 
             {/* Social & Wishlist */}

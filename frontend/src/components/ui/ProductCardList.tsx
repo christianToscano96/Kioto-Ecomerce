@@ -36,16 +36,29 @@ export function ProductCardList({ product, onQuickAdd }: ProductCardListProps) {
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
 
-  const availableSizes = product.variants?.map(v => v.size) || product.sizes || [];
-  const availableColors = product.colors || [];
-  
-  // Calculate total stock from variants or base stock
-  const totalStock = product.variants?.length > 0
-    ? product.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
-    : product.stock;
+const availableSizes = product?.variants?.map(v => v.size) || product?.sizes || [];
+   const availableColors = product?.colors || [];
+   
+   // Get stock for a specific size
+   const getSizeStock = (size: string) => {
+     if (!product?.variants) return 0;
+     const variant = product.variants.find(v => v.size === size);
+     return variant?.stock ?? 0;
+   };
+   
+   // Calculate total stock from variants or base stock
+   const totalStock = product?.variants && product.variants.length > 0
+     ? product.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
+     : product?.stock;
+   
+   // Get stock for selected size or total
+   const selectedSizeStock = selectedSize ? getSizeStock(selectedSize) : 0;
+   const availableStock = product?.variants && product.variants.length > 0 
+     ? (selectedSize ? selectedSizeStock : 0) 
+     : totalStock;
 
-  // Determine if product has sizes
-  const hasSizes = availableSizes.length > 0;
+   // Determine if product has sizes
+   const hasSizes = availableSizes.length > 0;
 
   const handleAddToCart = async () => {
     // Check if size is required but not selected
@@ -135,72 +148,84 @@ export function ProductCardList({ product, onQuickAdd }: ProductCardListProps) {
               {showCartPanel && totalStock > 0 && (
                 <>
                   <div className="absolute bottom-full right-0 mb-2 bg-surface-container-low rounded-lg shadow-lg p-3 w-64 z-20">
-                    {/* Size Selection - only show if product has sizes */}
-                    {availableSizes.length > 0 && (
-                      <div className="mb-3">
-                        <p className="font-label text-[10px] uppercase tracking-wider text-on-surface mb-2">
-                          Talla
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {availableSizes.map((size) => (
-                            <button
-                              key={size}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setSelectedSize(size);
-                              }}
-                              className={`w-8 h-7 text-[10px] rounded border transition-all ${
-                                selectedSize === size
-                                  ? "bg-primary text-on-primary border-primary"
-                                  : "border-outline-variant"
-                              }`}
-                            >
-                              {size}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+{/* Size Selection - only show if product has sizes */}
+                     {availableSizes.length > 0 && (
+                       <div className="mb-3">
+                         <p className="font-label text-[10px] uppercase tracking-wider text-on-surface mb-2">
+                           Talla
+                         </p>
+                         <div className="flex flex-wrap gap-1">
+                           {availableSizes.map((size) => {
+                             const sizeStock = getSizeStock(size);
+                             const isOutOfStock = sizeStock === 0;
+                             return (
+                               <button
+                                 key={size}
+                                 onClick={(e) => {
+                                   e.preventDefault();
+                                   e.stopPropagation();
+                                   if (!isOutOfStock) setSelectedSize(size);
+                                 }}
+                                 disabled={isOutOfStock}
+                                 className={`w-8 h-7 text-[10px] rounded border transition-all relative ${
+                                   selectedSize === size
+                                     ? "bg-primary text-on-primary border-primary"
+                                     : isOutOfStock
+                                     ? "border-outline-variant/30 text-on-surface-variant/50 cursor-not-allowed opacity-50"
+                                     : "border-outline-variant"
+                                 }`}
+                               >
+                                 {size}
+                                 {isOutOfStock && (
+                                   <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-error rounded-full" />
+                                 )}
+                               </button>
+                             );
+                           })}
+                         </div>
+                       </div>
+                     )}
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setQuantity(Math.max(1, quantity - 1));
-                          }}
-                          className="w-6 h-6 rounded border border-outline-variant flex items-center justify-center"
-                        >
-                          <MinusIcon />
-                        </button>
-                        <span className="text-xs font-bold w-4 text-center">{quantity}</span>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setQuantity(Math.min(10, quantity + 1));
-                          }}
-                          className="w-6 h-6 rounded border border-outline-variant flex items-center justify-center"
-                        >
-                          <PlusIcon />
-                        </button>
-                      </div>
+<div className="flex items-center justify-between">
+                       <div className="flex items-center gap-1">
+                         <button
+                           onClick={(e) => {
+                             e.preventDefault();
+                             e.stopPropagation();
+                             setQuantity(Math.max(1, quantity - 1));
+                           }}
+                           disabled={availableStock === 0}
+                           className="w-6 h-6 rounded border border-outline-variant flex items-center justify-center disabled:opacity-50"
+                         >
+                           <MinusIcon />
+                         </button>
+                         <span className="text-xs font-bold w-4 text-center">{quantity}</span>
+                         <button
+                           onClick={(e) => {
+                             e.preventDefault();
+                             e.stopPropagation();
+                             setQuantity(Math.min(availableStock, quantity + 1));
+                           }}
+                           disabled={quantity >= availableStock || availableStock === 0}
+                           className="w-6 h-6 rounded border border-outline-variant flex items-center justify-center disabled:opacity-50"
+                         >
+                           <PlusIcon />
+                         </button>
+                       </div>
 
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleAddToCart();
-                          setShowCartPanel(false);
-                        }}
-                        disabled={availableSizes.length > 0 && !selectedSize}
-                        className="bg-primary text-on-primary font-label text-[10px] uppercase tracking-widest px-2 py-1 rounded disabled:opacity-50"
-                      >
-                        Agregar
-                      </button>
-                    </div>
+                       <button
+                         onClick={(e) => {
+                           e.preventDefault();
+                           e.stopPropagation();
+                           handleAddToCart();
+                           setShowCartPanel(false);
+                         }}
+                         disabled={availableSizes.length > 0 && !selectedSize}
+                         className="bg-primary text-on-primary font-label text-[10px] uppercase tracking-widest px-2 py-1 rounded disabled:opacity-50"
+                       >
+                         Agregar
+                       </button>
+                     </div>
                   </div>
 
                   <div 
