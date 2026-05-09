@@ -7,12 +7,16 @@ export const createProductSchema = z.object({
     price: z.number().min(0, 'Price must be non-negative'),
     images: z.array(z.string().url('Invalid image URL')).max(3, 'Maximum 3 images allowed').optional().default([]),
     description: z.string().min(1, 'Description is required'),
-    stock: z.number().int().min(0, 'Stock must be non-negative').default(0),
+    stock: z.number().int().min(0, 'Stock must be non-negative').optional(),
     published: z.boolean().default(false),
     materials: z.string().optional(),
     sizes: z.array(z.string()).optional(),
     colors: z.array(z.string()).optional(),
     category: z.string().optional(),
+    variants: z.array(z.object({
+      size: z.string(),
+      stock: z.number().int().min(0).default(0),
+    })).optional(),
   }),
 });
 
@@ -29,6 +33,10 @@ export const updateProductSchema = z.object({
     sizes: z.array(z.string()).optional(),
     colors: z.array(z.string()).optional(),
     category: z.string().optional(),
+    variants: z.array(z.object({
+      size: z.string(),
+      stock: z.number().int().min(0).default(0),
+    })).optional(),
   }),
   params: z.object({
     id: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid product ID'),

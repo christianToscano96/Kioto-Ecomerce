@@ -81,11 +81,27 @@ router.post('/items', validate(addToCartSchema), async (req: Request, res: Respo
       return;
     }
 
-    // Check stock availability
-    if (product.stock < quantity) {
-      res.status(400).json({ error: 'Requested quantity exceeds available stock' });
-      return;
-    }
+// Check stock availability - support variants (size-based stock)
+     let availableStock = product.stock;
+     if (product.variants && size && size !== "") {
+       const variant = product.variants.find((v: any) => v.size === size);
+       if (!variant) {
+         res.status(400).json({ error: `Size ${size} not available for this product` });
+         return;
+       }
+       availableStock = variant.stock;
+     }
+
+     // If product has variants but no size selected, reject
+     if (product.variants && product.variants.length > 0 && (!size || size === "")) {
+       res.status(400).json({ error: 'Size is required for this product' });
+       return;
+     }
+
+     if (availableStock < quantity) {
+       res.status(400).json({ error: 'Requested quantity exceeds available stock' });
+       return;
+     }
 
     const cart = await addToCart(
       sessionId,

@@ -38,8 +38,20 @@ export const addToCart = async (
     throw new Error('Product not found or not available');
   }
   
-  if (product.stock < quantity) {
-    throw new Error(`Requested quantity exceeds available stock. Available: ${product.stock}`);
+  // Check stock based on variants or base stock
+  let availableStock = product.stock;
+  if (product.variants && size && size !== "") {
+    const variant = product.variants.find((v: any) => v.size === size);
+    if (!variant) {
+      throw new Error(`Size ${size} not available for this product`);
+    }
+    availableStock = variant.stock;
+  } else if (product.variants && product.variants.length > 0 && (!size || size === "")) {
+    throw new Error('Size is required for this product');
+  }
+  
+  if (availableStock < quantity) {
+    throw new Error(`Requested quantity exceeds available stock. Available: ${availableStock}`);
   }
   
   // Verify price matches current product price
@@ -59,8 +71,8 @@ export const addToCart = async (
   if (existingItemIndex >= 0) {
     // Check if total quantity exceeds stock
     const newQuantity = cart.items[existingItemIndex].quantity + quantity;
-    if (product.stock < newQuantity) {
-      throw new Error(`Total quantity would exceed available stock. Available: ${product.stock}`);
+    if (availableStock < newQuantity) {
+      throw new Error(`Total quantity would exceed available stock. Available: ${availableStock}`);
     }
     cart.items[existingItemIndex].quantity = newQuantity;
   } else {
@@ -68,8 +80,8 @@ export const addToCart = async (
       productId,
       quantity,
       price,
-      size,
-      color,
+      size: size ?? "",
+      color: color ?? "",
     } as any);
   }
   
@@ -107,8 +119,18 @@ export const updateCartItem = async (
     throw new Error('Product not found');
   }
   
-  if (product.stock < quantity) {
-    throw new Error(`Requested quantity exceeds available stock. Available: ${product.stock}`);
+  // Check stock based on variants or base stock
+  const itemSize = (cart.items[itemIndex] as any).size;
+  let availableStock = product.stock;
+  if (product.variants && itemSize && itemSize !== "") {
+    const variant = product.variants.find((v: any) => v.size === itemSize);
+    if (variant) {
+      availableStock = variant.stock;
+    }
+  }
+  
+  if (availableStock < quantity) {
+    throw new Error(`Requested quantity exceeds available stock. Available: ${availableStock}`);
   }
 
   // Verify price hasn't changed

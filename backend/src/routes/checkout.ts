@@ -32,14 +32,37 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
     }
 
     // Populate product details
-    await cart.populate('items.productId', 'name images stock');
+    await cart.populate('items.productId', 'name images stock variants');
 
     // Check stock availability
     for (const item of cart.items) {
       const product = item.productId as any;
-      if (product.stock < item.quantity) {
+      let availableStock = product.stock;
+      
+      // Check variant stock if size is specified
+      if (product.variants && product.variants.length > 0) {
+        // Item must have size if product has variants
+        const itemSize = (item as any).size;
+        if (!itemSize) {
+          res.status(400).json({ 
+            error: `${product.name} requires size selection. Please specify a size.` 
+          });
+          return;
+        }
+        
+        const variant = product.variants.find((v: any) => v.size === itemSize);
+        if (!variant) {
+          res.status(400).json({ 
+            error: `Size ${itemSize} not available for ${product.name}` 
+          });
+          return;
+        }
+        availableStock = variant.stock;
+      }
+      
+      if (availableStock < item.quantity) {
         res.status(400).json({ 
-          error: `Insufficient stock for ${product.name}. Available: ${product.stock}, Required: ${item.quantity}` 
+          error: `Insufficient stock for ${product.name}. Available: ${availableStock}, Required: ${item.quantity}` 
         });
         return;
       }
@@ -66,12 +89,26 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
 
     // Deduct stock from products
     await Promise.all(
-      cart.items.map(item =>
-        Product.findByIdAndUpdate(
+      cart.items.map(async (item) => {
+        const product = await Product.findById(item.productId);
+        const itemSize = (item as any).size;
+        
+        // If product has variants and item has size, deduct from variant
+        if (product?.variants && product.variants.length > 0 && itemSize) {
+          const variantIndex = product.variants.findIndex((v: any) => v.size === itemSize);
+          if (variantIndex >= 0) {
+            product.variants[variantIndex].stock -= item.quantity;
+            await product.save();
+            return;
+          }
+        }
+        
+        // Otherwise deduct from base stock
+        return Product.findByIdAndUpdate(
           item.productId,
           { $inc: { stock: -item.quantity } }
-        )
-      )
+        );
+      })
     );
 
     // Mark cart as converted (customer completed purchase)
@@ -172,16 +209,25 @@ router.post('/webhook', async (req: Request, res: Response) => {
         return;
       }
 
-      // Check stock availability before creating order
-      await cart.populate('items.productId', 'name stock');
-      for (const item of cart.items) {
-        const product = item.productId as any;
-        if (product.stock < item.quantity) {
-          console.error(`Insufficient stock for ${product.name} (ID: ${product._id})`);
-          res.json({ received: true });
-          return;
-        }
-      }
+// Check stock availability before creating order
+       await cart.populate('items.productId', 'name stock variants');
+       for (const item of cart.items) {
+         const product = item.productId as any;
+         let availableStock = product.stock;
+         
+         if (product.variants && product.variants.length > 0 && (item as any).size) {
+           const variant = product.variants.find((v: any) => v.size === (item as any).size);
+           if (variant) {
+             availableStock = variant.stock;
+           }
+         }
+         
+         if (availableStock < item.quantity) {
+           console.error(`Insufficient stock for ${product.name} (ID: ${product._id})`);
+           res.json({ received: true });
+           return;
+         }
+       }
 
       const total = calculateCartTotal(cart.items);
       const subtotal = total; // Use cart total as subtotal
@@ -218,15 +264,27 @@ router.post('/webhook', async (req: Request, res: Response) => {
         shippingDetails,
       });
 
-      // Deduct stock from products
-      await Promise.all(
-        cart.items.map(item =>
-          Product.findByIdAndUpdate(
-            item.productId,
-            { $inc: { stock: -item.quantity } }
-          )
-        )
-      );
+// Deduct stock from products
+       await Promise.all(
+         cart.items.map(async (item) => {
+           const product = await Product.findById(item.productId);
+           const itemSize = (item as any).size;
+           
+           if (product?.variants && product.variants.length > 0 && itemSize) {
+             const variantIndex = product.variants.findIndex((v: any) => v.size === itemSize);
+             if (variantIndex >= 0) {
+               product.variants[variantIndex].stock -= item.quantity;
+               await product.save();
+               return;
+             }
+           }
+           
+           return Product.findByIdAndUpdate(
+             item.productId,
+             { $inc: { stock: -item.quantity } }
+           );
+         })
+       );
 
       // Mark cart as converted
       await markCartAsConverted(sessionId);

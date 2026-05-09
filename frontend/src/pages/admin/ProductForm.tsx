@@ -21,6 +21,17 @@ const XIcon = () => (
 );
 
 const PRESET_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const BOTTOM_SIZES = ['28', '30', '32', '34', '36', '38', '40', '42'];
+const FOOTWEAR_SIZES = ['5', '6', '7', '8', '9', '10', '11', '12'];
+
+type SizeType = 'tops' | 'bottoms' | 'footwear' | 'custom';
+
+const SIZE_PRESETS: Record<SizeType, string[]> = {
+  tops: PRESET_SIZES,
+  bottoms: BOTTOM_SIZES,
+  footwear: FOOTWEAR_SIZES,
+  custom: [],
+};
 
 export function ProductForm() {
   const navigate = useNavigate();
@@ -51,6 +62,9 @@ export function ProductForm() {
     stock: '',
     published: false,
     materials: '',
+    hasSizes: false,
+    sizeType: 'tops' as SizeType,
+    sizeStock: {} as Record<string, number>,
     sizes: [] as string[],
     colors: [] as string[],
     category: '',
@@ -60,21 +74,33 @@ export function ProductForm() {
 
 // Load product data for editing
    useEffect(() => {
-     if (isEdit && product) {
-       setFormData({
-         name: product.name || '',
-         price: product.price?.toString() || '',
-         images: product.images || [],
-         description: product.description || '',
-         stock: product.stock?.toString() || '',
-         published: product.published || false,
-         materials: product.materials || '',
-         sizes: product.sizes || [],
-         colors: product.colors || [],
-         category: typeof product.category === 'object' ? product.category?._id : product.category || '',
-       });
-     }
-   }, [isEdit, product]);
+      if (isEdit && product) {
+        // Check if product has variants (size-based stock) or simple stock
+        const hasSizes = product.variants && product.variants.length > 0;
+        const sizeStock = hasSizes 
+          ? product.variants.reduce((acc: Record<string, number>, v: any) => {
+              acc[v.size] = v.stock || 0;
+              return acc;
+            }, {})
+          : {};
+        
+        setFormData({
+          name: product.name || '',
+          price: product.price?.toString() || '',
+          images: product.images || [],
+          description: product.description || '',
+          stock: product.stock?.toString() || '',
+          published: product.published || false,
+          materials: product.materials || '',
+          hasSizes: hasSizes || false,
+          sizeType: 'tops',
+          sizeStock: sizeStock,
+          sizes: product.sizes || [],
+          colors: product.colors || [],
+          category: typeof product.category === 'object' ? product.category?._id : product.category || '',
+        });
+      }
+    }, [isEdit, product]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -88,7 +114,7 @@ export function ProductForm() {
     if (!formData.description.trim()) {
       newErrors.description = 'La descripción es requerida';
     }
-    if (formData.stock === '' || isNaN(Number(formData.stock)) || Number(formData.stock) < 0) {
+    if (!formData.hasSizes && (formData.stock === '' || isNaN(Number(formData.stock)) || Number(formData.stock) < 0)) {
       newErrors.stock = 'Se requiere una cantidad válida';
     }
 
@@ -106,12 +132,15 @@ export function ProductForm() {
       price: Number(formData.price),
       images: formData.images.filter(Boolean),
       description: formData.description,
-      stock: Number(formData.stock),
+      stock: formData.hasSizes ? 0 : Number(formData.stock),
       published: formData.published,
       materials: formData.materials,
-      sizes: formData.sizes,
+      sizes: formData.hasSizes ? Object.keys(formData.sizeStock) : formData.sizes,
       colors: formData.colors,
       category: formData.category || undefined,
+      variants: formData.hasSizes 
+        ? Object.entries(formData.sizeStock).map(([size, stock]) => ({ size, stock }))
+        : undefined,
     };
 
     try {
@@ -187,15 +216,17 @@ export function ProductForm() {
                   required
                 />
                 
-                <Input
-                  label="Stock"
-                  type="number"
-                  min="0"
-                  value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  error={errors.stock}
-                  required
-                />
+                {!formData.hasSizes && (
+                  <Input
+                    label="Stock"
+                    type="number"
+                    min="0"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                    error={errors.stock}
+                    required
+                  />
+                )}
               </div>
 
               <Input
@@ -255,40 +286,140 @@ export function ProductForm() {
             </div>
           </div>
 
-          {/* Variantes */}
+{/* Variantes */}
           <div className="bg-surface-container-low rounded-xl p-5 border border-outline-variant/40">
             <h2 className="text-base font-serif font-bold text-on-surface mb-4">Variantes</h2>
             
             <div className="space-y-4">
-              {/* Sizes */}
-              <div>
-                <label className="block text-sm font-medium text-on-surface-variant mb-2">
-                  Tallas
+              {/* Has Sizes Checkbox */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="hasSizes"
+                  checked={formData.hasSizes}
+                  onChange={(e) => setFormData({ ...formData, hasSizes: e.target.checked })}
+                  className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
+                />
+                <label htmlFor="hasSizes" className="ml-2 text-sm font-medium text-on-surface">
+                  Este producto tiene tallas
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {PRESET_SIZES.map((size) => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => toggleSize(size)}
-                      className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                        formData.sizes.includes(size)
-                          ? 'bg-primary text-on-primary'
-                          : 'bg-white border border-outline text-on-surface hover:border-primary'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
               </div>
 
-              {/* Colors */}
+              {/* Size Type Selector - Only show if hasSizes */}
+              {formData.hasSizes && (
+                <div>
+                  <label className="block text-sm font-medium text-on-surface-variant mb-2">
+                    Tipo de Tallas
+                  </label>
+                  <select
+                    value={formData.sizeType}
+                    onChange={(e) => setFormData({ ...formData, sizeType: e.target.value as SizeType })}
+                    className="w-full rounded-lg border border-outline bg-white px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="tops">Prenda superior (XS-XXL)</option>
+                    <option value="bottoms">Prenda inferior (28-42)</option>
+                    <option value="footwear">Calzado (5-12 US)</option>
+                    <option value="custom">Personalizado</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Size Stock Table - Only show if hasSizes */}
+              {formData.hasSizes && (
+                <div>
+                  <label className="block text-sm font-medium text-on-surface-variant mb-2">
+                    Stock por Talla
+                  </label>
+                  <div className="border border-outline-variant/40 rounded-lg overflow-hidden">
+                    <table className="w-full">
+                      <thead className="bg-surface-container">
+                        <tr>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-on-surface-variant">Talla</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-on-surface-variant">Stock</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(formData.sizeType === 'custom' 
+                          ? formData.sizes 
+                          : SIZE_PRESETS[formData.sizeType]
+                        ).map((size) => (
+                          <tr key={size} className="border-t border-outline-variant/20">
+                            <td className="px-3 py-2 text-sm font-medium text-on-surface">{size}</td>
+                            <td className="px-3 py-2">
+                              <input
+                                type="number"
+                                min="0"
+                                value={formData.sizeStock[size] || 0}
+                                onChange={(e) => setFormData({
+                                  ...formData,
+                                  sizeStock: {
+                                    ...formData.sizeStock,
+                                    [size]: parseInt(e.target.value) || 0
+                                  }
+                                })}
+                                className="w-full rounded border border-outline px-2 py-1 text-sm"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Custom sizes input */}
+                  {formData.sizeType === 'custom' && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        placeholder="Agregar talla (ej: S, M, L)"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            const size = (e.target as HTMLInputElement).value.trim();
+                            if (size && !formData.sizes.includes(size)) {
+                              setFormData({
+                                ...formData,
+                                sizes: [...formData.sizes, size],
+                                sizeStock: { ...formData.sizeStock, [size]: 0 }
+                              });
+                              (e.target as HTMLInputElement).value = '';
+                            }
+                          }
+                        }}
+                        className="w-full rounded-lg border border-outline bg-white px-3 py-2 text-sm"
+                      />
+                      <p className="text-xs text-on-surface-variant mt-1">Presiona Enter para agregar talla</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Colors - keep existing */}
               <div>
                 <label className="block text-sm font-medium text-on-surface-variant mb-2">
                   Colores
                 </label>
-                
+
+                {/* Predefined color palette */}
+                <div className="mb-3">
+                  <p className="text-xs text-on-surface-variant mb-2">Paleta rápida:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['#000000', '#FFFFFF', '#99452c', '#2e6b4f', '#c27e41', '#6b7280', '#dc2626', '#2563eb', '#7c3aed', '#ca8a04', '#059669', '#db2777'].map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => {
+                          if (!formData.colors.includes(color)) {
+                            setFormData((prev) => ({ ...prev, colors: [...prev.colors, color] }));
+                          }
+                        }}
+                        className="w-8 h-8 rounded-full border-2 border-outline hover:border-primary transition-all shadow-sm"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                </div>
+
                 {/* Color input nativo + manual input */}
                 <div className="flex items-center gap-3 mb-2">
                   <input

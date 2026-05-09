@@ -49,7 +49,7 @@ export function HomePage() {
         {/* Welcome Banner - Feminine Elegant Style */}
         <PageContainer>
           <section className="bg-surface py-16 border-b border-outline-variant/10">
-            <div className="flex flex-col lg:flex-row gap-12 items-center justify-center">
+            <div className="flex flex-col lg:flex-row gap-12 items-center justify-beteween">
               {/* Left Content */}
               <div className="flex-1 max-w-xl">
                 {/* Soft Badge */}

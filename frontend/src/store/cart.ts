@@ -60,27 +60,32 @@ export const useCartStore = create<CartStore>()(
         },
 
 addToCart: async (product: Product, quantity: number, size?: string, color?: string) => {
-           set({ isSyncing: true, error: null });
-           const optimisticItem: CartItem = {
-             productId: product._id,
-             quantity,
-             price: product.price,
-           };
-           get().addItem(optimisticItem);
+             set({ isSyncing: true, error: null });
+             // Use empty string for size/color if not provided (backend requires strings)
+             const sizeValue = size ?? "";
+             const colorValue = color ?? "";
+             const optimisticItem: CartItem = {
+               productId: product._id,
+               quantity,
+               price: product.price,
+               size: sizeValue,
+               color: colorValue,
+             };
+             get().addItem(optimisticItem);
            
-           try {
-             const response = await cartApi.addItem({ productId: product._id, quantity, size, color });
-             await get().fetchCart();
-             toast.success('Added to cart');
-           } catch (error: any) {
-             get().removeItem(product._id);
-             const message = error instanceof Error ? error.message : 'Failed to add item';
-             set({ error: message });
-             toast.error(message);
-           } finally {
-             set({ isSyncing: false });
-           }
-         },
+            try {
+              const response = await cartApi.addItem({ productId: product._id, quantity, size: sizeValue, color: colorValue });
+              await get().fetchCart();
+              toast.success('Added to cart');
+            } catch (error: any) {
+              get().removeItem(product._id);
+              const message = error instanceof Error ? error.message : 'Failed to add item';
+              set({ error: message });
+              toast.error(message);
+            } finally {
+              set({ isSyncing: false });
+            }
+          },
 
       updateCartItem: async (itemId, quantity) => {
           set({ isSyncing: true, error: null });
@@ -138,24 +143,24 @@ addToCart: async (product: Product, quantity: number, size?: string, color?: str
          }
        },
 
-      // Local actions
-      addItem: (item) =>
-        set((state) => {
-          const existingIndex = state.items.findIndex(
-            (i) => i.productId === item.productId
-          );
+// Local actions
+       addItem: (item) =>
+         set((state) => {
+           const existingIndex = state.items.findIndex(
+             (i) => i.productId === item.productId && i.size === item.size && i.color === item.color
+           );
 
-          if (existingIndex >= 0) {
-            const newItems = [...state.items];
-            newItems[existingIndex] = {
-              ...newItems[existingIndex],
-              quantity: newItems[existingIndex].quantity + item.quantity,
-            };
-            return { items: newItems };
-          }
+           if (existingIndex >= 0) {
+             const newItems = [...state.items];
+             newItems[existingIndex] = {
+               ...newItems[existingIndex],
+               quantity: newItems[existingIndex].quantity + item.quantity,
+             };
+             return { items: newItems };
+           }
 
-          return { items: [...state.items, item] };
-        }),
+           return { items: [...state.items, item] };
+         }),
 
       updateItem: (productId, quantity) =>
         set((state) => ({
@@ -164,10 +169,14 @@ addToCart: async (product: Product, quantity: number, size?: string, color?: str
           ),
         })),
 
-      removeItem: (productId) =>
-        set((state) => ({
-          items: state.items.filter((item) => item.productId !== productId),
-        })),
+removeItem: (productId, size?: string, color?: string) =>
+         set((state) => ({
+           items: state.items.filter((item) => 
+             item.productId !== productId || 
+             (size && item.size !== size) || 
+             (color && item.color !== color)
+           ),
+         })),
 
       clear: () => set({ items: [] }),
 

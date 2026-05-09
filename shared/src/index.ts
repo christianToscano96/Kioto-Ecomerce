@@ -20,6 +20,11 @@ export interface Category {
 }
 
 // Product Types
+export interface ProductVariant {
+  size: string;
+  stock: number;
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -28,11 +33,13 @@ export interface Product {
   images: string[];
   description: string;
   stock: number;
+  totalStock?: number; // Virtual: sum of variants stock
   published: boolean;
   materials?: string;
   sizes?: string[];
   colors?: string[];
   category?: string | { _id: string; name: string; slug?: string };
+  variants?: ProductVariant[]; // Size-based stock for products with sizes
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -42,8 +49,9 @@ export interface CreateProductInput {
   price: number;
   images: string[];
   description: string;
-  stock: number;
+  stock?: number;
   published?: boolean;
+  variants?: ProductVariant[];
 }
 
 export interface UpdateProductInput extends Partial<CreateProductInput> {}
