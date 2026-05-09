@@ -78,23 +78,34 @@ export function ProductCardGeneric({
       {/* Image Container */}
       <Link to={`/products/${product._id}`} className="block">
         <div className="aspect-[3/4] bg-surface-container rounded-lg overflow-hidden relative">
-          {images.length > 0 ? (
-            <img
-              src={images[currentImageIndex]}
-              alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          ) : (
+{images.length > 0 ? (
+             <img
+               src={images[currentImageIndex]}
+               alt={product.name}
+               className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${
+                 product.stock === 0 ? "grayscale opacity-70" : ""
+               }`}
+             />
+           ) : (
             <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
               Sin imagen
             </div>
           )}
 
-          {/* Badges */}
-          <ProductBadges isNew stock={product.stock} />
+{/* Badges */}
+           <ProductBadges isNew stock={product.stock} />
 
-          {/* Image Navigation Arrows */}
-          {images.length > 1 && (
+           {/* Sold Out Overlay */}
+           {product.stock === 0 && (
+             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+               <span className="font-label text-xs uppercase tracking-widest text-white bg-error/90 px-3 py-1.5 rounded">
+                 Agotado
+               </span>
+             </div>
+           )}
+
+/* Image Navigation Arrows */
+           {images.length > 1 && product.stock > 0 && (
             <>
               <button
                 onClick={prevImage}
@@ -111,8 +122,8 @@ export function ProductCardGeneric({
             </>
           )}
 
-          {/* Image Indicators */}
-          {images.length > 1 && (
+/* Image Indicators */
+           {images.length > 1 && product.stock > 0 && (
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
               {images.map((_, idx) => (
                 <button
@@ -130,8 +141,8 @@ export function ProductCardGeneric({
             </div>
           )}
 
-          {/* Quick Actions */}
-          {showQuickActions && (
+/* Quick Actions */
+           {showQuickActions && product.stock > 0 && (
             <div className="absolute top-3 left-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <Link
                 to={`/products/${product._id}`}
@@ -166,8 +177,8 @@ export function ProductCardGeneric({
         </div>
       </Link>
 
-      {/* Expanded Cart Panel - Bottom overlay */}
-      {showCartPanel && (
+{/* Expanded Cart Panel - Bottom overlay */}
+       {showCartPanel && product.stock > 0 && (
         <>
           <div className="absolute bottom-14 left-2 right-2 bg-surface-container-low rounded-lg shadow-lg p-3 z-20 mb-5">
             {/* Size Selection */}

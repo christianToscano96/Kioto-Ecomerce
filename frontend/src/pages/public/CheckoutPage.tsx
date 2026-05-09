@@ -84,6 +84,11 @@ export function CheckoutPage() {
     }).catch(() => {});
   }, []);
 
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [paymentMethod] = useState<"transfer">("transfer"); // Only Galio Pay transfer
   const [error, setError] = useState<string | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -106,11 +111,15 @@ export function CheckoutPage() {
   const handleNext = () => {
     if (step === "shipping") setStep("payment");
     else if (step === "payment") setStep("review");
+    // Scroll to top when changing steps
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBack = () => {
     if (step === "payment") setStep("shipping");
     else if (step === "review") setStep("payment");
+    // Scroll to top when changing steps
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

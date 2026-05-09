@@ -65,6 +65,14 @@ export function OrdersList() {
     fetchOrders();
   }, [fetchOrders]);
 
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchOrders]);
+
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
     return orders.filter((order) => {

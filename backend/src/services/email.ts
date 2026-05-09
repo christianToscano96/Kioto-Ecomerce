@@ -115,7 +115,7 @@ const getOrderConfirmationTemplate = (
   <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
     <!-- Header with Logo -->
     <div style="background: linear-gradient(135deg, #1e293b, #334155); padding: 40px 30px; text-align: center;">
-      <img src="https://kioto-ecommerce.vercel.app/logo.png" alt="KIOTO INDUSTRIAL" style="height: 40px; margin-bottom: 16px;">
+      <img src="https://kioto-ecommerce.vercel.app/logo.png" alt="KIOTO INDU" style="height: 40px; margin-bottom: 16px;">
       <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">
         ¡Gracias por tu compra!
       </h1>
@@ -130,7 +130,7 @@ const getOrderConfirmationTemplate = (
         Hola <strong>${customerName}</strong>,
       </p>
       <p style="margin: 0 0 24px; color: #374151; font-size: 16px; line-height: 1.6;">
-        Gracias por elegir KIOTO INDUSTRIAL. Aquí están los detalles de tu pedido:
+        Gracias por elegir KIOTO INDU. Aquí están los detalles de tu pedido:
       </p>
 
       <!-- Order Info -->
@@ -197,7 +197,7 @@ const getOrderConfirmationTemplate = (
     <!-- Footer -->
     <div style="background-color: #1e293b; padding: 20px 30px; text-align: center;">
       <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-        © ${new Date().getFullYear()} KIOTO INDUSTRIAL. Todos los derechos reservados.
+        © ${new Date().getFullYear()} KIOTO INDU. Todos los derechos reservados.
       </p>
     </div>
   </div>
@@ -328,7 +328,7 @@ export const sendAdminNotificationEmail = async (
       ${itemsWithEmail.map((item: any) => `<li>${item.productName} x ${item.quantity} - $${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</li>`).join('')}
     </ul>
     <p><strong>Total:</strong> $${(order.total || 0).toFixed(2)}</p>
-    <p style="color: #6b7280; font-size: 12px;">KIOTO INDUSTRIAL - Notificación automática</p>
+    <p style="color: #6b7280; font-size: 12px;">KIOTO INDU - Notificación automática</p>
   </div>
 </body>
 </html>`;
