@@ -72,7 +72,7 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
     const shipping = calculateShipping(req.body.shippingDetails?.address?.postal_code || '');
     const total = subtotal + shipping;
 
-// FAKE CHECKOUT: Create order directly without Stripe (no transactions for standalone MongoDB)
+// Fake checkout: Create order directly without Stripe (no transactions for standalone MongoDB)
     const order = await Order.create({
       sessionId,
       items: cart.items.map(item => ({
@@ -87,29 +87,45 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
       shippingDetails: req.body.shippingDetails,
     });
 
-    // Deduct stock from products
-    await Promise.all(
-      cart.items.map(async (item) => {
-        const product = await Product.findById(item.productId);
-        const itemSize = (item as any).size;
-        
-        // If product has variants and item has size, deduct from variant
-        if (product?.variants && product.variants.length > 0 && itemSize) {
-          const variantIndex = product.variants.findIndex((v: any) => v.size === itemSize);
-          if (variantIndex >= 0) {
-            product.variants[variantIndex].stock -= item.quantity;
-            await product.save();
-            return;
-          }
-        }
-        
-        // Otherwise deduct from base stock
-        return Product.findByIdAndUpdate(
-          item.productId,
-          { $inc: { stock: -item.quantity } }
-        );
-      })
-    );
+    // Create notification for admin
+    const { notifyNewOrder } = await import('../utils/notifications');
+    notifyNewOrder(order._id.toString()).catch(console.error);
+
+// Deduct stock from products
+     await Promise.all(
+       cart.items.map(async (item) => {
+         const product = await Product.findById(item.productId);
+         const itemSize = (item as any).size;
+         
+         // If product has variants and item has size, deduct from variant
+         if (product?.variants && product.variants.length > 0 && itemSize) {
+           const variantIndex = product.variants.findIndex((v: any) => v.size === itemSize);
+           if (variantIndex >= 0) {
+             product.variants[variantIndex].stock -= item.quantity;
+             // Check for low stock notification
+             const newStock = product.variants[variantIndex].stock;
+             if (newStock <= 5) {
+               const { notifyLowStock } = await import('../utils/notifications');
+               notifyLowStock(product._id.toString(), newStock).catch(console.error);
+             }
+             await product.save();
+             return;
+           }
+         }
+         
+         // Otherwise deduct from base stock
+         const updated = await Product.findByIdAndUpdate(
+           item.productId,
+           { $inc: { stock: -item.quantity } },
+           { new: true }
+         );
+         // Check for low stock on base product
+         if (updated && updated.stock <= 5) {
+           const { notifyLowStock } = await import('../utils/notifications');
+           notifyLowStock(item.productId.toString(), updated.stock).catch(console.error);
+         }
+       })
+     );
 
     // Mark cart as converted (customer completed purchase)
     await markCartAsConverted(sessionId);

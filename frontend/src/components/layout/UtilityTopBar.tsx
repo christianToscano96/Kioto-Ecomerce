@@ -1,8 +1,18 @@
+import { NotificationBell } from "@/components/ui/NotificationBell";
+import { initNotifications, useNotificationsSocket } from "@/store/notifications";
+import { useEffect } from "react";
+
+// Init notifications on module load
+initNotifications();
+
 interface UtilityTopBarProps {
   className?: string;
 }
 
 export function UtilityTopBar({ className }: UtilityTopBarProps) {
+  // Initialize Socket.IO connection for real-time notifications
+  useNotificationsSocket();
+
   return (
     <header className={`fixed top-0 right-0 left-64 h-16 bg-surface-container-low border-b border-outline-variant/30 z-40 ${className || ''}`}>
       <div className="flex items-center justify-between h-full px-6">
@@ -21,10 +31,7 @@ export function UtilityTopBar({ className }: UtilityTopBarProps) {
         {/* Quick Actions */}
         <div className="flex items-center gap-2">
           {/* Notifications */}
-          <button className="relative p-2 rounded-lg hover:bg-surface-container transition-colors">
-            <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
-            <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
-          </button>
+          <NotificationBell />
 
           {/* Chat */}
           <button className="p-2 rounded-lg hover:bg-surface-container transition-colors">
