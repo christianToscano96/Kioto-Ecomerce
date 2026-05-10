@@ -10,6 +10,10 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
   actions?: (row: T) => ReactNode;
+  isLoading?: boolean;
+  onEdit?: (row: T) => void;
+  onDelete?: (row: T) => void;
+  emptyMessage?: string;
 }
 
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
@@ -41,7 +45,31 @@ export function DataTable<T extends Record<string, any>>({
   columns,
   data,
   actions,
+  isLoading,
+  onEdit,
+  onDelete,
+  emptyMessage = "No data available",
 }: DataTableProps<T>) {
+  if (isLoading) {
+    return (
+      <div className="overflow-x-auto">
+        <div className="min-h-[200px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="overflow-x-auto">
+        <div className="min-h-[200px] flex items-center justify-center text-on-surface-variant">
+          {emptyMessage}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse">
@@ -55,9 +83,9 @@ export function DataTable<T extends Record<string, any>>({
                 {column.label}
               </th>
             ))}
-            {actions && (
+            {(actions || onEdit || onDelete) && (
               <th className="py-4 text-[10px] uppercase tracking-widest font-semibold text-on-surface-variant">
-                Actions
+                Acciones
               </th>
             )}
           </tr>
@@ -75,7 +103,30 @@ export function DataTable<T extends Record<string, any>>({
                     : column.key ? String(row[column.key] ?? '') : null}
                 </td>
               ))}
-              {actions && <td className="py-6">{actions(row)}</td>}
+              {(actions || onEdit || onDelete) && (
+                <td className="py-6">
+                  {actions ? actions(row) : (
+                    <div className="flex gap-2">
+                      {onEdit && (
+                        <button
+                          onClick={() => onEdit(row)}
+                          className="text-primary hover:underline text-xs"
+                        >
+                          Editar
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          onClick={() => onDelete(row)}
+                          className="text-terracota-600 hover:underline text-xs"
+                        >
+                          Eliminar
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

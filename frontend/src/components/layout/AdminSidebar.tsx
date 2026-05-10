@@ -6,6 +6,7 @@ const navItems = [
   { to: "/admin", label: "Tablero", icon: "fa-tachometer-alt", exact: true },
   { to: "/admin/products", label: "Productos", icon: "fa-box" },
   { to: "/admin/categories", label: "Categorías", icon: "fa-tags" },
+  { to: "/admin/combos", label: "Combos", icon: "fa-layer-group" },
   { to: "/admin/orders", label: "Pedidos", icon: "fa-shopping-bag" },
   { to: "/admin/settings", label: "Configuración", icon: "fa-cog" },
 ];

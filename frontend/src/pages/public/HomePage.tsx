@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useProductsStore } from "@/store/products";
 import { useCategoriesStore } from "@/store/categories";
 import { useCartStore } from "@/store/cart";
+import { useCombosStore } from "@/store/combos";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -19,11 +20,13 @@ export function HomePage() {
   const { products, isLoading, fetchProducts } = useProductsStore();
   const { categories, fetchCategories } = useCategoriesStore();
   const addToCart = useCartStore((state) => state.addToCart);
+  const { combos, fetchPublicCombos } = useCombosStore();
 
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-  }, [fetchProducts, fetchCategories]);
+    fetchPublicCombos();
+  }, [fetchProducts, fetchCategories, fetchPublicCombos]);
 
   const newProducts = products?.slice(0, 10) || [];
   const saleProducts = products?.filter((p) => p.price < 50).slice(0, 6) || [];
@@ -187,7 +190,7 @@ export function HomePage() {
               </div>
             </section>
           )}
-
+          
           {/* New Arrivals Grid */}
           <section className="py-12 relative animate-on-scroll">
             <div className="flex items-center justify-between mb-6">
@@ -217,6 +220,93 @@ export function HomePage() {
               ))}
             </div>
           </section>
+
+    {/* Combos Section */}
+          {combos.length > 0 && (
+            <section className="py-12 bg-gradient-to-r from-primary-container/10 to-primary/5 animate-on-scroll">
+              <PageContainer>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="font-serif text-2xl font-bold text-on-surface">
+                      Combos Especiales
+                    </h2>
+                    <p className="text-sm text-on-surface-variant mt-1">
+                      Ahorrá con nuestras combinaciones
+                    </p>
+                  </div>
+                  <Link
+                    to="/combos"
+                    className="text-primary font-label uppercase tracking-wider text-xs hover:underline"
+                  >
+                    Ver todos
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
+                  {combos.slice(0, 3).map((combo) => (
+                    <Link
+                      key={combo._id}
+                      to={`/combos/${combo._id}`}
+                      className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-outline-variant/20"
+                    >
+                      <div className="relative aspect-[4/3] overflow-hidden">
+                        {combo.products?.[0] && typeof combo.products[0] !== 'string' && combo.products[0].images?.[0] ? (
+                          <img
+                            src={combo.products[0].images[0]}
+                            alt={combo.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-surface-container flex items-center justify-center">
+                            <span className="material-symbols-outlined text-4xl text-on-surface-variant">
+                              inventory_2
+                            </span>
+                          </div>
+                        )}
+                        <div className="absolute top-3 right-3 bg-primary text-on-primary text-xs font-bold px-2 py-1 rounded-full">
+                          -{combo.discount}%
+                        </div>
+                      </div>
+                      
+                      <div className="p-4">
+                        <h3 className="font-serif font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">
+                          {combo.name}
+                        </h3>
+                        <p className="text-xs text-on-surface-variant mb-3 line-clamp-2">
+                          {combo.description}
+                        </p>
+                        
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-primary">
+                            ${combo.comboPrice.toLocaleString()}
+                          </span>
+                          <span className="text-xs line-through text-on-surface-variant">
+                            ${combo.originalPrice.toLocaleString()}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1 mt-2">
+                          {combo.products?.slice(0, 4).map((p, i) => {
+                            const product = typeof p === 'string' ? null : p;
+                            return product?.images?.[0] ? (
+                              <div key={i} className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow">
+                                <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                              </div>
+                            ) : null;
+                          })}
+                          {combo.products && combo.products.length > 4 && (
+                            <span className="text-xs text-on-surface-variant">
+                              +{combo.products.length - 4}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </PageContainer>
+            </section>
+          )}
 
           {/* Promotional Banner */}
           <section className="py-8 animate-on-scroll">

@@ -157,11 +157,35 @@ export const settingsApi = {
     api.put<{ settings: Settings }>('/settings', { settings }),
 };
 
+// Combos API
+export const combosApi = {
+  list: () =>
+    api.get<{ combos: unknown[] }>('/public/combos').then(res => res.data.combos),
+
+  get: (id: string) =>
+    api.get<{ combo: unknown }>(`/public/combos/${id}`).then(res => res.data.combo),
+
+  listAdmin: () =>
+    api.get<{ combos: unknown[] }>('/combos').then(res => res.data.combos),
+
+  getAdmin: (id: string) =>
+    api.get<{ combo: unknown }>(`/combos/${id}`).then(res => res.data.combo),
+
+  create: (data: Partial<unknown>) =>
+    api.post<{ combo: unknown }>('/combos', data).then(res => res.data.combo),
+
+  update: (id: string, data: Partial<unknown>) =>
+    api.put<{ combo: unknown }>(`/combos/${id}`, data).then(res => res.data.combo),
+
+  delete: (id: string) =>
+    api.delete(`/combos/${id}`),
+};
+
 // Profile API
 export const profileApi = {
   update: (data: { name?: string; email?: string }) =>
     api.put<{ user: User }>('/auth/profile', data),
-  
+
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put('/auth/password', data),
 };

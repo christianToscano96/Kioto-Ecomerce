@@ -81,6 +81,24 @@ export interface Cart {
   createdAt?: Date;
 }
 
+// Combo Types
+export interface Combo {
+  _id: string;
+  name: string;
+  description?: string;
+  products: Array<{ _id: string; name: string; price: number; images: string[] } | string>;
+  categories: Array<{ _id: string; name: string } | string>;
+  discount: number;
+  originalPrice: number;
+  comboPrice: number;
+  image?: string;
+  active: boolean;
+  startDate?: Date;
+  endDate?: Date;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
 // Order Types
 export type OrderStatus = 'pending' | 'paid' | 'failed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 

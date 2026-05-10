@@ -12,12 +12,15 @@ import { SettingsPage } from '@/pages/admin/SettingsPage';
 import { HomePage } from '@/pages/public/HomePage';
 import { ProductsListPage } from '@/pages/public/ProductsListPage';
 import { ProductDetailPage } from '@/pages/public/ProductDetailPage';
+import { CombosPage } from '@/pages/public/CombosPage';
+import { ComboDetailPage } from '@/pages/public/ComboDetailPage';
 import { CartPage } from '@/pages/public/CartPage';
 import { CheckoutPage } from '@/pages/public/CheckoutPage';
 import { CheckoutSuccessPage } from '@/pages/public/CheckoutSuccessPage';
 import { CheckoutCancelPage } from '@/pages/public/CheckoutCancelPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { DashboardOverview } from '@/pages/admin/DashboardOverview';
+import { CombosPage as AdminCombosPage } from '@/pages/admin/CombosPage';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ToastContainer } from '@/components/ui/Toast';
 
@@ -30,6 +33,8 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/products" element={<ProductsListPage />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
+            <Route path="/combos" element={<CombosPage />} />
+            <Route path="/combos/:id" element={<ComboDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
@@ -46,6 +51,7 @@ function App() {
               <Route path="categories/:id/edit" element={<CategoryForm />} />
               <Route path="orders" element={<OrdersList />} />
               <Route path="orders/:id" element={<OrderDetailsPage />} />
+              <Route path="combos" element={<AdminCombosPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
 
