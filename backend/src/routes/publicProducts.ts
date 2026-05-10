@@ -109,4 +109,16 @@ router.get('/products/slug/:slug', async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/public/colors - Get all unique colors from published products
+router.get('/colors', async (_req: Request, res: Response) => {
+  try {
+    const colors = await Product.distinct<string>('colors', { published: true });
+    const filteredColors = colors.filter((c): c is string => typeof c === 'string' && c.length > 0);
+    res.status(200).json({ colors: filteredColors });
+  } catch (error) {
+    console.error('Error fetching colors:', error);
+    res.status(500).json({ error: 'Failed to fetch colors' });
+  }
+});
+
 export default router;

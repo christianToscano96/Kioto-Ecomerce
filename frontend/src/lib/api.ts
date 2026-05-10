@@ -54,6 +54,11 @@ export const productsApi = {
     const res = await api.get<{ products: Product[] }>('/public/products', { params: { search: query } });
     return res.data.products || [];
   },
+
+  getColors: async () => {
+    const res = await api.get<{ colors: string[] }>('/public/colors');
+    return res.data.colors || [];
+  },
 };
 
 // Admin Products API

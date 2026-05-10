@@ -1,31 +1,24 @@
-import { useState } from 'react';
-
 interface SidebarFiltersProps {
   categories?: Array<{ name: string; count: number; active?: boolean }>;
   colors?: string[];
   sizes?: string[];
   selectedSize?: string;
+  selectedColor?: string | null;
   onSizeChange?: (size: string) => void;
+  onColorChange?: (color: string | null) => void;
   onCategoryClick?: (categoryName: string) => void;
 }
 
-const earthToneColors = [
-  '#99452c', // primary (Terracota)
-  '#735a3a', // tertiary (Brown)
-  '#dbc1ba', // outline-variant (Light Brown)
-  '#1c1c12', // on-background (Dark Brown)
-  '#fdfae9', // background (Cream)
-];
-
 export function SidebarFilters({
   categories = [],
-  colors = earthToneColors,
+  colors = [],
   sizes = ['XS', 'S', 'M', 'L', 'XL'],
   selectedSize = 'S',
+  selectedColor = null,
   onSizeChange,
+  onColorChange,
   onCategoryClick,
 }: SidebarFiltersProps) {
-  const [activeColor, setActiveColor] = useState<string | null>(null);
 
   return (
     <aside className="w-full lg:w-64 flex-shrink-0">
@@ -54,24 +47,27 @@ export function SidebarFilters({
         )}
 
         {/* Color Filter */}
-        <div className="border-t border-dashed border-outline-variant/40 pt-10">
-          <h3 className="font-serif text-xl mb-6 text-on-surface italic">Tonos Terrosos</h3>
-          <div className="grid grid-cols-5 gap-3">
-            {colors.map((color, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveColor(color)}
-                className={`w-8 h-8 rounded-full transition-transform ${
-                  activeColor === color
-                    ? 'ring-2 ring-offset-2 ring-primary border border-white/20'
-                    : 'border border-white/20 hover:scale-110'
-                }`}
-                style={{ backgroundColor: color }}
-                aria-label={`Filtrar por color ${index + 1}`}
-              />
-            ))}
+        {colors.length > 0 && (
+          <div className="border-t border-dashed border-outline-variant/40 pt-10">
+            <h3 className="font-serif text-xl mb-6 text-on-surface italic">Colores</h3>
+            <div className="grid grid-cols-5 gap-3">
+              {colors.map((color, index) => (
+                <button
+                  key={index}
+                  onClick={() => onColorChange?.(selectedColor === color ? null : color)}
+                  className={`w-8 h-8 rounded-full transition-transform ${
+                    selectedColor === color
+                      ? 'ring-2 ring-offset-2 ring-primary border border-white/20'
+                      : 'border border-white/20 hover:scale-110'
+                  }`}
+                  style={{ backgroundColor: color }}
+                  aria-label={`Filtrar por color ${index + 1}`}
+                  title={color}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Size Filter */}
         <div className="border-t border-dashed border-outline-variant/40 pt-10">

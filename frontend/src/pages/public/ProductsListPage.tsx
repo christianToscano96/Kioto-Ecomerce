@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useProductsStore } from "@/store/products";
 import { useCategoriesStore } from "@/store/categories";
+import { productsApi } from "@/lib/api";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCardGeneric } from "@/components/ui/ProductCardGeneric";
@@ -49,16 +50,24 @@ export function ProductsListPage() {
     initialCategory || null,
   );
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 60000]);
   const [visibleCount, setVisibleCount] = useState(12);
+  const [availableColors, setAvailableColors] = useState<string[]>([]);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { products, isLoading, error } = useProductsStore();
   const fetchProducts = useProductsStore.getState().fetchProducts;
   const addToCart = useCartStore.getState().addToCart;
   const { categories: allCategories, fetchCategories } = useCategoriesStore();
   const { addToast } = useToast();
+
+  // Fetch categories and colors on mount
+  useEffect(() => {
+    fetchCategories();
+    productsApi.getColors().then(setAvailableColors).catch(console.error);
+  }, [fetchCategories]);
 
   // Fetch categories on mount
   useEffect(() => {
@@ -149,6 +158,11 @@ export function ProductsListPage() {
       filtered = filtered.filter((p) => p.sizes?.includes(selectedSize));
     }
 
+    // Color filter
+    if (selectedColor) {
+      filtered = filtered.filter((p) => p.colors?.includes(selectedColor));
+    }
+
     // Price filter
     filtered = filtered.filter(
       (p) => p.price >= priceRange[0] && p.price <= priceRange[1],
@@ -179,6 +193,7 @@ export function ProductsListPage() {
     selectedCategory,
     searchQuery,
     selectedSize,
+    selectedColor,
     sortBy,
     priceRange,
   ]);
@@ -236,16 +251,21 @@ export function ProductsListPage() {
     ...(selectedSize
       ? [{ id: "size", label: "Talla", value: selectedSize }]
       : []),
+    ...(selectedColor
+      ? [{ id: "color", label: "Color", value: selectedColor }]
+      : []),
   ];
 
   const removeFilter = (id: string) => {
     if (id === "category") setSelectedCategory(null);
     if (id === "size") setSelectedSize(null);
+    if (id === "color") setSelectedColor(null);
   };
 
   const clearAllFilters = () => {
     setSelectedCategory(null);
     setSelectedSize(null);
+    setSelectedColor(null);
     setSearchQuery("");
   };
 
@@ -303,14 +323,17 @@ export function ProductsListPage() {
         />
 
         <div className="flex flex-col lg:flex-row gap-16">
-          {/* Filtros Laterales */}
-          <SidebarFilters
-            categories={categories}
-            sizes={["XS", "S", "M", "L", "XL"]}
-            selectedSize={selectedSize || "S"}
-            onSizeChange={setSelectedSize}
-            onCategoryClick={handleCategoryClick}
-          />
+{/* Filtros Laterales */}
+           <SidebarFilters
+             categories={categories}
+             colors={availableColors}
+             sizes={["XS", "S", "M", "L", "XL"]}
+             selectedSize={selectedSize || "S"}
+             selectedColor={selectedColor}
+             onSizeChange={setSelectedSize}
+             onColorChange={setSelectedColor}
+             onCategoryClick={handleCategoryClick}
+           />
 
           <div className="lg:hidden mt-8">
             <PriceRangeFilter
