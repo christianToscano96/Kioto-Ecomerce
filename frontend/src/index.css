@@ -115,3 +115,29 @@ body {
 .animate-on-scroll.animate-in > *:nth-child(8) { transition-delay: 525ms; }
 .animate-on-scroll.animate-in > *:nth-child(9) { transition-delay: 600ms; }
 .animate-on-scroll.animate-in > *:nth-child(10) { transition-delay: 675ms; }
+
+/* Slide in animation for toasts */
+@-webkit-keyframes slide-in-from-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-in-from-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-in.slide-in-from-right {
+  animation: slide-in-from-right 0.3s ease-out;
+}
+
+/* Pulse animation for notification badge */
+@keyframes pulse-badge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.animate-pulse {
+  animation: pulse-badge 1s ease-in-out;
+}

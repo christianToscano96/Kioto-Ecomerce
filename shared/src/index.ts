@@ -139,6 +139,25 @@ export interface AuthResponse {
   token: string;
 }
 
+// Notification Types
+export type NotificationType = 'order' | 'low_stock' | 'out_of_stock' | 'return';
+
+export interface Notification {
+  _id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  orderId?: string;
+  productId?: string;
+  productSnapshot?: {
+    name: string;
+    stock: number;
+  };
+  read: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Settings Types
 export interface Settings {
   profile?: {

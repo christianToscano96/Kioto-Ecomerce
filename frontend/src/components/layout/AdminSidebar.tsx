@@ -22,12 +22,16 @@ export function AdminSidebar() {
     <aside className="w-64 bg-background border-r border-outline/40 min-h-screen flex flex-col">
       {/* Brand Header */}
       <div className="p-6 border-b border-outline/40">
-        <h1 className="text-2xl font-serif font-bold text-on-surface tracking-tight">
-          Kioto
-        </h1>
-        <p className="text-xs text-on-surface-variant/70 font-medium tracking-widest uppercase mt-1">
-          Panel de Control
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-serif font-bold text-on-surface tracking-tight">
+              Kioto
+            </h1>
+            <p className="text-xs text-on-surface-variant/70 font-medium tracking-widest uppercase mt-1">
+              Panel de Control
+            </p>
+          </div>
+        </div>
       </div>
       
       {/* Navigation */}

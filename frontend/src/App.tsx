@@ -19,13 +19,12 @@ import { CheckoutCancelPage } from '@/pages/public/CheckoutCancelPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { DashboardOverview } from '@/pages/admin/DashboardOverview';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { ToastProvider } from '@/components/ui/Toast';
+import { ToastContainer } from '@/components/ui/Toast';
 
 function App() {
   return (
-    <ToastProvider>
-      <div className="min-h-screen bg-background">
-        <ErrorBoundary>
+    <div className="min-h-screen bg-background">
+      <ErrorBoundary>
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
@@ -58,9 +57,9 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </ErrorBoundary>
+        <ToastContainer />
       </div>
-    </ToastProvider>
-  );
-}
+    );
+  }
 
 export default App;

@@ -41,13 +41,24 @@ router.get('/', async (req, res) => {
 // Get single order
 router.get('/:id', async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id)
-      .populate('items.productId', 'name');
+    // Try to find by full ID or partial ID (last 8 chars)
+    let order;
+    if (req.params.id.length <= 8) {
+      // Search by partial ID
+      const orders = await Order.find({});
+      order = orders.find(o => o._id.toString().endsWith(req.params.id));
+    } else {
+      order = await Order.findById(req.params.id)
+        .populate('items.productId', 'name price')
+        .lean();
+    }
+    
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
     res.json(order);
   } catch (error) {
+    console.error('Order fetch error:', error);
     res.status(500).json({ error: 'Failed to fetch order' });
   }
 });
