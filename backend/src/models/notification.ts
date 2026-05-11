@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
 export type NotificationType = 'order' | 'low_stock' | 'out_of_stock' | 'return';
 
@@ -6,8 +6,8 @@ export interface INotification extends Document {
   type: NotificationType;
   title: string;
   message: string;
-  orderId?: string;
-  productId?: string;
+  orderId?: Types.ObjectId;
+  productId?: Types.ObjectId;
   productSnapshot?: {
     name: string;
     stock: number;

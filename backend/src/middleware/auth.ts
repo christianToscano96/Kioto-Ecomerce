@@ -5,6 +5,9 @@ import User, { IUser } from '../models/User';
 // Extend Express Request to include user
 export interface AuthenticatedRequest extends Request {
   user?: IUser;
+  cookies: {
+    token?: string;
+  };
 }
 
 // HTTP-only cookie options
