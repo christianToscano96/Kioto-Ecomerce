@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageContainer } from "@/components/ui/Container";
+import { ComboStack } from "@/components/ui/ComboStack";
 import { Button } from "@/components/ui/Button";
 import { toast } from "sonner";
 
