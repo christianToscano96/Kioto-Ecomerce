@@ -3,11 +3,13 @@ import { useEffect } from "react";
 import { useProductsStore } from "@/store/products";
 import { useCategoriesStore } from "@/store/categories";
 import { useCartStore } from "@/store/cart";
+import { useCombosStore } from "@/store/combos";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageContainer } from "@/components/ui/Container";
 import { ProductCardGeneric } from "@/components/ui/ProductCardGeneric";
+import { ComboCard } from "@/components/ui/ComboCard";
 import comprandoVideo from '../../../assets/comprando.mp4';
 import fleteVideo from '../../../assets/flete.mp4';
 import kiotoVideo from '../../../assets/kioto.mp4';
@@ -19,11 +21,13 @@ export function HomePage() {
   const { products, isLoading, fetchProducts } = useProductsStore();
   const { categories, fetchCategories } = useCategoriesStore();
   const addToCart = useCartStore((state) => state.addToCart);
+  const { combos, fetchPublicCombos } = useCombosStore();
 
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-  }, [fetchProducts, fetchCategories]);
+    fetchPublicCombos();
+  }, [fetchProducts, fetchCategories, fetchPublicCombos]);
 
   const newProducts = products?.slice(0, 10) || [];
   const saleProducts = products?.filter((p) => p.price < 50).slice(0, 6) || [];
@@ -94,21 +98,7 @@ export function HomePage() {
               </div>
             </div>
           </section>
-  {/* Flash Sale Banner - Shein Style */}
-        <section className="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 overflow-hidden">
-          <PageContainer>
-            <div className="flex items-center justify-center gap-4 text-sm font-medium">
-              <div className="flex items-center gap-2 animate-pulse">
-                <FlashIcon />
-                <span>Oferta Flash: 50% OFF en productos seleccionados</span>
-              </div>
-              <span className="hidden sm:inline">|</span>
-              <span>Envío gratis en pedidos +$60.000</span>
-              <span className="hidden sm:inline">|</span>
-              <span>Promos Imperdibles</span>
-            </div>
-          </PageContainer>
-        </section>
+
           {/* Categories Section */}
           <section className="bg-surface py-10 border-b border-outline-variant/10 animate-on-scroll">
             <div className="text-center mb-8">
@@ -187,7 +177,7 @@ export function HomePage() {
               </div>
             </section>
           )}
-
+          
           {/* New Arrivals Grid */}
           <section className="py-12 relative animate-on-scroll">
             <div className="flex items-center justify-between mb-6">
@@ -217,6 +207,36 @@ export function HomePage() {
               ))}
             </div>
           </section>
+
+{/* Combos Section */}
+           {combos.length > 0 && (
+             <section className="py-12 bg-gradient-to-r from-primary-container/10 to-primary/5 animate-on-scroll">
+               <PageContainer>
+                 <div className="flex items-center justify-between mb-6">
+                   <div>
+                     <h2 className="font-serif text-2xl font-bold text-on-surface">
+                       Combos Especiales
+                     </h2>
+                     <p className="text-sm text-on-surface-variant mt-1">
+                       Ahorrá con nuestras combinaciones
+                     </p>
+                   </div>
+                   <Link
+                     to="/combos"
+                     className="text-primary font-label uppercase tracking-wider text-xs hover:underline"
+                   >
+                     Ver todos
+                   </Link>
+                 </div>
+
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+                   {combos.slice(0, 3).map((combo) => (
+                     <ComboCard key={combo._id} combo={combo} size="sm" />
+                   ))}
+                 </div>
+               </PageContainer>
+             </section>
+           )}
 
           {/* Promotional Banner */}
           <section className="py-8 animate-on-scroll">
@@ -251,7 +271,21 @@ export function HomePage() {
               </div>
             </div>
           </section>
-
+  {/* Flash Sale Banner - Shein Style */}
+        <section className="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 overflow-hidden">
+          <PageContainer>
+            <div className="flex items-center justify-center gap-4 text-sm font-medium">
+              <div className="flex items-center gap-2 animate-pulse">
+                <FlashIcon />
+                <span>Oferta Flash: 50% OFF en productos seleccionados</span>
+              </div>
+              <span className="hidden sm:inline">|</span>
+              <span>Envío gratis en pedidos +$60.000</span>
+              <span className="hidden sm:inline">|</span>
+              <span>Promos Imperdibles</span>
+            </div>
+          </PageContainer>
+        </section>
           {/* Shipping Banner - Todo el País */}
           <section className="py-8 animate-on-scroll">
             <div className="flex flex-col lg:flex-row gap-4">

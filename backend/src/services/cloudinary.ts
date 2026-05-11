@@ -18,7 +18,7 @@ export interface UploadResult {
  */
 export const uploadToCloudinary = async (
   buffer: Buffer,
-  folder: 'products' | 'categories' = 'products'
+  folder: 'products' | 'categories' | 'combos' = 'products'
 ): Promise<UploadResult> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
