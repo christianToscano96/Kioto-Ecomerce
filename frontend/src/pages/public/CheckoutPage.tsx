@@ -17,6 +17,7 @@ import {
 } from "@/components/checkout/CheckoutFormComponents";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { api } from "@/lib/api";
+import { showToast } from "@/components/ui/Toast";
 
 const LoaderIcon = () => (
   <svg
@@ -147,6 +148,7 @@ export function CheckoutPage() {
 
       // GalioPay checkout - redirect to payment page
       if (data.success) {
+        showToast({ type: 'success', title: 'Orden creada correctamente' });
         if (data.paymentUrl) {
           setSubmitStatus('redirecting');
           // Redirigir a GalioPay
@@ -157,7 +159,9 @@ export function CheckoutPage() {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ocurrió un error");
+      const errorMsg = err instanceof Error ? err.message : "Ocurrió un error";
+      setError(errorMsg);
+      showToast({ type: 'error', title: errorMsg });
       setSubmitStatus('idle');
     }
   };

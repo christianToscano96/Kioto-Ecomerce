@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Input } from "@/components/ui/Input";
 import { useProductsStore } from "@/store/products";
+import { showToast } from "@/components/ui/Toast";
 
 const LoaderIcon = () => (
   <svg
@@ -212,10 +213,15 @@ export function ProductsList() {
         `¿Estás seguro de que deseas eliminar ${selectedProducts.length} productos?`,
       )
     ) {
-      for (const id of selectedProducts) {
-        await deleteProduct(id);
+      try {
+        for (const id of selectedProducts) {
+          await deleteProduct(id);
+        }
+        showToast({ type: 'success', title: `${selectedProducts.length} productos eliminados` });
+        setSelectedProducts([]);
+      } catch (error) {
+        showToast({ type: 'error', title: 'Error al eliminar productos' });
       }
-      setSelectedProducts([]);
     }
   };
 
@@ -226,7 +232,12 @@ export function ProductsList() {
         `¿Estás seguro de que deseas eliminar "${product?.name}"?`,
       )
     ) {
+try {
       await deleteProduct(id);
+      showToast({ type: 'success', title: 'Producto eliminado' });
+    } catch (error) {
+      showToast({ type: 'error', title: 'Error al eliminar producto' });
+    }
     }
   };
 

@@ -94,21 +94,7 @@ export function HomePage() {
               </div>
             </div>
           </section>
-  {/* Flash Sale Banner - Shein Style */}
-        <section className="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 overflow-hidden">
-          <PageContainer>
-            <div className="flex items-center justify-center gap-4 text-sm font-medium">
-              <div className="flex items-center gap-2 animate-pulse">
-                <FlashIcon />
-                <span>Oferta Flash: 50% OFF en productos seleccionados</span>
-              </div>
-              <span className="hidden sm:inline">|</span>
-              <span>Envío gratis en pedidos +$60.000</span>
-              <span className="hidden sm:inline">|</span>
-              <span>Promos Imperdibles</span>
-            </div>
-          </PageContainer>
-        </section>
+  
           {/* Categories Section */}
           <section className="bg-surface py-10 border-b border-outline-variant/10 animate-on-scroll">
             <div className="text-center mb-8">
@@ -251,7 +237,21 @@ export function HomePage() {
               </div>
             </div>
           </section>
-
+        {/* Flash Sale Banner - Shein Style */}
+        <section className="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 overflow-hidden">
+          <PageContainer>
+            <div className="flex items-center justify-center gap-4 text-sm font-medium">
+              <div className="flex items-center gap-2 animate-pulse">
+                <FlashIcon />
+                <span>Oferta Flash: 50% OFF en productos seleccionados</span>
+              </div>
+              <span className="hidden sm:inline">|</span>
+              <span>Envío gratis en pedidos +$60.000</span>
+              <span className="hidden sm:inline">|</span>
+              <span>Promos Imperdibles</span>
+            </div>
+          </PageContainer>
+        </section>
           {/* Shipping Banner - Todo el País */}
           <section className="py-8 animate-on-scroll">
             <div className="flex flex-col lg:flex-row gap-4">

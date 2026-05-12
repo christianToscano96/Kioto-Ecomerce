@@ -13,6 +13,7 @@ import { Header } from "@/components/layout/Header";
 import { CartItemCard } from "@/components/ui/CartItemCard";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { showToast } from "@/components/ui/Toast";
 
 const LoaderIcon = () => (
   <svg
@@ -205,10 +206,11 @@ return (
                 </Link>
 
                 <div className="mt-8 space-y-4">
-                  <button
+<button
                     onClick={() => {
                       if (confirm("¿Vaciar el carrito?")) {
                         useCartStore.getState().clearCart();
+                        showToast({ type: 'success', title: 'Carrito vaciado' });
                       }
                     }}
                     className="font-label text-xs uppercase tracking-widest text-terracota-600 border-b border-dashed border-terracota-600/40 pb-1 hover:border-terracota-600 transition-all"

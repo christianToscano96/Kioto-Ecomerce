@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { toast } from 'sonner';
+import { showToast } from '../components/ui/Toast';
 import type { Product } from '../../../shared/src/index';
 import { productsApi, adminProductsApi } from '../lib/api';
 
@@ -53,7 +53,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch products';
       set({ error: message, products: [] });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -67,7 +67,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch product';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -82,7 +82,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
      } catch (error) {
        const message = error instanceof Error ? error.message : 'Failed to fetch admin products';
        set({ error: message });
-       toast.error(message);
+       showToast.error(message);
      } finally {
        set({ isLoading: false });
      }
@@ -93,11 +93,11 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     try {
       await adminProductsApi.create(data);
       await get().fetchAdminProducts();
-      toast.success('Product created');
+      showToast.success('Product created');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to create product';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -108,11 +108,11 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     try {
       await adminProductsApi.update(id, data);
       await get().fetchAdminProducts();
-      toast.success('Product updated');
+      showToast.success('Product updated');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to update product';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -123,11 +123,11 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     try {
       await adminProductsApi.delete(id);
       await get().fetchAdminProducts();
-      toast.success('Product deleted');
+      showToast.success('Product deleted');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to delete product';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }

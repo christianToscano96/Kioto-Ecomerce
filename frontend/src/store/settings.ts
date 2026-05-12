@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { toast } from 'sonner';
+import { showToast } from '../components/ui/Toast';
 import type { Settings } from '../../../shared/src';
 import { settingsApi } from '../lib/api';
 
@@ -32,7 +32,7 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch settings';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -43,11 +43,11 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
     try {
       await settingsApi.update(settings);
       set({ settings });
-      toast.success('Configuración guardada');
+      showToast.success('Configuración guardada');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to update settings';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }

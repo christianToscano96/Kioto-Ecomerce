@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { toast } from 'sonner';
+import { showToast } from '../components/ui/Toast';
 import type { Category } from '../../../shared/src/index';
 import { adminCategoriesApi } from '../lib/api';
 
@@ -48,7 +48,7 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch categories';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -61,7 +61,7 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       try {
         await adminCategoriesApi.create(data);
         await get().fetchCategories();
-        toast.success('Categoría creada');
+        showToast.success('Categoría creada');
         return;
       } catch (adminError: any) {
         // If unauthorized or forbidden, fall back to public endpoint
@@ -72,11 +72,11 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       // Fallback to public endpoint
       await adminCategoriesApi.createPublic(data);
       await get().fetchCategories();
-      toast.success('Categoría creada');
+      showToast.success('Categoría creada');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to create category';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -89,7 +89,7 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       try {
         await adminCategoriesApi.update(id, data);
         await get().fetchCategories();
-        toast.success('Categoría actualizada');
+        showToast.success('Categoría actualizada');
         return;
       } catch (adminError: any) {
         if (adminError.response?.status !== 401 && adminError.response?.status !== 403) {
@@ -99,11 +99,11 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       // Fallback to public endpoint
       await adminCategoriesApi.updatePublic(id, data);
       await get().fetchCategories();
-      toast.success('Categoría actualizada');
+      showToast.success('Categoría actualizada');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to update category';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -116,7 +116,7 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       try {
         await adminCategoriesApi.delete(id);
         await get().fetchCategories();
-        toast.success('Categoría eliminada');
+        showToast.success('Categoría eliminada');
         return;
       } catch (adminError: any) {
         if (adminError.response?.status !== 401 && adminError.response?.status !== 403) {
@@ -126,11 +126,11 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
       // Fallback to public endpoint
       await adminCategoriesApi.deletePublic(id);
       await get().fetchCategories();
-      toast.success('Categoría eliminada');
+      showToast.success('Categoría eliminada');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to delete category';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }

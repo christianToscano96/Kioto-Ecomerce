@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { toast } from 'sonner';
+import { showToast } from '../components/ui/Toast';
 import type { User } from '../../../shared/src/index';
 import { authApi } from '../lib/api';
 
@@ -42,12 +42,12 @@ export const useAuthStore = create<AuthStore>()(
             refreshToken: response.data.refreshToken,
             isLoading: false 
           });
-          toast.success('Welcome back!');
+          showToast.success('Welcome back!');
           return true;
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Login failed';
           set({ error: message, isLoading: false });
-          toast.error(message);
+          showToast.error(message);
           return false;
         }
       },
@@ -61,12 +61,12 @@ export const useAuthStore = create<AuthStore>()(
             refreshToken: response.data.refreshToken,
             isLoading: false 
           });
-          toast.success('Account created!');
+          showToast.success('Account created!');
           return true;
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Registration failed';
           set({ error: message, isLoading: false });
-          toast.error(message);
+          showToast.error(message);
           return false;
         }
       },
@@ -80,7 +80,7 @@ export const useAuthStore = create<AuthStore>()(
           // Ignore errors - clear local state anyway
         } finally {
           set({ user: null, refreshToken: null, isLoading: false, error: null });
-          toast.success('Logged out');
+          showToast.success('Logged out');
         }
       },
 

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrdersStore } from '@/store/orders';
-import { toast } from 'sonner';
+import { showToast } from '@/components/ui/Toast';
 import type { Order } from '../../../../shared/src';
 
 interface OrderActionsProps {
@@ -37,7 +37,12 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
   };
 
   const handleChangeStatus = async (newStatus: Order['status']) => {
-    await updateOrderStatus(orderId, newStatus);
+    try {
+      await updateOrderStatus(orderId, newStatus);
+      showToast({ type: 'success', title: `Estado actualizado a ${STATUS_LABELS[newStatus]}` });
+    } catch (error) {
+      showToast({ type: 'error', title: 'Error al actualizar estado' });
+    }
     setOpen(false);
   };
 
@@ -50,12 +55,12 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
       });
       
       if (response.ok) {
-        toast.success('Email reenviado correctamente');
+        showToast({ type: 'success', title: 'Email reenviado correctamente' });
       } else {
-        toast.error('Error al reenviar email');
+        showToast({ type: 'error', title: 'Error al reenviar email' });
       }
     } catch (error) {
-      toast.error('Error al reenviar email');
+      showToast({ type: 'error', title: 'Error al reenviar email' });
     } finally {
       setResending(false);
       setOpen(false);
@@ -74,12 +79,12 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
       
       if (response.ok) {
         const payment = await response.json();
-        toast.success(`Pago ${payment.status}`);
+        showToast({ type: 'success', title: `Pago ${payment.status}` });
       } else {
-        toast.error('No se pudo verificar el pago');
+        showToast({ type: 'error', title: 'No se pudo verificar el pago' });
       }
     } catch (error) {
-      toast.error('Error al verificar pago');
+      showToast({ type: 'error', title: 'Error al verificar pago' });
     } finally {
       setCheckingPayment(false);
       setOpen(false);
@@ -104,12 +109,12 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
       );
       
       if (response.ok) {
-        toast.success('Reembolso procesado');
+        showToast({ type: 'success', title: 'Reembolso procesado' });
       } else {
-        toast.error('Error al reembolsar');
+        showToast({ type: 'error', title: 'Error al reembolsar' });
       }
     } catch (error) {
-      toast.error('Error al reembolsar');
+      showToast({ type: 'error', title: 'Error al reembolsar' });
     } finally {
       setRefunding(false);
       setOpen(false);

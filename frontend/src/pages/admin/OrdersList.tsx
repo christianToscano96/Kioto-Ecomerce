@@ -10,6 +10,7 @@ import { OrderActions } from '@/components/ui/OrderActions';
 import { ManualOrderModal } from '@/components/ui/ManualOrderModal';
 import { ShippingLabelModal } from '@/components/ui/ShippingLabelModal';
 import type { Order } from '../../../../shared/src';
+import { showToast } from '@/components/ui/Toast';
 
 const LoaderIcon = () => (
   <svg className="animate-spin h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24">
@@ -109,10 +110,15 @@ export function OrdersList() {
   };
 
   const handleBulkStatusUpdate = async (status: Order['status']) => {
-    for (const orderId of selectedOrders) {
-      await updateOrderStatus(orderId, status);
+    try {
+      for (const orderId of selectedOrders) {
+        await updateOrderStatus(orderId, status);
+      }
+      showToast({ type: 'success', title: `${selectedOrders.length} pedidos actualizados` });
+      setSelectedOrders([]);
+    } catch (error) {
+      showToast({ type: 'error', title: 'Error al actualizar pedidos' });
     }
-    setSelectedOrders([]);
   };
 
   const handlePrintLabel = (orderId: string) => {

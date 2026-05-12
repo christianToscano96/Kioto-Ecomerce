@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { toast } from 'sonner';
+import { showToast } from '../components/ui/Toast';
 import type { Order } from '../../../shared/src/index';
 import { ordersApi } from '../lib/api';
 
@@ -38,7 +38,7 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch orders';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -52,7 +52,7 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch order';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -63,11 +63,11 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
     try {
       await ordersApi.updateStatus(id, status);
       await get().fetchOrders();
-      toast.success('Estado actualizado');
+      showToast.success('Estado actualizado');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to update order status';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }
@@ -78,11 +78,11 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
     try {
       await ordersApi.createManual(data);
       await get().fetchOrders();
-      toast.success('Pedido manual creado');
+      showToast.success('Pedido manual creado');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to create manual order';
       set({ error: message });
-      toast.error(message);
+      showToast.error(message);
     } finally {
       set({ isLoading: false });
     }

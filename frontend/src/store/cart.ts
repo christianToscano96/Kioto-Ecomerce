@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { toast } from 'sonner';
+import { showToast } from '../components/ui/Toast';
 import type { CartItem, Product } from '../../../shared/src/index';
 import { cartApi } from '../lib/api';
 
@@ -53,7 +53,7 @@ export const useCartStore = create<CartStore>()(
           } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to fetch cart';
             set({ error: message });
-            toast.error(message);
+            showToast.error(message);
           } finally {
             set({ isLoading: false });
           }
@@ -76,12 +76,12 @@ addToCart: async (product: Product, quantity: number, size?: string, color?: str
             try {
               const response = await cartApi.addItem({ productId: product._id, quantity, size: sizeValue, color: colorValue });
               await get().fetchCart();
-              toast.success('Added to cart');
+              showToast.success('Added to cart');
             } catch (error: any) {
               get().removeItem(product._id);
               const message = error instanceof Error ? error.message : 'Failed to add item';
               set({ error: message });
-              toast.error(message);
+              showToast.error(message);
             } finally {
               set({ isSyncing: false });
             }
@@ -96,12 +96,12 @@ addToCart: async (product: Product, quantity: number, size?: string, color?: str
           
           try {
             await cartApi.updateItem(itemId, quantity);
-            toast.success('Cart updated');
+            showToast.success('Cart updated');
           } catch (error) {
             await get().fetchCart();
             const message = error instanceof Error ? error.message : 'Failed to update cart';
             set({ error: message });
-            toast.error(message);
+            showToast.error(message);
           } finally {
             set({ isSyncing: false });
           }
@@ -114,12 +114,12 @@ addToCart: async (product: Product, quantity: number, size?: string, color?: str
            
            try {
              await cartApi.removeItem(itemId);
-             toast.success('Removed from cart');
+             showToast.success('Removed from cart');
            } catch (error) {
              set({ items: previousItems });
              const message = error instanceof Error ? error.message : 'Failed to remove item';
              set({ error: message });
-             toast.error(message);
+             showToast.error(message);
            } finally {
              set({ isSyncing: false });
            }
@@ -132,12 +132,12 @@ addToCart: async (product: Product, quantity: number, size?: string, color?: str
          
          try {
            await cartApi.clear();
-           toast.success('Cart cleared');
+           showToast.success('Cart cleared');
          } catch (error) {
            set({ items: previousItems });
            const message = error instanceof Error ? error.message : 'Failed to clear cart';
            set({ error: message });
-           toast.error(message);
+           showToast.error(message);
          } finally {
            set({ isSyncing: false });
          }
