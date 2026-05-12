@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Order from '../models/Order';
 import Product from '../models/Product';
 import { verifyPaymentStatus, getPayment } from '../services/galio';
+import { sendOrderConfirmationEmail, sendAdminNotificationEmail } from '../services/email';
 
 const router = Router();
 
@@ -39,6 +40,10 @@ router.post('/galio', async (req, res) => {
       order.status = 'paid';
       await order.save();
       
+      // Send order confirmation emails
+      sendOrderConfirmationEmail(order, order._id.toString()).catch(console.error);
+      sendAdminNotificationEmail(order, order._id.toString(), order.shippingDetails?.name || 'Cliente').catch(console.error);
+      
       // Deduct stock now that payment is confirmed
       await deductStockForOrder(order);
       return res.json({ success: true });
@@ -50,6 +55,10 @@ router.post('/galio', async (req, res) => {
       if (payment.status === 'approved' && order.status === 'pending') {
         order.status = 'paid';
         await order.save();
+        
+        // Send order confirmation emails
+        sendOrderConfirmationEmail(order, order._id.toString()).catch(console.error);
+        sendAdminNotificationEmail(order, order._id.toString(), order.shippingDetails?.name || 'Cliente').catch(console.error);
         
         // Deduct stock now that payment is confirmed
         await deductStockForOrder(order);
