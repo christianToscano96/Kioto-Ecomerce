@@ -87,50 +87,17 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
       shippingDetails: req.body.shippingDetails,
     });
 
-    // Create notification for admin
+// Create notification for admin
     const { notifyNewOrder } = await import('../utils/notifications');
     notifyNewOrder(order._id.toString()).catch(console.error);
 
-// Deduct stock from products
-     await Promise.all(
-       cart.items.map(async (item) => {
-         const product = await Product.findById(item.productId);
-         const itemSize = (item as any).size;
-         
-         // If product has variants and item has size, deduct from variant
-         if (product?.variants && product.variants.length > 0 && itemSize) {
-           const variantIndex = product.variants.findIndex((v: any) => v.size === itemSize);
-           if (variantIndex >= 0) {
-             product.variants[variantIndex].stock -= item.quantity;
-             // Check for low stock notification
-             const newStock = product.variants[variantIndex].stock;
-             if (newStock <= 5) {
-               const { notifyLowStock } = await import('../utils/notifications');
-               notifyLowStock(product._id.toString(), newStock).catch(console.error);
-             }
-             await product.save();
-             return;
-           }
-         }
-         
-         // Otherwise deduct from base stock
-         const updated = await Product.findByIdAndUpdate(
-           item.productId,
-           { $inc: { stock: -item.quantity } },
-           { new: true }
-         );
-         // Check for low stock on base product
-         if (updated && updated.stock <= 5) {
-           const { notifyLowStock } = await import('../utils/notifications');
-           notifyLowStock(item.productId.toString(), updated.stock).catch(console.error);
-         }
-       })
-     );
+    // Stock is deducted only when payment succeeds (via webhook)
+    // This ensures stock is NOT reduced if payment is rejected/fails
 
-    // Mark cart as converted (customer completed purchase)
+    // Mark cart as converted (customer initiated checkout)
     await markCartAsConverted(sessionId);
 
-    // Create GalioPay payment link
+    // Create GalioPay payment link (optimized)
     let paymentUrl = null;
     try {
       const galioItems = cart.items.map(item => ({
@@ -140,6 +107,7 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
         currencyId: 'ARS',
       }));
 
+      // Run GalioPay creation
       const galioLink = await createPaymentLink({
         items: galioItems,
         referenceId: order._id.toString(),
@@ -150,36 +118,27 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
         notificationUrl: `${process.env.PUBLIC_API_URL || 'http://localhost:4000'}/api/webhooks/galio`,
         sandbox: process.env.GALIO_SANDBOX === 'true',
       });
-      paymentUrl = galioLink.url;
 
       // Save GalioPay payment ID to order
-      order.galioPaymentId = galioLink.referenceId;
+      order.galioPaymentId = galioLink.url;
+      paymentUrl = galioLink.url;
       await order.save();
     } catch (galioError) {
       console.error('GalioPay error:', galioError);
       // Continue without GalioPay link - order still created
     }
 
-    // Send order confirmation email
-    try {
-      await sendOrderConfirmationEmail(order, (order._id as any).toString());
-      // Send admin notification
-      try {
-        await sendAdminNotificationEmail(order, (order._id as any).toString(), order.shippingDetails?.name || 'Cliente');
-      } catch (adminEmailError) {
-        console.error('Failed to send admin notification email:', adminEmailError);
-      }
-    } catch (emailError) {
-      console.error('Failed to send confirmation email:', emailError);
-    }
+    // Send order confirmation email (async, don't wait)
+    sendOrderConfirmationEmail(order, (order._id as any).toString()).catch(console.error);
+    sendAdminNotificationEmail(order, (order._id as any).toString(), order.shippingDetails?.name || 'Cliente').catch(console.error);
 
     res.status(200).json({
       orderId: order._id,
       sessionId: `fake_session_${order._id}`,
       success: true,
       message: 'Order created successfully',
-      shipping: shipping,
-      paymentUrl, // GalioPay payment URL
+      shipping,
+      paymentUrl,
     });
   } catch (error) {
     console.error('Checkout error:', error);
@@ -323,5 +282,37 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
   res.json({ received: true });
 });
+
+// Async GalioPay payment link creation (doesn't block checkout response)
+async function createGalioPayLinkAsync(orderId: string, items: any[]) {
+  try {
+    const order = await Order.findById(orderId);
+    if (!order) return;
+
+    const galioItems = items.map((item: any) => ({
+      title: (item.productId as any)?.name || 'Product',
+      quantity: item.quantity,
+      unitPrice: item.price,
+      currencyId: 'ARS',
+    }));
+
+    const galioLink = await createPaymentLink({
+      items: galioItems,
+      referenceId: orderId,
+      backUrl: {
+        success: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success?orderId=${orderId}`,
+        failure: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/cancel`,
+      },
+      notificationUrl: `${process.env.PUBLIC_API_URL || 'http://localhost:4000'}/api/webhooks/galio`,
+      sandbox: process.env.GALIO_SANDBOX === 'true',
+    });
+
+    // Update order with GalioPay link
+    order.galioPaymentId = galioLink.url;
+    await order.save();
+  } catch (error) {
+    console.error('Async GalioPay error:', error);
+  }
+}
 
 export default router;
