@@ -146,10 +146,10 @@ export function CheckoutPage() {
         
         if (data.paymentUrl) {
           setSubmitStatus('redirecting');
-          // Redirigir a GalioPay
           window.location.href = data.paymentUrl;
         } else {
-          // Fallback sin GalioPay
+          // GalioPay link being created - redirect to success page with orderId
+          // Payment URL will be available via webhook
           navigate(`/checkout/success?orderId=${data.orderId}`);
         }
       } else {
