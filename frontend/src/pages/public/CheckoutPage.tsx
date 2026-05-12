@@ -135,6 +135,7 @@ export function CheckoutPage() {
 
       const data = response.data;
 
+      // Check if response indicates success
       if (response.status !== 200) {
         throw new Error(data.error || "Error al crear sesión de checkout");
       }
@@ -142,6 +143,7 @@ export function CheckoutPage() {
       // GalioPay checkout - redirect to payment page
       if (data.success) {
         showToast({ type: 'success', title: 'Orden creada correctamente' });
+        
         if (data.paymentUrl) {
           setSubmitStatus('redirecting');
           // Redirigir a GalioPay
@@ -150,6 +152,9 @@ export function CheckoutPage() {
           // Fallback sin GalioPay
           navigate(`/checkout/success?orderId=${data.orderId}`);
         }
+      } else {
+        // Backend returned success: false
+        throw new Error(data.error || 'No se pudo crear la orden');
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Ocurrió un error";
