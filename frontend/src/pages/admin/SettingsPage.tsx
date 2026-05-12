@@ -11,7 +11,7 @@ import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useSettingsStore } from '@/store/settings';
 import { useAuthStore } from '@/store/auth';
 import { profileApi } from '@/lib/api';
-import { toast } from 'sonner';
+import { showToast } from '@/components/ui/Toast';
 import type { Settings } from '../../../../shared/src';
 
 const SETTINGS_SECTIONS = [
@@ -136,9 +136,9 @@ export function SettingsPage() {
       });
       // Update user in auth store
       useAuthStore.setState({ user: response.data.user });
-      toast.success('Perfil actualizado');
+      showToast({ type: 'success', title: 'Perfil actualizado' });
     } catch (error) {
-      toast.error('Error al actualizar perfil');
+      showToast({ type: 'error', title: 'Error al actualizar perfil' });
     } finally {
       setSaving(false);
     }
@@ -162,7 +162,7 @@ export function SettingsPage() {
 
   const handleChangePassword = async () => {
     if (!passwordData.new || passwordData.new !== passwordData.confirm) {
-      toast.error('Las contraseñas no coinciden');
+      showToast({ type: 'error', title: 'Las contraseñas no coinciden' });
       return;
     }
     setSaving(true);
@@ -171,10 +171,10 @@ export function SettingsPage() {
         currentPassword: passwordData.current,
         newPassword: passwordData.new,
       });
-      toast.success('Contraseña actualizada');
+      showToast({ type: 'success', title: 'Contraseña actualizada' });
       setPasswordData({ current: '', new: '', confirm: '' });
     } catch (error) {
-      toast.error('Error al cambiar contraseña');
+      showToast({ type: 'error', title: 'Error al cambiar contraseña' });
     } finally {
       setSaving(false);
     }

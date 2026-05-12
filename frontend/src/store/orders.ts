@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { toast } from 'sonner';
 import type { Order } from '../../../shared/src/index';
 import { ordersApi } from '../lib/api';
 
@@ -30,63 +29,57 @@ export const useOrdersStore = create<OrdersStore>((set, get) => ({
   isLoading: false,
   error: null,
 
-  fetchOrders: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const orders = await ordersApi.list();
-      set({ orders });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch orders';
-      set({ error: message });
-      toast.error(message);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+fetchOrders: async () => {
+     set({ isLoading: true, error: null });
+     try {
+       const orders = await ordersApi.list();
+       set({ orders });
+     } catch (error) {
+       const message = error instanceof Error ? error.message : 'Failed to fetch orders';
+       set({ error: message });
+     } finally {
+       set({ isLoading: false });
+     }
+   },
 
-  fetchOrder: async (id) => {
-    set({ isLoading: true, error: null });
-    try {
-      const order = await ordersApi.get(id);
-      set({ order });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch order';
-      set({ error: message });
-      toast.error(message);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+   fetchOrder: async (id) => {
+     set({ isLoading: true, error: null });
+     try {
+       const order = await ordersApi.get(id);
+       set({ order });
+     } catch (error) {
+       const message = error instanceof Error ? error.message : 'Failed to fetch order';
+       set({ error: message });
+     } finally {
+       set({ isLoading: false });
+     }
+   },
 
-  updateOrderStatus: async (id, status) => {
-    set({ isLoading: true, error: null });
-    try {
-      await ordersApi.updateStatus(id, status);
-      await get().fetchOrders();
-      toast.success('Estado actualizado');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update order status';
-      set({ error: message });
-      toast.error(message);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+   updateOrderStatus: async (id, status) => {
+     set({ isLoading: true, error: null });
+     try {
+       await ordersApi.updateStatus(id, status);
+       await get().fetchOrders();
+     } catch (error) {
+       const message = error instanceof Error ? error.message : 'Failed to update order status';
+       set({ error: message });
+     } finally {
+       set({ isLoading: false });
+     }
+   },
 
-  createManualOrder: async (data: { customerEmail: string; customerName: string; items: any[] }) => {
-    set({ isLoading: true, error: null });
-    try {
-      await ordersApi.createManual(data);
-      await get().fetchOrders();
-      toast.success('Pedido manual creado');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create manual order';
-      set({ error: message });
-      toast.error(message);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+   createManualOrder: async (data: { customerEmail: string; customerName: string; items: any[] }) => {
+     set({ isLoading: true, error: null });
+     try {
+       await ordersApi.createManual(data);
+       await get().fetchOrders();
+     } catch (error) {
+       const message = error instanceof Error ? error.message : 'Failed to create manual order';
+       set({ error: message });
+     } finally {
+       set({ isLoading: false });
+     }
+   },
 
   setOrders: (orders) => set({ orders }),
   setOrder: (order) => set({ order }),

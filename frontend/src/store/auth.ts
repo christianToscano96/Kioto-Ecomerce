@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { toast } from 'sonner';
 import type { User } from '../../../shared/src/index';
 import { authApi } from '../lib/api';
 
@@ -33,56 +32,51 @@ export const useAuthStore = create<AuthStore>()(
       error: null,
 
       // Async actions
-      login: async (email, password) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await authApi.login({ email, password });
-          set({ 
-            user: response.data.user, 
-            refreshToken: response.data.refreshToken,
-            isLoading: false 
-          });
-          toast.success('Welcome back!');
-          return true;
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Login failed';
-          set({ error: message, isLoading: false });
-          toast.error(message);
-          return false;
-        }
-      },
+login: async (email, password) => {
+         set({ isLoading: true, error: null });
+         try {
+           const response = await authApi.login({ email, password });
+           set({ 
+             user: response.data.user, 
+             refreshToken: response.data.refreshToken,
+             isLoading: false 
+           });
+           return true;
+         } catch (error) {
+           const message = error instanceof Error ? error.message : 'Login failed';
+           set({ error: message, isLoading: false });
+           return false;
+         }
+       },
 
-      register: async (data) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await authApi.register(data);
-          set({ 
-            user: response.data.user, 
-            refreshToken: response.data.refreshToken,
-            isLoading: false 
-          });
-          toast.success('Account created!');
-          return true;
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Registration failed';
-          set({ error: message, isLoading: false });
-          toast.error(message);
-          return false;
-        }
-      },
+       register: async (data) => {
+         set({ isLoading: true, error: null });
+         try {
+           const response = await authApi.register(data);
+           set({ 
+             user: response.data.user, 
+             refreshToken: response.data.refreshToken,
+             isLoading: false 
+           });
+           return true;
+         } catch (error) {
+           const message = error instanceof Error ? error.message : 'Registration failed';
+           set({ error: message, isLoading: false });
+           return false;
+         }
+       },
 
-      logout: async () => {
-        set({ isLoading: true });
-        try {
-          // Try to call backend logout
-          await authApi.logout();
-        } catch {
-          // Ignore errors - clear local state anyway
-        } finally {
-          set({ user: null, refreshToken: null, isLoading: false, error: null });
-          toast.success('Logged out');
-        }
-      },
+       logout: async () => {
+         set({ isLoading: true });
+         try {
+           // Try to call backend logout
+           await authApi.logout();
+         } catch {
+           // Ignore errors - clear local state anyway
+         } finally {
+           set({ user: null, refreshToken: null, isLoading: false, error: null });
+         }
+       },
 
       fetchCurrentUser: async () => {
         set({ isLoading: true, error: null });

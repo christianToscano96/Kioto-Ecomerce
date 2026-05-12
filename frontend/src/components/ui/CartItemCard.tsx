@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useCartStore } from "@/store/cart";
 import type { CartItem } from "../../../../shared/src/index";
+import { showToast } from "@/components/ui/Toast";
 
 interface CartItemCardProps {
   item: CartItem;
@@ -52,6 +53,9 @@ export function CartItemCard({ item }: CartItemCardProps) {
     setIsUpdating(true);
     try {
       await updateCartItem(cartItemId, newQuantity);
+      showToast({ type: 'success', title: 'Cantidad actualizada' });
+    } catch {
+      showToast({ type: 'error', title: 'Error al actualizar cantidad' });
     } finally {
       setIsUpdating(false);
     }
@@ -62,6 +66,9 @@ export function CartItemCard({ item }: CartItemCardProps) {
     setIsRemoving(true);
     try {
       await removeCartItem(cartItemId);
+      showToast({ type: 'success', title: 'Producto eliminado del carrito' });
+    } catch {
+      showToast({ type: 'error', title: 'Error al eliminar producto' });
     } finally {
       setIsRemoving(false);
     }

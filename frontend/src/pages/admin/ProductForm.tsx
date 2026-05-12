@@ -7,6 +7,7 @@ import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useProductsStore } from '@/store/products';
 import { useCategoriesStore } from '@/store/categories';
 import type { Product } from '../../../../shared/src';
+import { showToast } from '@/components/ui/Toast';
 
 const SaveIcon = () => (
   <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,12 +147,15 @@ export function ProductForm() {
     try {
       if (isEdit) {
         await updateProduct(id!, submitData);
+        showToast({ type: 'success', title: 'Producto actualizado' });
       } else {
         await createProduct(submitData);
+        showToast({ type: 'success', title: 'Producto creado' });
       }
       navigate('/admin/products');
     } catch (error) {
       console.error('Error al guardar producto:', error);
+      showToast({ type: 'error', title: 'Error al guardar producto' });
     }
   };
 

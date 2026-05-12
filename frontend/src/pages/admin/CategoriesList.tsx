@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { useCategoriesStore } from "@/store/categories";
+import { showToast } from "@/components/ui/Toast";
 
 const PlusIcon = () => (
   <svg
@@ -64,7 +65,12 @@ export function CategoriesList() {
 
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Estás seguro de que deseas eliminar esta categoría?")) {
-      await deleteCategory(id);
+      try {
+        await deleteCategory(id);
+        showToast({ type: 'success', title: 'Categoría eliminada' });
+      } catch (error) {
+        showToast({ type: 'error', title: 'Error al eliminar categoría' });
+      }
     }
   };
 

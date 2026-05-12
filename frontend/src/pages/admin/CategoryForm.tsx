@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/Input";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { useCategoriesStore } from "@/store/categories";
 import type { Category } from "../../../../shared/src";
+import { showToast } from "@/components/ui/Toast";
 
 const SaveIcon = () => (
   <svg
@@ -91,12 +92,15 @@ export function CategoryForm() {
     try {
       if (isEdit) {
         await updateCategory(id!, formData);
+        showToast({ type: 'success', title: 'Categoría actualizada' });
       } else {
         await createCategory(formData);
+        showToast({ type: 'success', title: 'Categoría creada' });
       }
       navigate("/admin/categories");
     } catch (error) {
       console.error("Error al guardar categoría:", error);
+      showToast({ type: 'error', title: 'Error al guardar categoría' });
     }
   };
 

@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { toast } from 'sonner';
 import type { Product } from '../../../shared/src/index';
 import { productsApi, adminProductsApi } from '../lib/api';
 
@@ -38,100 +37,91 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
   error: null,
 
   // Public products
-  fetchProducts: async (params) => {
-    set({ isLoading: true, error: null });
-    try {
-      const products = await productsApi.list();
-      let filtered = products || [];
-      if (params?.search) {
-        filtered = products.filter(p => 
-          p.name.toLowerCase().includes(params.search!.toLowerCase()) ||
-          p.description?.toLowerCase().includes(params.search!.toLowerCase())
-        );
-      }
-      set({ products: filtered });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch products';
-      set({ error: message, products: [] });
-      toast.error(message);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  fetchProduct: async (id) => {
-    set({ isLoading: true, error: null });
-    try {
-      const product = await productsApi.get(id);
-      set({ product });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch product';
-      set({ error: message });
-      toast.error(message);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-   // Admin products
-   fetchAdminProducts: async () => {
+fetchProducts: async (params) => {
      set({ isLoading: true, error: null });
      try {
-       const products = await adminProductsApi.list();
-       set({ products });
+       const products = await productsApi.list();
+       let filtered = products || [];
+       if (params?.search) {
+         filtered = products.filter(p => 
+           p.name.toLowerCase().includes(params.search!.toLowerCase()) ||
+           p.description?.toLowerCase().includes(params.search!.toLowerCase())
+         );
+       }
+       set({ products: filtered });
      } catch (error) {
-       const message = error instanceof Error ? error.message : 'Failed to fetch admin products';
-       set({ error: message });
-       toast.error(message);
+       const message = error instanceof Error ? error.message : 'Failed to fetch products';
+       set({ error: message, products: [] });
      } finally {
        set({ isLoading: false });
      }
    },
 
-  createProduct: async (data) => {
-    set({ isLoading: true, error: null });
-    try {
-      await adminProductsApi.create(data);
-      await get().fetchAdminProducts();
-      toast.success('Product created');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create product';
-      set({ error: message });
-      toast.error(message);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+   fetchProduct: async (id) => {
+     set({ isLoading: true, error: null });
+     try {
+       const product = await productsApi.get(id);
+       set({ product });
+     } catch (error) {
+       const message = error instanceof Error ? error.message : 'Failed to fetch product';
+       set({ error: message });
+     } finally {
+       set({ isLoading: false });
+     }
+   },
 
-  updateProduct: async (id, data) => {
-    set({ isLoading: true, error: null });
-    try {
-      await adminProductsApi.update(id, data);
-      await get().fetchAdminProducts();
-      toast.success('Product updated');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update product';
-      set({ error: message });
-      toast.error(message);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+    // Admin products
+    fetchAdminProducts: async () => {
+      set({ isLoading: true, error: null });
+      try {
+        const products = await adminProductsApi.list();
+        set({ products });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to fetch admin products';
+        set({ error: message });
+      } finally {
+        set({ isLoading: false });
+      }
+    },
 
-  deleteProduct: async (id) => {
-    set({ isLoading: true, error: null });
-    try {
-      await adminProductsApi.delete(id);
-      await get().fetchAdminProducts();
-      toast.success('Product deleted');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete product';
-      set({ error: message });
-      toast.error(message);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+   createProduct: async (data) => {
+     set({ isLoading: true, error: null });
+     try {
+       await adminProductsApi.create(data);
+       await get().fetchAdminProducts();
+     } catch (error) {
+       const message = error instanceof Error ? error.message : 'Failed to create product';
+       set({ error: message });
+     } finally {
+       set({ isLoading: false });
+     }
+   },
+
+   updateProduct: async (id, data) => {
+     set({ isLoading: true, error: null });
+     try {
+       await adminProductsApi.update(id, data);
+       await get().fetchAdminProducts();
+     } catch (error) {
+       const message = error instanceof Error ? error.message : 'Failed to update product';
+       set({ error: message });
+     } finally {
+       set({ isLoading: false });
+     }
+   },
+
+   deleteProduct: async (id) => {
+     set({ isLoading: true, error: null });
+     try {
+       await adminProductsApi.delete(id);
+       await get().fetchAdminProducts();
+     } catch (error) {
+       const message = error instanceof Error ? error.message : 'Failed to delete product';
+       set({ error: message });
+     } finally {
+       set({ isLoading: false });
+     }
+   },
 
   setProducts: (products) => set({ products }),
   setProduct: (product) => set({ product }),

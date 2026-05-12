@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SizeSelector } from "@/components/ui/SizeSelector";
 import type { Product } from "../../../../shared/src/index";
+import { showToast } from "@/components/ui/Toast";
 
 const LoaderIcon = () => (
   <svg
@@ -139,30 +140,34 @@ export function ProductDetailPage() {
      const availableStock = product?.variants && product.variants.length > 0 ? selectedSizeStock : totalStock;
 
 const handleAddToCart = async () => {
-     if (!product || isAddingToCart || isSyncing) return;
+      if (!product || isAddingToCart || isSyncing) return;
+      
+      // Validate stock
+      if (product.variants && product.variants.length > 0) {
+        // Size-based product: require selected size
+        if (!selectedSize) return;
+        const selectedVariant = product.variants.find(v => v.size === selectedSize);
+        if (!selectedVariant || (selectedVariant.stock ?? 0) < quantity) {
+          showToast({ type: 'error', title: 'Stock insuficiente' });
+          return;
+        }
+      } else if (product.stock < quantity) {
+        // Non-size-based product: check base stock
+        showToast({ type: 'error', title: 'Stock insuficiente' });
+        return;
+      }
      
-     // Validate stock
-     if (product.variants && product.variants.length > 0) {
-       // Size-based product: require selected size
-       if (!selectedSize) return;
-       const selectedVariant = product.variants.find(v => v.size === selectedSize);
-       if (!selectedVariant || (selectedVariant.stock ?? 0) < quantity) {
-         return;
-       }
-     } else if (product.stock < quantity) {
-       // Non-size-based product: check base stock
-       return;
+ setIsAddingToCart(true);
+      try {
+        await addToCart(product, quantity, selectedSize || undefined, selectedColor || undefined);
+        showToast({ type: 'success', title: 'Producto agregado al carrito' });
+      } catch (err) {
+       console.error("Failed to add to cart:", err);
+        showToast({ type: 'error', title: 'Error al agregar al carrito' });
+     } finally {
+       setIsAddingToCart(false);
      }
-    
-setIsAddingToCart(true);
-     try {
-       await addToCart(product, quantity, selectedSize || undefined, selectedColor || undefined);
-     } catch (err) {
-      console.error("Failed to add to cart:", err);
-    } finally {
-      setIsAddingToCart(false);
-    }
-  };
+   };
 
   if (isLoading) {
     return (
