@@ -133,9 +133,9 @@ export function CheckoutPage() {
         shippingDetails: formData,
       });
 
-      const data = await response.data;
+      const data = response.data;
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(data.error || "Error al crear sesión de checkout");
       }
 
