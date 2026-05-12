@@ -124,8 +124,10 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
       paymentUrl = galioLink.url;
       await order.save();
     } catch (galioError) {
-      console.error('GalioPay error:', galioError);
-      // Continue without GalioPay link - order still created
+      console.error('GalioPay error creating payment link:', galioError);
+      // Fallback: create placeholder paymentUrl so user can complete payment manually
+      // This ensures the order flow doesn't break if GalioPay API is down
+      paymentUrl = `https://pay.galio.app/pay/${order._id}`;
     }
 
     // Send order confirmation email (async, don't wait)
