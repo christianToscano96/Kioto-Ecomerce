@@ -20,11 +20,16 @@ export function Header() {
 
   useEffect(() => {
     // Fetch store logo from settings
-    api.get('/settings').then(res => {
-      if (res.data?.store?.logo) {
-        setStoreLogo(res.data.store.logo);
-      }
-    }).catch(() => {});
+    api.get('/settings')
+      .then(res => {
+        if (res.data?.store?.logo) {
+          setStoreLogo(res.data.store.logo);
+        }
+      })
+      .catch(() => {
+        // Silently fail - don't redirect on 401
+        setStoreLogo(null);
+      });
   }, []);
 
   useEffect(() => {

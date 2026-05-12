@@ -13,12 +13,20 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-// Add response interceptor for auth errors
+// Add response interceptor for auth errors - only redirect for protected routes
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear auth state on unauthorized
+    // Don't redirect on 401 for public routes
+    const isPublicRoute = window.location.pathname.startsWith('/login') || 
+                          window.location.pathname.startsWith('/register') ||
+                          window.location.pathname === '/' ||
+                          window.location.pathname.startsWith('/products') ||
+                          window.location.pathname.startsWith('/cart') ||
+                          window.location.pathname.startsWith('/checkout');
+    
+    if (error.response?.status === 401 && !isPublicRoute) {
+      // Clear auth state on unauthorized - only for admin routes
       window.location.href = '/login';
     }
     return Promise.reject(error);
