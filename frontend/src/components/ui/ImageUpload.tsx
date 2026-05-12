@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from './Button';
+import { api } from '@/lib/api';
 
 interface ImageUploadProps {
   label?: string;
@@ -30,15 +31,13 @@ export function ImageUpload({
     formData.append('image', file);
 
     try {
-      const response = await fetch(`/api/upload/${endpoint}`, {
-        method: 'POST',
-        body: formData,
+      const response = await api.post(`/upload/${endpoint}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (!response.ok) throw new Error('Failed to upload');
-
-      const data = await response.json();
-      onUpload(data.url);
+      onUpload(response.data.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
