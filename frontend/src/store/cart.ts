@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { showToast } from '../components/ui/Toast';
 import type { CartItem, Product } from '../../../shared/src/index';
 import { cartApi } from '../lib/api';
 
@@ -43,21 +42,20 @@ export const useCartStore = create<CartStore>()(
       error: null,
 
 // Async actions with optimistic updates
-       fetchCart: async () => {
-         set({ isLoading: true, error: null });
-          try {
-            const response = await cartApi.get();
-            const items = response.data.cart?.items || [];
-            const sessionId = response.data.cart?.sessionId || null;
-            set({ items, sessionId });
-          } catch (error) {
-            const message = error instanceof Error ? error.message : 'Failed to fetch cart';
-            set({ error: message });
-            showToast.error(message);
-          } finally {
-            set({ isLoading: false });
-          }
-        },
+fetchCart: async () => {
+          set({ isLoading: true, error: null });
+           try {
+             const response = await cartApi.get();
+             const items = response.data.cart?.items || [];
+             const sessionId = response.data.cart?.sessionId || null;
+             set({ items, sessionId });
+           } catch (error) {
+             const message = error instanceof Error ? error.message : 'Failed to fetch cart';
+             set({ error: message });
+           } finally {
+             set({ isLoading: false });
+           }
+         },
 
 addToCart: async (product: Product, quantity: number, size?: string, color?: string) => {
              set({ isSyncing: true, error: null });
@@ -71,17 +69,15 @@ addToCart: async (product: Product, quantity: number, size?: string, color?: str
                size: sizeValue,
                color: colorValue,
              };
-             get().addItem(optimisticItem);
-           
+get().addItem(optimisticItem);
+            
             try {
               const response = await cartApi.addItem({ productId: product._id, quantity, size: sizeValue, color: colorValue });
               await get().fetchCart();
-              showToast.success('Added to cart');
             } catch (error: any) {
               get().removeItem(product._id);
               const message = error instanceof Error ? error.message : 'Failed to add item';
               set({ error: message });
-              showToast.error(message);
             } finally {
               set({ isSyncing: false });
             }
@@ -96,52 +92,46 @@ addToCart: async (product: Product, quantity: number, size?: string, color?: str
           
           try {
             await cartApi.updateItem(itemId, quantity);
-            showToast.success('Cart updated');
           } catch (error) {
             await get().fetchCart();
             const message = error instanceof Error ? error.message : 'Failed to update cart';
             set({ error: message });
-            showToast.error(message);
           } finally {
             set({ isSyncing: false });
           }
         },
 
-       removeCartItem: async (itemId) => {
-           set({ isSyncing: true, error: null });
-           const previousItems = get().items;
-           set({ items: previousItems.filter(item => (item as any)._id !== itemId) });
-           
-           try {
-             await cartApi.removeItem(itemId);
-             showToast.success('Removed from cart');
-           } catch (error) {
-             set({ items: previousItems });
-             const message = error instanceof Error ? error.message : 'Failed to remove item';
-             set({ error: message });
-             showToast.error(message);
-           } finally {
-             set({ isSyncing: false });
-           }
-         },
+removeCartItem: async (itemId) => {
+        set({ isSyncing: true, error: null });
+        const previousItems = get().items;
+        set({ items: previousItems.filter(item => (item as any)._id !== itemId) });
+        
+        try {
+          await cartApi.removeItem(itemId);
+        } catch (error) {
+          set({ items: previousItems });
+          const message = error instanceof Error ? error.message : 'Failed to remove item';
+          set({ error: message });
+        } finally {
+          set({ isSyncing: false });
+        }
+      },
 
-       clearCart: async () => {
-         set({ isSyncing: true, error: null });
-         const previousItems = get().items;
-         set({ items: [] });
-         
-         try {
-           await cartApi.clear();
-           showToast.success('Cart cleared');
-         } catch (error) {
-           set({ items: previousItems });
-           const message = error instanceof Error ? error.message : 'Failed to clear cart';
-           set({ error: message });
-           showToast.error(message);
-         } finally {
-           set({ isSyncing: false });
-         }
-       },
+clearCart: async () => {
+          set({ isSyncing: true, error: null });
+          const previousItems = get().items;
+          set({ items: [] });
+          
+          try {
+            await cartApi.clear();
+          } catch (error) {
+            set({ items: previousItems });
+            const message = error instanceof Error ? error.message : 'Failed to clear cart';
+            set({ error: message });
+          } finally {
+            set({ isSyncing: false });
+          }
+        },
 
 // Local actions
        addItem: (item) =>
