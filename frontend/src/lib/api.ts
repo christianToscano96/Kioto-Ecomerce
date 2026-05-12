@@ -1,6 +1,12 @@
 import axios from 'axios';
 import type { User, Product, Cart, CartItem, Order, Category, Settings } from '../../../shared/src/index';
 
+// Get base URL without /api for socket.io
+const getBaseUrl = () => {
+  const apiUrl = import.meta.env?.VITE_API_URL ?? 'http://localhost:4000/api';
+  return apiUrl.replace('/api', '');
+};
+
 // Create axios instance with credentials
 export const api = axios.create({
   baseURL: import.meta.env?.VITE_API_URL ?? 'http://localhost:4000/api',

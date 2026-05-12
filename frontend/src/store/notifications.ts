@@ -3,6 +3,7 @@ import type { Notification } from '../../../shared/src';
 import { io, Socket } from 'socket.io-client';
 import { useEffect, useRef } from 'react';
 import { showToast } from '@/components/ui/Toast';
+import { api } from '@/lib/api';
 
 interface NotificationsState {
   notifications: Notification[];
@@ -23,8 +24,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   fetchNotifications: async () => {
     set({ isLoading: true });
     try {
-      const res = await fetch('/api/notifications?limit=20');
-      const data = await res.json();
+      const { data } = await api.get('/notifications?limit=20');
       set({ 
         notifications: data.notifications,
         unreadCount: data.unreadCount 
@@ -38,8 +38,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 
   fetchUnreadCount: async () => {
     try {
-      const res = await fetch('/api/notifications/unread-count');
-      const data = await res.json();
+      const { data } = await api.get('/notifications/unread-count');
       set({ unreadCount: data.count });
     } catch (error) {
       console.error('Failed to fetch unread count:', error);
@@ -48,7 +47,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 
   markAsRead: async (id) => {
     try {
-      await fetch(`/api/notifications/${id}/read`, { method: 'PATCH' });
+      await api.patch(`/notifications/${id}/read`);
       set(state => ({
         notifications: state.notifications.map(n => 
           n._id === id ? { ...n, read: true } : n
@@ -62,7 +61,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 
   markAllAsRead: async () => {
     try {
-      await fetch('/api/notifications/read-all', { method: 'PATCH' });
+      await api.patch('/notifications/read-all');
       set(state => ({
         notifications: state.notifications.map(n => ({ ...n, read: true })),
         unreadCount: 0
@@ -86,8 +85,12 @@ export function useNotificationsSocket() {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
+    // Get socket URL (without /api)
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+    const socketUrl = apiUrl.replace('/api', '');
+    
     // Initialize socket
-    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:4000', {
+    const socket = io(socketUrl, {
       transports: ['websocket'],
     });
 
