@@ -100,12 +100,22 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
     // Create GalioPay payment link (optimized)
     let paymentUrl = null;
     try {
-      const galioItems = cart.items.map(item => ({
-        title: (item.productId as any)?.name || 'Product',
-        quantity: item.quantity,
-        unitPrice: item.price,
-        currencyId: 'ARS',
-      }));
+      const galioItems = [
+        // Product items
+        ...cart.items.map(item => ({
+          title: (item.productId as any)?.name || 'Product',
+          quantity: item.quantity,
+          unitPrice: item.price,
+          currencyId: 'ARS',
+        })),
+        // Shipping as separate line item (only if > 0)
+        ...(shipping > 0 ? [{
+          title: 'Envío',
+          quantity: 1,
+          unitPrice: shipping,
+          currencyId: 'ARS',
+        }] : []),
+      ];
 
       // Run GalioPay creation
       const galioLink = await createPaymentLink({
