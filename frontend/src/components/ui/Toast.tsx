@@ -34,7 +34,7 @@ function ToastItem({ toast, onClose }: { toast: ToastData; onClose: () => void }
   }, [onClose, toast.duration]);
 
   return (
-    <div className="bg-surface-container-low rounded-lg shadow-lg border border-outline-variant/40 p-4 mb-2 flex items-start gap-3 min-w-[320px] animate-in slide-in-from-right">
+    <div className="bg-surface-container-low rounded-lg shadow-lg border border-outline-variant/40 p-4 mb-2 flex items-start gap-3 min-w-[320px] animate-in slide-in-from-top">
       <Icon className={`h-5 w-5 mt-0.5 ${colors[toast.type]}`} />
       <div className="flex-1">
         <p className="font-medium text-on-surface text-sm">{toast.title}</p>
@@ -68,7 +68,7 @@ function ToastContainer() {
     if (!toastContainer) {
       toastContainer = document.createElement('div');
       toastContainer.id = 'toast-container';
-      toastContainer.className = 'fixed top-4 right-4 z-[9999]';
+      toastContainer.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[9999]';
       document.body.appendChild(toastContainer);
     }
   }, []);
@@ -76,7 +76,7 @@ function ToastContainer() {
   if (!toastContainer) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-[9999] flex flex-col">
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center">
       {toasts.map(toast => (
         <ToastItem key={toast.id} toast={toast} onClose={() => removeToast(toast.id)} />
       ))}
@@ -91,7 +91,7 @@ if (typeof window !== 'undefined') {
     if (!container) {
       container = document.createElement('div');
       container.id = 'toast-container';
-      container.className = 'fixed top-4 right-4 z-[9999]';
+      container.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[9999]';
       document.body.appendChild(container);
     }
   });

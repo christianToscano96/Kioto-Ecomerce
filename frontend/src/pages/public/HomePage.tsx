@@ -222,16 +222,16 @@ export function HomePage() {
               <div className="flex-1 bg-surface-container rounded-xl p-6 flex items-center">
                 <div className="max-w-md">
                   <h2 className="font-serif text-2xl font-bold text-on-surface mb-3">
-                    Colección Verano 2025
+                    La magia de encontrar el detalle ideal
                   </h2>
                   <p className="text-on-surface-variant mb-4 text-sm">
-                    Descubre las últimas tendencias en moda sostenible.
+                    Sabemos que quieres sorprender, y nosotros estamos aquí para ayudarte a lograrlo. Hemos traído este producto a nuestra tienda porque combina todo lo que buscas: estilo, utilidad y esa chispa de emoción. Es la forma más sencilla de entregar un abrazo en forma de paquete.
                   </p>
                   <Link
                     to="/products"
                     className="inline-block bg-primary text-on-primary font-label uppercase tracking-widest text-xs px-4 py-2 rounded-lg hover:bg-primary-hover transition-colors"
                   >
-                    Ver Colección
+                    Ver Catálogo
                   </Link>
                 </div>
               </div>
@@ -272,8 +272,8 @@ export function HomePage() {
                   </h2>
                   
                   <p className="text-on-surface-variant mb-4 text-sm">
-                    Envíos gratis en compras mayores a $50. 
-                    Entrega en 24-48 horas en zonas urbanas.
+                    Envíos gratis en compras mayores a $70000. 
+                    Entrega en 24-48 horas en zonas cercanas.
                   </p>
                   
                   <div className="space-y-2 stagger-children">
