@@ -129,18 +129,11 @@ export function CheckoutPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          shippingDetails: formData,
-        }),
+      const response = await api.post("/checkout", {
+        shippingDetails: formData,
       });
 
-      const data = await response.json();
+      const data = await response.data;
 
       if (!response.ok) {
         throw new Error(data.error || "Error al crear sesión de checkout");
