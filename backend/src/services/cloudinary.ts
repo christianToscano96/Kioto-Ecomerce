@@ -3,9 +3,9 @@ import { Readable } from 'stream';
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'drjdpt4t7',
-  api_key: process.env.CLOUDINARY_API_KEY || '463585348947528',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'Wf9DmUkTtom95G-2siDvclnzPc4',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 export interface UploadResult {
