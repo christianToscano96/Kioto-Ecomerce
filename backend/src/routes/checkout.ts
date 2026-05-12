@@ -140,9 +140,13 @@ router.post('/', validate(createCheckoutSchema), async (req: Request, res: Respo
       paymentUrl = `https://pay.galio.app/pay/${order._id}`;
     }
 
-    // Send order confirmation email (async, don't wait)
-    sendOrderConfirmationEmail(order, (order._id as any).toString()).catch(console.error);
-    sendAdminNotificationEmail(order, (order._id as any).toString(), order.shippingDetails?.name || 'Cliente').catch(console.error);
+// Send order confirmation email (async, don't wait)
+     sendOrderConfirmationEmail(order, (order._id as any).toString())
+       .then(() => console.log(`[EMAIL] Order confirmation sent for ${order._id}`))
+       .catch((err) => console.error(`[EMAIL-ERROR] Order confirmation failed for ${order._id}:`, err));
+     sendAdminNotificationEmail(order, (order._id as any).toString(), order.shippingDetails?.name || 'Cliente')
+       .then(() => console.log(`[EMAIL] Admin notification sent for ${order._id}`))
+       .catch((err) => console.error(`[EMAIL-ERROR] Admin notification failed for ${order._id}:`, err));
 
     res.status(200).json({
       orderId: order._id,
