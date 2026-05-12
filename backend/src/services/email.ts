@@ -211,52 +211,58 @@ export const sendOrderConfirmationEmail = async (
   order: IOrder & { items: ICartItem[] },
   orderId: string
 ): Promise<void> => {
-  const transporter = await createTransporter();
-  const emailFrom = await getEmailFrom();
+  try {
+    const transporter = await createTransporter();
+    const emailFrom = await getEmailFrom();
+    const adminEmail = await getAdminEmail();
 
-  // Populate product names and prices for the email
-  await order.populate('items.productId', 'name price');
+    // Populate product names and prices for the email
+    await order.populate('items.productId', 'name price');
 
-  // Debug log
-  console.log('Email service - order data:', {
-    subtotal: order.subtotal,
-    shipping: order.shipping,
-    total: order.total,
-    itemsCount: order.items.length,
-    items: order.items.map((i: any) => ({ 
-      productId: i.productId, 
-      price: i.price,
-      productPrice: i.productId?.price 
-    })),
-  });
+    console.log('[EMAIL] Preparing order confirmation email:', {
+      orderId,
+      to: order.shippingDetails?.email,
+      from: emailFrom,
+    });
 
-  const itemsWithEmail = order.items.map((item: any) => ({
-    ...item,
-    productName: item.productId?.name || 'Producto',
-    // Ensure price is available
-    price: typeof item.price === 'number' ? item.price : (item.productId?.price || 0),
-  }));
+    const itemsWithEmail = order.items.map((item: any) => ({
+      ...item,
+      productName: item.productId?.name || 'Producto',
+      price: typeof item.price === 'number' ? item.price : (item.productId?.price || 0),
+    }));
 
-  const emailHtml = getOrderConfirmationTemplate(
-    order.shippingDetails?.name || 'Cliente',
-    { 
-      ...order, 
-      items: itemsWithEmail,
-      subtotal: order.subtotal ?? 0,
-      shipping: order.shipping ?? 0,
-      total: order.total ?? 0,
-    } as any,
-    orderId
-  );
+    const emailHtml = getOrderConfirmationTemplate(
+      order.shippingDetails?.name || 'Cliente',
+      { 
+        ...order, 
+        items: itemsWithEmail,
+        subtotal: order.subtotal ?? 0,
+        shipping: order.shipping ?? 0,
+        total: order.total ?? 0,
+      } as any,
+      orderId
+    );
 
-  const mailOptions = {
-    from: emailFrom,
-    to: order.shippingDetails?.email || 'customer@example.com',
-    subject: `Confirmación de Pedido #${orderId.slice(-8).toUpperCase()}`,
-    html: emailHtml,
-  };
+    const mailOptions = {
+      from: emailFrom,
+      to: order.shippingDetails?.email || 'customer@example.com',
+      subject: `Confirmación de Pedido #${orderId.slice(-8).toUpperCase()}`,
+      html: emailHtml,
+    };
 
-  await transporter.sendMail(mailOptions);
+    const result = await transporter.sendMail(mailOptions);
+    console.log('[EMAIL] Order confirmation sent successfully:', {
+      orderId,
+      messageId: result.messageId,
+    });
+  } catch (error: any) {
+    console.error('[EMAIL-ERROR] Failed to send order confirmation:', {
+      orderId,
+      error: error.message,
+      stack: error.stack,
+    });
+    throw error; // Re-throw so caller can catch it
+  }
 };
 
 // Email template for admin notification
@@ -299,20 +305,28 @@ export const sendAdminNotificationEmail = async (
   orderId: string,
   customerName: string
 ): Promise<void> => {
-  const transporter = await createTransporter();
-  const emailFrom = await getEmailFrom();
-  const adminEmail = await getAdminEmail();
+  try {
+    const transporter = await createTransporter();
+    const emailFrom = await getEmailFrom();
+    const adminEmail = await getAdminEmail();
 
-  // Populate product info
-  await order.populate('items.productId', 'name price');
+    // Populate product info
+    await order.populate('items.productId', 'name price');
 
-  const itemsWithEmail = order.items.map((item: any) => ({
-    ...item,
-    productName: item.productId?.name || 'Producto',
-    price: typeof item.price === 'number' ? item.price : (item.productId?.price || 0),
-  }));
+    console.log('[EMAIL] Preparing admin notification email:', {
+      orderId,
+      to: adminEmail,
+      from: emailFrom,
+      customerName,
+    });
 
-  const emailHtml = `
+    const itemsWithEmail = order.items.map((item: any) => ({
+      ...item,
+      productName: item.productId?.name || 'Producto',
+      price: typeof item.price === 'number' ? item.price : (item.productId?.price || 0),
+    }));
+
+    const emailHtml = `
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"></head>
@@ -333,14 +347,26 @@ export const sendAdminNotificationEmail = async (
 </body>
 </html>`;
 
-  const mailOptions = {
-    from: emailFrom,
-    to: adminEmail,
-    subject: `Nuevo Pedido #${orderId.slice(-8).toUpperCase()}`,
-    html: emailHtml,
-  };
+    const mailOptions = {
+      from: emailFrom,
+      to: adminEmail,
+      subject: `Nuevo Pedido #${orderId.slice(-8).toUpperCase()}`,
+      html: emailHtml,
+    };
 
-  await transporter.sendMail(mailOptions);
+    const result = await transporter.sendMail(mailOptions);
+    console.log('[EMAIL] Admin notification sent successfully:', {
+      orderId,
+      messageId: result.messageId,
+    });
+  } catch (error: any) {
+    console.error('[EMAIL-ERROR] Failed to send admin notification:', {
+      orderId,
+      error: error.message,
+      stack: error.stack,
+    });
+    throw error;
+  }
 };
 
 // Resend order confirmation email

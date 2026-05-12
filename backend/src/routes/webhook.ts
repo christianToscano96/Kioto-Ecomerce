@@ -36,13 +36,18 @@ router.post('/galio', async (req, res) => {
     }
 
     // Mark order as paid and deduct stock
-    if (status === 'approved') {
+    // GalioPay sends 'approved' or 'ok' for successful payments
+    if (status === 'approved' || status === 'ok') {
       order.status = 'paid';
       await order.save();
       
       // Send order confirmation emails
-      sendOrderConfirmationEmail(order, order._id.toString()).catch(console.error);
-      sendAdminNotificationEmail(order, order._id.toString(), order.shippingDetails?.name || 'Cliente').catch(console.error);
+      sendOrderConfirmationEmail(order, order._id.toString())
+        .then(() => console.log(`[EMAIL] Customer confirmation sent for order ${order._id}`))
+        .catch((err) => console.error(`[EMAIL-ERROR] Customer confirmation failed for order ${order._id}:`, err));
+      sendAdminNotificationEmail(order, order._id.toString(), order.shippingDetails?.name || 'Cliente')
+        .then(() => console.log(`[EMAIL] Admin notification sent for order ${order._id}`))
+        .catch((err) => console.error(`[EMAIL-ERROR] Admin notification failed for order ${order._id}:`, err));
       
       // Deduct stock now that payment is confirmed
       await deductStockForOrder(order);
@@ -52,13 +57,18 @@ router.post('/galio', async (req, res) => {
     // Otherwise verify with GalioPay API
     if (paymentId) {
       const payment = await getPayment(paymentId);
-      if (payment.status === 'approved' && order.status === 'pending') {
+      // GalioPay API returns 'approved' for successful payments
+      if ((payment.status === 'approved' || payment.status === 'ok') && order.status === 'pending') {
         order.status = 'paid';
         await order.save();
         
-        // Send order confirmation emails
-        sendOrderConfirmationEmail(order, order._id.toString()).catch(console.error);
-        sendAdminNotificationEmail(order, order._id.toString(), order.shippingDetails?.name || 'Cliente').catch(console.error);
+// Send order confirmation emails
+         sendOrderConfirmationEmail(order, order._id.toString())
+           .then(() => console.log(`[EMAIL] Customer confirmation sent for order ${order._id}`))
+           .catch((err) => console.error(`[EMAIL-ERROR] Customer confirmation failed for order ${order._id}:`, err));
+         sendAdminNotificationEmail(order, order._id.toString(), order.shippingDetails?.name || 'Cliente')
+           .then(() => console.log(`[EMAIL] Admin notification sent for order ${order._id}`))
+           .catch((err) => console.error(`[EMAIL-ERROR] Admin notification failed for order ${order._id}:`, err));
         
         // Deduct stock now that payment is confirmed
         await deductStockForOrder(order);
