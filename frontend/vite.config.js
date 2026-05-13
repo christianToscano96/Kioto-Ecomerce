@@ -1,10 +1,20 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
         react(),
+        /**
+         * Bundle analyzer - generates stats.html
+         * Run: ANALYZE=true npm run build
+         */
+        ...(process.env.ANALYZE ? [visualizer({
+                filename: 'stats.html',
+                open: true,
+                gzipSize: true,
+            })] : []),
         VitePWA({
             registerType: 'autoUpdate',
             injectRegister: 'auto',

@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCartItemCount } from "@/store/cart";
 import { useCategoriesStore } from "@/store/categories";
-import { api } from "@/lib/api";
+import { useSettings } from "@/lib/queries";
 import logoK from '../../../assets/logo.png';
 
 const navItems = [
@@ -12,25 +12,14 @@ const navItems = [
 export function Header() {
   const cartItemCount = useCartItemCount();
   const [searchQuery, setSearchQuery] = useState("");
-  const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [closeTimeout, setCloseTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const { categories, fetchCategories } = useCategoriesStore();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Fetch store logo from settings
-    api.get('/settings')
-      .then(res => {
-        if (res.data?.store?.logo) {
-          setStoreLogo(res.data.store.logo);
-        }
-      })
-      .catch(() => {
-        // Silently fail - don't redirect on 401
-        setStoreLogo(null);
-      });
-  }, []);
+  
+  // React Query for settings (avoids duplicate API calls)
+  const { data: settings } = useSettings();
+  const storeLogo = settings?.store?.logo;
 
   useEffect(() => {
     fetchCategories();
