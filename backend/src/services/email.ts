@@ -1,4 +1,3 @@
-import nodemailer from 'nodemailer';
 import { IOrder } from '../models/Order';
 import { ICartItem } from '../models/types';
 import Settings from '../models/Settings';
@@ -27,31 +26,48 @@ export const resetSettingsCache = () => {
   settingsCacheTime = 0;
 };
 
-// Create transporter
-const createTransporter = async () => {
-  const settings = await getSettings();
+// Send email via Brevo API REST
+const sendBrevoEmail = async (to: string, subject: string, html: string, senderName?: string) => {
+  const apiKey = process.env.EMAIL_PASS; // Brevo API key
+  const fromEmail = process.env.EMAIL_FROM || 'noreply@kioto.com';
   
-  return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // TLS
-    auth: {
-      user: settings?.email?.user || process.env.EMAIL_USER,
-      pass: settings?.email?.pass || process.env.EMAIL_PASS,
-    },
+  if (!apiKey) {
+    throw new Error('Brevo API key not configured (EMAIL_PASS)');
+  }
+
+  console.log('[BREVO API] Sending email:', {
+    to,
+    from: fromEmail,
+    subject,
+    hasApiKey: !!apiKey
   });
-};
 
-// Get email from address with fallback
-const getEmailFrom = async (): Promise<string> => {
-  const settings = await getSettings();
-  return settings?.email?.from || settings?.email?.user || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@kioto.com';
-};
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': apiKey,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: {
+        name: 'KIOTO INDU',
+        email: fromEmail,
+      },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    }),
+  });
 
-// Get admin email from settings or .env
-const getAdminEmail = async (): Promise<string> => {
-  const settings = await getSettings();
-  return settings?.email?.user || process.env.EMAIL_USER || process.env.EMAIL_FROM || 'admin@kioto.com';
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`Brevo API error: ${response.status} - ${errorData}`);
+  }
+
+  const result = await response.json() as { messageId?: string };
+  console.log('[BREVO API] Email sent successfully:', result.messageId);
+  return result;
 };
 
 // Status labels in Spanish
@@ -212,18 +228,8 @@ export const sendOrderConfirmationEmail = async (
   orderId: string
 ): Promise<void> => {
   try {
-    const transporter = await createTransporter();
-    const emailFrom = await getEmailFrom();
-    const adminEmail = await getAdminEmail();
-
     // Populate product names and prices for the email
     await order.populate('items.productId', 'name price');
-
-    console.log('[EMAIL] Preparing order confirmation email:', {
-      orderId,
-      to: order.shippingDetails?.email,
-      from: emailFrom,
-    });
 
     const itemsWithEmail = order.items.map((item: any) => ({
       ...item,
@@ -243,60 +249,20 @@ export const sendOrderConfirmationEmail = async (
       orderId
     );
 
-    const mailOptions = {
-      from: emailFrom,
-      to: order.shippingDetails?.email || 'customer@example.com',
-      subject: `Confirmación de Pedido #${orderId.slice(-8).toUpperCase()}`,
-      html: emailHtml,
-    };
-
-    const result = await transporter.sendMail(mailOptions);
-    console.log('[EMAIL] Order confirmation sent successfully:', {
-      orderId,
-      messageId: result.messageId,
-    });
+    const toEmail = order.shippingDetails?.email || 'customer@example.com';
+    await sendBrevoEmail(
+      toEmail,
+      `Confirmación de Pedido #${orderId.slice(-8).toUpperCase()}`,
+      emailHtml
+    );
   } catch (error: any) {
     console.error('[EMAIL-ERROR] Failed to send order confirmation:', {
       orderId,
       error: error.message,
       stack: error.stack,
     });
-    throw error; // Re-throw so caller can catch it
+    throw error;
   }
-};
-
-// Email template for admin notification
-const getAdminNotificationTemplate = (
-  customerName: string,
-  order: IOrder & { items: Array<ICartItem & { productName?: string }> },
-  orderId: string
-): string => {
-  const itemsList = order.items
-    .map((item: any) => {
-      const productName = item.productName || 'Producto';
-      const price = typeof item.price === 'number' ? item.price : 0;
-      return `• ${productName} x ${item.quantity || 1} - $${(price * (item.quantity || 1)).toFixed(2)}`;
-    })
-    .join('\n');
-
-  return `
-¡Nuevo pedido recibido!
-
-Número de pedido: #${orderId.slice(-8).toUpperCase()}
-Cliente: ${customerName}
-Email: ${order.shippingDetails?.email || 'N/A'}
-
-Productos:
-${itemsList}
-
-Subtotal: $${(order.subtotal || 0).toFixed(2)}
-Envío: $${(order.shipping || 0).toFixed(2)}
-TOTAL: $${(order.total || 0).toFixed(2)}
-
-Dirección de envío:
-${order.shippingDetails?.name || 'N/A'}
-${order.shippingDetails?.address?.line1 || ''}, ${order.shippingDetails?.address?.city || ''}
-`.trim();
 };
 
 // Send email to admin
@@ -306,19 +272,8 @@ export const sendAdminNotificationEmail = async (
   customerName: string
 ): Promise<void> => {
   try {
-    const transporter = await createTransporter();
-    const emailFrom = await getEmailFrom();
-    const adminEmail = await getAdminEmail();
-
     // Populate product info
     await order.populate('items.productId', 'name price');
-
-    console.log('[EMAIL] Preparing admin notification email:', {
-      orderId,
-      to: adminEmail,
-      from: emailFrom,
-      customerName,
-    });
 
     const itemsWithEmail = order.items.map((item: any) => ({
       ...item,
@@ -347,18 +302,12 @@ export const sendAdminNotificationEmail = async (
 </body>
 </html>`;
 
-    const mailOptions = {
-      from: emailFrom,
-      to: adminEmail,
-      subject: `Nuevo Pedido #${orderId.slice(-8).toUpperCase()}`,
-      html: emailHtml,
-    };
-
-    const result = await transporter.sendMail(mailOptions);
-    console.log('[EMAIL] Admin notification sent successfully:', {
-      orderId,
-      messageId: result.messageId,
-    });
+    const adminEmail = process.env.EMAIL_FROM || 'christoscano96@gmail.com';
+    await sendBrevoEmail(
+      adminEmail,
+      `Nuevo Pedido #${orderId.slice(-8).toUpperCase()}`,
+      emailHtml
+    );
   } catch (error: any) {
     console.error('[EMAIL-ERROR] Failed to send admin notification:', {
       orderId,
