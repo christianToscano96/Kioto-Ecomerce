@@ -7,6 +7,8 @@ interface ProductsState {
   product: Product | null;
   isLoading: boolean;
   error: string | null;
+  lastFetch: number | null;
+  cacheExpiry: number; // 5 minutes in ms
 }
 
 interface ProductsActions {
@@ -35,20 +37,31 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
   product: null,
   isLoading: false,
   error: null,
+  lastFetch: null,
+  cacheExpiry: 5 * 60 * 1000, // 5 minutes
 
-  // Public products
-fetchProducts: async (params) => {
-     set({ isLoading: true, error: null });
-     try {
-       const products = await productsApi.list();
-       let filtered = products || [];
-       if (params?.search) {
-         filtered = products.filter(p => 
-           p.name.toLowerCase().includes(params.search!.toLowerCase()) ||
-           p.description?.toLowerCase().includes(params.search!.toLowerCase())
-         );
-       }
-       set({ products: filtered });
+// Public products
+  fetchProducts: async (params) => {
+      const now = Date.now();
+      const state = get();
+      
+      // Cache hit - return cached data without fetching
+      if (state.products.length > 0 && state.lastFetch && 
+          (now - state.lastFetch) < state.cacheExpiry) {
+        return;
+      }
+      
+      set({ isLoading: true, error: null });
+      try {
+        const products = await productsApi.list();
+let filtered = products || [];
+        if (params?.search) {
+          filtered = products.filter(p => 
+            p.name.toLowerCase().includes(params.search!.toLowerCase()) ||
+            p.description?.toLowerCase().includes(params.search!.toLowerCase())
+          );
+        }
+        set({ products: filtered, lastFetch: Date.now() });
      } catch (error) {
        const message = error instanceof Error ? error.message : 'Failed to fetch products';
        set({ error: message, products: [] });
