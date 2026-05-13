@@ -6,6 +6,8 @@ interface CategoriesState {
   categories: Category[];
   isLoading: boolean;
   error: string | null;
+  lastFetch: number | null;
+  cacheExpiry: number; // 5 minutes in ms
 }
 
 interface CategoriesActions {
@@ -25,25 +27,36 @@ export const useCategoriesStore = create<CategoriesStore>((set, get) => ({
   categories: [],
   isLoading: false,
   error: null,
+  lastFetch: null,
+  cacheExpiry: 5 * 60 * 1000, // 5 minutes
 
   // Fetch all categories
-fetchCategories: async () => {
-     set({ isLoading: true, error: null });
+  fetchCategories: async () => {
+      const now = Date.now();
+      const state = get();
+      
+      // Cache hit - return cached data without fetching
+      if (state.categories.length > 0 && state.lastFetch && 
+          (now - state.lastFetch) < state.cacheExpiry) {
+        return;
+      }
+      
+      set({ isLoading: true, error: null });
      try {
-       // Try admin endpoint first (if authenticated)
-       try {
-         const response = await adminCategoriesApi.list();
-         set({ categories: response.categories });
-         return;
-       } catch (adminError: any) {
-         // If unauthorized or forbidden, fall back to public endpoint
-         if (adminError.response?.status !== 401 && adminError.response?.status !== 403) {
-           throw adminError;
-         }
-       }
-       // Fallback to public endpoint
-       const response = await adminCategoriesApi.listPublic();
-       set({ categories: response.categories });
+// Try admin endpoint first (if authenticated)
+        try {
+          const response = await adminCategoriesApi.list();
+          set({ categories: response.categories, lastFetch: Date.now() });
+          return;
+        } catch (adminError: any) {
+          // If unauthorized or forbidden, fall back to public endpoint
+          if (adminError.response?.status !== 401 && adminError.response?.status !== 403) {
+            throw adminError;
+          }
+        }
+        // Fallback to public endpoint
+        const response = await adminCategoriesApi.listPublic();
+        set({ categories: response.categories, lastFetch: Date.now() });
      } catch (error) {
        const message = error instanceof Error ? error.message : 'Failed to fetch categories';
        set({ error: message });
