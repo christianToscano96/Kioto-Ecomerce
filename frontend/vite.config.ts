@@ -84,7 +84,7 @@ export default defineConfig({
           // Admin-only libraries (loaded via code splitting but good for cache)
           charts: ['recharts'],
           // Utilities
-          utils: ['axios', 'date-fns', 'zod'],
+          utils: ['axios', 'date-fns'],
         },
       },
     },
