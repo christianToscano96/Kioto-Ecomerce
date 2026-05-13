@@ -78,20 +78,21 @@ export function HomePage() {
               </div>
               
               {/* Right Video */}
-              <div className="flex-1 relative w-full max-w-lg animate-fade-in" style={{ animationDelay: '400ms' }}>
-                <div className="relative rounded-2xl overflow-hidden max-w-lg">
-                  <div className="aspect-video">
-                    <video
-                      src={kiotoVideo}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
+<div className="flex-1 relative w-full max-w-lg animate-fade-in" style={{ animationDelay: '400ms' }}>
+                  <div className="relative rounded-2xl overflow-hidden max-w-lg">
+                    <div className="aspect-video">
+                      <video
+                        src={kiotoVideo}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="w-full h-full object-cover"
+                        preload="none"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
             </div>
           </section>
   
@@ -216,6 +217,7 @@ export function HomePage() {
                   loop
                   playsInline
                   className="w-full h-full object-cover"
+                  preload="none"
                 />
               </div>
               {/* Text Content */}
@@ -292,17 +294,18 @@ export function HomePage() {
                   </div>
                 </div>
               </div>
-              {/* Video */}
-              <div className="flex-1 rounded-xl overflow-hidden aspect-video">
-                <video
-                  src={fleteVideo}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-              </div>
+{/* Video */}
+               <div className="flex-1 rounded-xl overflow-hidden aspect-video">
+                 <video
+                   src={fleteVideo}
+                   autoPlay
+                   muted
+                   loop
+                   playsInline
+                   className="w-full h-full object-cover"
+                   preload="none"
+                 />
+               </div>
             </div>
           </section>
         </PageContainer>
