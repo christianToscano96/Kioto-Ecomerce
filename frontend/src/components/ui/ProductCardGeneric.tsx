@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Link } from "react-router-dom";
 import { useCartStore } from "../../store/cart";
 import { useToast } from "./Toast";
 import { ProductBadges } from "./ProductBadges";
+import { OptimizedImage } from "./OptimizedImage";
 import type { Product } from "../../../../shared/src";
 
 interface ProductCardGenericProps {
@@ -35,7 +36,7 @@ const CartIcon = () => (
   </span>
 );
 
-export function ProductCardGeneric({
+export const ProductCardGeneric = memo(function ProductCardGeneric({
   product,
   onQuickAdd,
   showQuickActions = true,
@@ -113,7 +114,7 @@ const handleAddToCart = async () => {
       <Link to={`/products/${product._id}`} className="block">
         <div className="aspect-[3/4] bg-surface-container rounded-lg overflow-hidden relative">
 {images.length > 0 ? (
-              <img
+              <OptimizedImage
                 src={images[currentImageIndex]}
                 alt={product.name}
                 className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${
@@ -324,13 +325,22 @@ const handleAddToCart = async () => {
               </div>
            </div>
 
-           {/* Overlay to close panel */}
-           <div
-             className="fixed inset-0 z-10"
-             onClick={() => setShowCartPanel(false)}
-           />
-         </>
-       )}
-     </div>
-   );
- }
+{/* Overlay to close panel */}
+            <div
+              className="fixed inset-0 z-10"
+              onClick={() => setShowCartPanel(false)}
+            />
+          </>
+        )}
+      </div>
+    );
+  }
+},
+// Custom comparison - only re-render if product data changes
+(prev, next) => 
+  prev.product._id === next.product._id &&
+  prev.product.price === next.product.price &&
+  prev.product.name === next.product.name &&
+  prev.product.images?.join() === next.product.images?.join() &&
+  prev.showQuickActions === next.showQuickActions
+);
