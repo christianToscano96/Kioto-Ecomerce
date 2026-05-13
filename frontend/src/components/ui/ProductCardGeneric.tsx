@@ -36,7 +36,7 @@ const CartIcon = () => (
   </span>
 );
 
-export const ProductCardGeneric = memo(function ProductCardGeneric({
+function ProductCardGenericComponent({
   product,
   onQuickAdd,
   showQuickActions = true,
@@ -335,9 +335,8 @@ const handleAddToCart = async () => {
       </div>
     );
   }
-},
-// Custom comparison - only re-render if product data changes
-(prev, next) => 
+
+export const ProductCardGeneric = memo(ProductCardGenericComponent, (prev, next) => 
   prev.product._id === next.product._id &&
   prev.product.price === next.product.price &&
   prev.product.name === next.product.name &&

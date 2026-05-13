@@ -19,4 +19,20 @@ export default defineConfig({
             },
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // Core React libraries
+                    vendor: ['react', 'react-dom', 'react-router-dom'],
+                    // UI components
+                    ui: ['lucide-react', 'clsx', 'tailwind-merge'],
+                    // Admin-only libraries (loaded via code splitting but good for cache)
+                    charts: ['recharts'],
+                    // Utilities
+                    utils: ['axios', 'date-fns', 'zod'],
+                },
+            },
+        },
+    },
 });

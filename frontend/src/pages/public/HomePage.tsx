@@ -88,7 +88,6 @@ export function HomePage() {
                         loop
                         playsInline
                         className="w-full h-full object-cover"
-                        loading="lazy"
                         preload="none"
                       />
                     </div>
@@ -218,7 +217,6 @@ export function HomePage() {
                   loop
                   playsInline
                   className="w-full h-full object-cover"
-                  loading="lazy"
                   preload="none"
                 />
               </div>
@@ -305,7 +303,6 @@ export function HomePage() {
                    loop
                    playsInline
                    className="w-full h-full object-cover"
-                   loading="lazy"
                    preload="none"
                  />
                </div>
