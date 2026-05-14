@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { create } from 'zustand';
 import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -11,27 +12,43 @@ interface ToastData {
   duration?: number;
 }
 
+interface ToastState {
+  toasts: ToastData[];
+  addToast: (toast: Omit<ToastData, 'id'>) => void;
+  removeToast: (id: string) => void;
+}
+
+export const useToastStore = create<ToastState>((set) => ({
+  toasts: [],
+  addToast: (toast) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    set((state) => ({ toasts: [{ ...toast, id }, ...state.toasts] }));
+  },
+  removeToast: (id) => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
+}));
+
 const icons = {
   success: CheckCircle,
   error: XCircle,
   warning: AlertCircle,
   info: Info,
-};
+} as const;
 
 const colors = {
   success: 'text-green-600',
   error: 'text-red-600',
   warning: 'text-terracota-600',
   info: 'text-blue-600',
-};
+} as const;
 
-function ToastItem({ toast, onClose }: { toast: ToastData; onClose: () => void }) {
+function ToastItem({ toast }: { toast: ToastData }) {
+  const removeToast = useToastStore((state) => state.removeToast);
   const Icon = icons[toast.type];
 
   useEffect(() => {
-    const timer = setTimeout(onClose, toast.duration || 5000);
+    const timer = setTimeout(() => removeToast(toast.id), toast.duration || 5000);
     return () => clearTimeout(timer);
-  }, [onClose, toast.duration]);
+  }, [toast.id, toast.duration, removeToast]);
 
   return (
     <div className="bg-surface-container-low rounded-lg shadow-lg border border-outline-variant/40 p-4 mb-2 flex items-start gap-3 min-w-[320px] animate-in slide-in-from-top">
@@ -42,80 +59,35 @@ function ToastItem({ toast, onClose }: { toast: ToastData; onClose: () => void }
           <p className="text-xs text-on-surface-variant mt-1">{toast.message}</p>
         )}
       </div>
-      <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface">
+      <button onClick={() => removeToast(toast.id)} className="text-on-surface-variant hover:text-on-surface">
         <X className="h-4 w-4" />
       </button>
     </div>
   );
 }
 
-// Toast container
-let toastContainer: HTMLDivElement | null = null;
-let toasts: ToastData[] = [];
-let forceUpdate: () => void = () => {};
+export function ToastContainer() {
+  const toasts = useToastStore((state) => state.toasts);
 
-function ToastContainer() {
-  const [, setVersion] = useState(0);
-  forceUpdate = () => setVersion(v => v + 1);
-
-  const removeToast = (id: string) => {
-    toasts = toasts.filter(t => t.id !== id);
-    forceUpdate();
-  };
-
-  // Ensure container exists
-  useEffect(() => {
-    if (!toastContainer) {
-      toastContainer = document.createElement('div');
-      toastContainer.id = 'toast-container';
-      toastContainer.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[9999]';
-      document.body.appendChild(toastContainer);
-    }
-  }, []);
-
-  if (!toastContainer) return null;
+  if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center">
-      {toasts.map(toast => (
-        <ToastItem key={toast.id} toast={toast} onClose={() => removeToast(toast.id)} />
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center pointer-events-none">
+      {toasts.map((toast) => (
+        <div key={toast.id} className="pointer-events-auto">
+          <ToastItem toast={toast} />
+        </div>
       ))}
     </div>
   );
 }
 
-// Initialize container
-if (typeof window !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-    let container = document.getElementById('toast-container');
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'toast-container';
-      container.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[9999]';
-      document.body.appendChild(container);
-    }
-  });
-}
-
 // Public API
-let idCounter = 0;
+export const showToast = (data: Omit<ToastData, 'id'>) => {
+  useToastStore.getState().addToast(data);
+};
 
-export function showToast(data: Omit<ToastData, 'id'>) {
-  const id = `toast-${++idCounter}`;
-  toasts = [{ ...data, id }, ...toasts];
-  forceUpdate();
-}
-
-export function dismissToast(id: string) {
-  toasts = toasts.filter(t => t.id !== id);
-  forceUpdate();
-}
-
-// useToast hook for compatibility
 export function useToast() {
-  const addToast = (data: Omit<ToastData, 'id'>) => showToast(data);
+  const addToast = useToastStore((state) => state.addToast);
   return { addToast };
 }
-
-// Export ToastContainer for global rendering
-export { ToastContainer };
