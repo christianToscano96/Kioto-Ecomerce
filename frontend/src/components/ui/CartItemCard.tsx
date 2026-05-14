@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useCartStore } from "@/store/cart";
-import type { CartItem } from "../../../../shared/src/index";
+import type { CartItem } from "@shared/index";
 import { showToast } from "@/components/ui/Toast";
+import { Plus, Minus, Package } from '@/components/icons';
 
 interface CartItemCardProps {
   item: CartItem;

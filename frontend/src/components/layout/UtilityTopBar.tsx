@@ -1,3 +1,5 @@
+import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { initNotifications, useNotificationsSocket } from "@/store/notifications";
 import { useEffect } from "react";
@@ -19,7 +21,7 @@ export function UtilityTopBar({ className }: UtilityTopBarProps) {
         {/* Search Bar */}
         <div className="flex-1 max-w-md">
           <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+            <Search size={20} />
             <input
               type="text"
               placeholder="Search orders, products..."
@@ -41,7 +43,7 @@ export function UtilityTopBar({ className }: UtilityTopBarProps) {
           {/* Profile */}
           <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors">
             <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center">
-              <span className="material-symbols-outlined text-sm text-on-primary-container">person</span>
+              <User size={20} />
             </div>
             <span className="text-sm font-medium text-on-surface">Admin</span>
           </button>

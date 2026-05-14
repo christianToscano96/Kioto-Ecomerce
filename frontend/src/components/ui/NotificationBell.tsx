@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNotificationsStore } from '@/store/notifications';
+import { Bell, Package, Archive, ShoppingBag } from '@/components/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -27,8 +28,8 @@ const playNotificationSound = () => {
   }
 };
 
-const BellIcon = () => (
-  <span className="material-symbols-outlined">notifications</span>
+const BellIcon = ({ className }: { className?: string }) => (
+  <Bell size={24} className={className} />
 );
 
 export function NotificationBell() {
@@ -76,10 +77,10 @@ export function NotificationBell() {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'order': return 'shopping_bag';
-      case 'low_stock': return 'inventory_2';
-      case 'out_of_stock': return 'dangerous';
-      default: return 'notifications';
+      case 'order': return ShoppingBag;
+      case 'low_stock': return Archive;
+      case 'out_of_stock': return Package;
+      default: return Bell;
     }
   };
 
@@ -152,9 +153,7 @@ export function NotificationBell() {
           <div className="overflow-y-auto flex-1">
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-on-surface-variant">
-                <span className="material-symbols-outlined text-3xl mb-2 block">
-                  notifications_none
-                </span>
+                <Bell size={24} className="text-3xl mb-2 block" />
                 No hay notificaciones
               </div>
             ) : (
@@ -167,9 +166,10 @@ export function NotificationBell() {
                   }`}
                 >
                   <div className="flex gap-3">
-                    <span className={`material-symbols-outlined text-sm ${getNotificationColor(notification.type)}`}>
-                      {getNotificationIcon(notification.type)}
-                    </span>
+                    {(() => {
+                      const Icon = getNotificationIcon(notification.type);
+                      return <Icon size={16} className={getNotificationColor(notification.type)} />;
+                    })()}
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
                         <p className="font-medium text-on-surface text-sm">{notification.title}</p>

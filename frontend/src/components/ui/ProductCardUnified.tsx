@@ -14,29 +14,7 @@ interface ProductCardUnifiedProps {
   showQuickActions?: boolean;
 }
 
-const MinusIcon = () => (
-  <span className="material-symbols-outlined text-sm">
-    remove
-  </span>
-);
-
-const PlusIcon = () => (
-  <span className="material-symbols-outlined text-sm">
-    add
-  </span>
-);
-
-const EyeIcon = () => (
-  <span className="material-symbols-outlined text-sm">
-    visibility
-  </span>
-);
-
-const CartIcon = () => (
-  <span className="material-symbols-outlined text-sm">
-    shopping_bag
-  </span>
-);
+import { Minus, Plus, Eye, ShoppingBag, ChevronLeft, ChevronRight } from '@/components/icons';
 
 function ProductCardUnifiedComponent({
   product,
@@ -167,7 +145,7 @@ function ProductCardUnifiedComponent({
                   onClick={() => setShowCartPanel(!showCartPanel)}
                   className="bg-primary text-on-primary font-label text-xs uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-primary-container transition-colors flex items-center gap-1"
                 >
-                  <CartIcon />
+                  <ShoppingBag className="text-sm" />
                   Agregar
                 </button>
 
@@ -224,7 +202,7 @@ function ProductCardUnifiedComponent({
                             disabled={availableStock === 0}
                             className="w-6 h-6 rounded border border-outline-variant flex items-center justify-center disabled:opacity-50"
                           >
-                            <MinusIcon />
+                            <Minus className="text-sm" />
                           </button>
                           <span className="text-xs font-bold w-4 text-center">{quantity}</span>
                           <button
@@ -236,7 +214,7 @@ function ProductCardUnifiedComponent({
                             disabled={quantity >= availableStock || availableStock === 0}
                             className="w-6 h-6 rounded border border-outline-variant flex items-center justify-center disabled:opacity-50"
                           >
-                            <PlusIcon />
+                            <Plus className="text-sm" />
                           </button>
                         </div>
 
@@ -308,13 +286,13 @@ function ProductCardUnifiedComponent({
                 onClick={prevImage}
                 className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-black/40 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
-                <span className="material-symbols-outlined text-sm">chevron_left</span>
+                <ChevronLeft />
               </button>
               <button
                 onClick={nextImage}
                 className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-black/40 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
-                <span className="material-symbols-outlined text-sm">chevron_right</span>
+                <ChevronRight />
               </button>
             </>
           )}
@@ -346,7 +324,7 @@ function ProductCardUnifiedComponent({
                 className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-surface-container transition-colors"
                 title="Ver detalles"
               >
-                <EyeIcon />
+                <Eye className="text-sm" />
               </Link>
 
               <button
@@ -358,7 +336,7 @@ function ProductCardUnifiedComponent({
                 className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-surface-container transition-colors"
                 title="Agregar al carrito"
               >
-                <CartIcon />
+                <ShoppingBag className="text-sm" />
               </button>
             </div>
           )}
@@ -455,7 +433,7 @@ function ProductCardUnifiedComponent({
                   disabled={availableStock === 0}
                   className="w-6 h-6 rounded border border-outline-variant flex items-center justify-center disabled:opacity-50"
                 >
-                  <MinusIcon />
+                  <Minus className="text-sm" />
                 </button>
                 <span className="text-xs font-bold w-4 text-center">
                   {quantity}
@@ -469,7 +447,7 @@ function ProductCardUnifiedComponent({
                   disabled={quantity >= availableStock || availableStock === 0}
                   className="w-6 h-6 rounded border border-outline-variant flex items-center justify-center disabled:opacity-50"
                 >
-                  <PlusIcon />
+                  <Plus className="text-sm" />
                 </button>
               </div>
 

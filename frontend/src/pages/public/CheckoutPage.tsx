@@ -1,3 +1,5 @@
+import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -404,7 +406,7 @@ export function CheckoutPage() {
                   onClick={() => setShowTerms(false)}
                   className="text-on-surface hover:text-primary"
                 >
-                  <span className="material-symbols-outlined">close</span>
+                  <X size={20} />
                 </button>
               </div>
               <div className="prose prose-sm max-w-none text-on-surface">
