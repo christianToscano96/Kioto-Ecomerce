@@ -1,3 +1,4 @@
+import { ChevronDown } from '@/components/icons';
 import { useState } from 'react';
 
 export type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
@@ -25,9 +26,7 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
         className="flex items-center gap-2 font-label text-xs uppercase tracking-widest text-on-surface border-b border-dashed border-outline-variant/40 pb-1 hover:border-primary transition-all"
       >
         <span>Ordenar por: {sortOptions.find(opt => opt.value === value)?.label}</span>
-        <span className={`material-symbols-outlined text-sm transition-transform ${isOpen ? 'rotate-180' : ''}`}>
-          expand_more
-        </span>
+        <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (

@@ -13,17 +13,18 @@ import { useAuthStore } from '@/store/auth';
 import { profileApi } from '@/lib/api';
 import { showToast } from '@/components/ui/Toast';
 import type { Settings } from '../../../../shared/src';
+import { User, Store, CreditCard, Mail, Bell, Palette, Shield, Share2, FileText } from '@/components/icons';
 
 const SETTINGS_SECTIONS = [
-  { id: 'profile', label: 'Perfil', icon: 'person' },
-  { id: 'store', label: 'Tienda', icon: 'storefront' },
-  { id: 'payments', label: 'Pagos', icon: 'credit_card' },
-  { id: 'email', label: 'Email', icon: 'mail' },
-  { id: 'notifications', label: 'Notificaciones', icon: 'notifications' },
-  { id: 'appearance', label: 'Apariencia', icon: 'palette' },
-  { id: 'security', label: 'Seguridad', icon: 'security' },
-  { id: 'social', label: 'Redes', icon: 'share' },
-  { id: 'policies', label: 'Políticas', icon: 'description' },
+  { id: 'profile', label: 'Perfil', icon: User },
+  { id: 'store', label: 'Tienda', icon: Store },
+  { id: 'payments', label: 'Pagos', icon: CreditCard },
+  { id: 'email', label: 'Email', icon: Mail },
+  { id: 'notifications', label: 'Notificaciones', icon: Bell },
+  { id: 'appearance', label: 'Apariencia', icon: Palette },
+  { id: 'security', label: 'Seguridad', icon: Shield },
+  { id: 'social', label: 'Redes', icon: Share2 },
+  { id: 'policies', label: 'Políticas', icon: FileText },
 ];
 
 // Default settings for non-user-specific sections
@@ -189,20 +190,23 @@ export function SettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <nav className="lg:col-span-1">
           <div className="bg-surface-container-low rounded-lg border border-outline-variant/30 p-2">
-            {SETTINGS_SECTIONS.map(section => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  activeSection === section.id
-                    ? 'bg-primary-container text-on-primary-container'
-                    : 'text-on-surface hover:bg-surface-container'
-                }`}
-              >
-                <span className="material-symbols-outlined text-lg">{section.icon}</span>
-                {section.label}
-              </button>
-            ))}
+{SETTINGS_SECTIONS.map(section => {
+               const Icon = section.icon;
+               return (
+                 <button
+                   key={section.id}
+                   onClick={() => setActiveSection(section.id)}
+                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                     activeSection === section.id
+                       ? 'bg-primary-container text-on-primary-container'
+                       : 'text-on-surface hover:bg-surface-container'
+                   }`}
+                 >
+                   <Icon size={18} />
+                   {section.label}
+                 </button>
+               );
+             })}
           </div>
         </nav>
 

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Globe, Leaf, Flower } from '@/components/icons';
 
 export function Footer() {
   return (
@@ -61,15 +62,9 @@ export function Footer() {
             <button className="text-primary font-bold">Unirme</button>
           </div>
           <div className="flex gap-4">
-            <span className="material-symbols-outlined text-primary text-lg">
-              public
-            </span>
-            <span className="material-symbols-outlined text-primary text-lg">
-              eco
-            </span>
-            <span className="material-symbols-outlined text-primary text-lg">
-              filter_vintage
-            </span>
+            <Globe size={20} className="text-primary" />
+            <Leaf size={20} className="text-primary" />
+            <Flower size={20} className="text-primary" />
           </div>
         </div>
       </div>

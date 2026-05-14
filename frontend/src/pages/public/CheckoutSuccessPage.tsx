@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Footer } from "@/components/layout/Footer";
 import { useCartStore } from "@/store/cart";
+import { ShoppingBag } from '@/components/icons';
 import successVideo from '../../../assets/success.mp4';
 
 export function CheckoutSuccessPage() {
@@ -51,7 +52,7 @@ export function CheckoutSuccessPage() {
               to="/products"
               className="inline-flex items-center gap-2 bg-primary text-on-primary font-medium px-8 py-3.5 rounded-full hover:bg-primary-hover transition-colors"
             >
-              <span className="material-symbols-outlined">shopping_bag</span>
+              <ShoppingBag size={20} />
               Seguir Comprando
             </Link>
             

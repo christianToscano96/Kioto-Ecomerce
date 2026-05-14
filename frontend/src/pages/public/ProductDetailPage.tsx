@@ -46,9 +46,7 @@ const AccordionSection = ({
       <span className="text-sm font-bold uppercase tracking-widest font-label">
         {title}
       </span>
-      <span className="material-symbols-outlined transition-transform group-open:rotate-180">
-        expand_more
-      </span>
+      <ChevronDown className="transition-transform group-open:rotate-180" />
     </summary>
     <div className="mt-4 text-sm text-on-surface-variant leading-relaxed space-y-2">
       {children}

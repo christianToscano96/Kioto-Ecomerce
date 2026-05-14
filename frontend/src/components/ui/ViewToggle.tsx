@@ -1,4 +1,4 @@
-import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+import { Eye, Plus, Grid, X, Minus, Search, User, List } from '@/components/icons';
 
 interface ViewToggleProps {
   view: 'grid' | 'list';
@@ -15,8 +15,8 @@ export function ViewToggle({ view, onChange }: ViewToggleProps) {
         <button
           onClick={() => onChange('grid')}
           className={`p-2 transition-colors ${
-            view === 'grid' 
-              ? 'bg-primary text-on-primary' 
+            view === 'grid'
+              ? 'bg-primary text-on-primary'
               : 'bg-transparent text-on-surface-variant hover:bg-surface-container'
           }`}
           aria-label="Vista de cuadrícula"
@@ -26,13 +26,13 @@ export function ViewToggle({ view, onChange }: ViewToggleProps) {
         <button
           onClick={() => onChange('list')}
           className={`p-2 transition-colors ${
-            view === 'list' 
-              ? 'bg-primary text-on-primary' 
+            view === 'list'
+              ? 'bg-primary text-on-primary'
               : 'bg-transparent text-on-surface-variant hover:bg-surface-container'
           }`}
           aria-label="Vista de lista"
         >
-          <span className="material-symbols-outlined text-sm">view_list</span>
+          <List size={18} />
         </button>
       </div>
     </div>

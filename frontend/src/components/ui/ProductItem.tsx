@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { Heart } from '@/components/icons';
 
 interface ProductItemProps {
   _id: string;
@@ -31,12 +32,12 @@ export function ProductItem({ _id, name, price, images, description, stock = 0 }
             </div>
           )}
           {/* Wishlist button - micro interaction */}
-          <button 
+          <button
             className="absolute top-3 right-3 bg-white/80 backdrop-blur-md p-1.5 rounded-full text-on-surface hover:text-primary transition-colors"
             aria-label="Add to wishlist"
             onClick={(e) => e.stopPropagation()}
           >
-            <span className="material-symbols-outlined text-sm">favorite</span>
+            <Heart size={16} />
           </button>
         </div>
         

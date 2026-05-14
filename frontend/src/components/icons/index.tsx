@@ -67,8 +67,16 @@ export {
   ArrowRight,
   Home,
   BarChart3,
+  ClipboardList,
   Users,
   ShoppingBasket,
+  Globe,
+  Leaf,
+  Flower,
+  MessageCircle,
+  TrendingUp,
+  TrendingDown,
+  BookOpen,Palette,Shield,Store,Tags
 } from 'lucide-react';
 
 // Import type separately
