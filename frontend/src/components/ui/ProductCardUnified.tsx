@@ -25,6 +25,7 @@ function ProductCardUnifiedComponent({
   const addToCart = useCartStore((state) => state.addToCart);
   const { addToast } = useToast();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageError, setImageError] = useState(false);
   const [showCartPanel, setShowCartPanel] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
@@ -253,13 +254,14 @@ function ProductCardUnifiedComponent({
       {/* Image Container */}
       <Link to={`/products/${product._id}`} className="block">
         <div className="aspect-[3/4] bg-surface-container rounded-lg overflow-hidden relative">
-          {images.length > 0 ? (
+{images.length > 0 && !imageError ? (
             <OptimizedImage
               src={images[currentImageIndex]}
               alt={product.name}
               className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${
-                totalStock === 0 ? "grayscale opacity-70" : ""
+                totalStock === 0 ? "grayscale opacity-60" : ""
               }`}
+              onError={() => setImageError(true)}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-on-surface-variant">

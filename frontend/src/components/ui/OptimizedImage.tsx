@@ -25,8 +25,11 @@ const getOptimizedImageUrl = (
   // For remote URLs, use Vercel image optimizer in production
   if (import.meta.env.PROD && !src.startsWith('http')) return src;
   
-  // External URLs get optimized
+  // External URLs - skip Vercel optimization for Cloudinary (already optimized)
   if (src.startsWith('http')) {
+    // Skip optimization for Cloudinary URLs (they're already optimized)
+    if (src.includes('cloudinary.com')) return src;
+    
     const params = new URLSearchParams();
     if (width) params.set('w', width.toString());
     params.set('q', quality.toString());
@@ -47,7 +50,16 @@ export function OptimizedImage({
   ...props 
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const optimizedSrc = getOptimizedImageUrl(src, width, quality);
+
+  if (hasError) {
+    return (
+      <div className={`bg-surface-container flex items-center justify-center ${className}`}>
+        <span className="text-on-surface-variant text-xs">Imagen no disponible</span>
+      </div>
+    );
+  }
 
   return (
     <img
@@ -59,6 +71,7 @@ export function OptimizedImage({
       loading={priority ? 'eager' : 'lazy'}
       decoding="async"
       onLoad={() => setIsLoaded(true)}
+      onError={() => setHasError(true)}
       {...props}
     />
   );
