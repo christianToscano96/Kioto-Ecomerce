@@ -7,6 +7,7 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCardUnified } from "@/components/ui/ProductCardUnified";
 import { SidebarFilters } from "@/components/public/SidebarFilters";
+import { Drawer } from "@/components/ui/Drawer";
 import { useCartStore } from "@/store/cart";
 import { PageContainer } from "@/components/ui/Container";
 import {
@@ -17,6 +18,7 @@ import { useToast } from "@/components/ui/Toast";
 import { SortDropdown, type SortOption } from "@/components/ui/SortDropdown";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { PriceRangeFilter } from "@/components/ui/PriceRangeFilter";
+import { Filter, ArrowLeft } from "@/components/icons";
 
 const LoaderIcon = () => (
   <svg
@@ -55,6 +57,7 @@ export function ProductsListPage() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 60000]);
   const [visibleCount, setVisibleCount] = useState(12);
   const [availableColors, setAvailableColors] = useState<string[]>([]);
+  const [showFiltersDrawer, setShowFiltersDrawer] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { products, isLoading, error } = useProductsStore();
   const fetchProducts = useProductsStore.getState().fetchProducts;
@@ -308,11 +311,20 @@ export function ProductsListPage() {
 
       <PageContainer>
         {/* Encabezado Narrativo */}
-        <header className="mb-16 mt-16">
-          <span className="font-label text-xs uppercase tracking-[0.2em] text-primary font-bold mb-4 block">
-            Selección de Temporada
-          </span>
-        </header>
+<header className="mb-8 md:mb-16 mt-8 md:mt-16">
+           <div className="flex items-center gap-3 mb-4">
+             <button
+               onClick={() => window.history.back()}
+               className="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container min-h-[44px] min-w-[44px]"
+               aria-label="Volver atrás"
+             >
+               <ArrowLeft size={20} />
+             </button>
+           </div>
+           <span className="font-label text-xs uppercase tracking-[0.2em] text-primary font-bold">
+             Selección de Temporada
+           </span>
+         </header>
 
         {/* Active Filters */}
         <ActiveFilters
@@ -321,32 +333,62 @@ export function ProductsListPage() {
           onClearAll={activeFilters.length > 1 ? clearAllFilters : undefined}
         />
 
-        <div className="flex flex-col lg:flex-row gap-16">
-{/* Filtros Laterales */}
-           <SidebarFilters
-             categories={categories}
-             colors={availableColors}
-             sizes={["XS", "S", "M", "L", "XL"]}
-             selectedSize={selectedSize || "S"}
-             selectedColor={selectedColor}
-             onSizeChange={setSelectedSize}
-             onColorChange={setSelectedColor}
-             onCategoryClick={handleCategoryClick}
-           />
-
-          <div className="lg:hidden mt-8">
-            <PriceRangeFilter
-              minPrice={minPrice}
-              maxPrice={maxPrice}
-              value={priceRange}
-              onChange={setPriceRange}
-            />
+<div className="flex flex-col lg:flex-row gap-8 md:gap-16">
+{/* Mobile Filter Button */}
+          <div className="lg:hidden px-4">
+            <button
+              onClick={() => setShowFiltersDrawer(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 border border-outline-variant/40 rounded-lg font-label text-xs uppercase tracking-widest hover:bg-surface-container min-h-[44px]"
+            >
+              <Filter size={18} />
+              Filtrar productos
+            </button>
           </div>
 
+{/* Filtros Laterales */}
+            <div className="hidden lg:block">
+            <SidebarFilters
+              categories={categories}
+              colors={availableColors}
+              sizes={["XS", "S", "M", "L", "XL"]}
+              selectedSize={selectedSize || "S"}
+              selectedColor={selectedColor}
+              onSizeChange={setSelectedSize}
+              onColorChange={setSelectedColor}
+              onCategoryClick={handleCategoryClick}
+            />
+            </div>
+
+           {/* Drawer for mobile filters */}
+           <Drawer
+             isOpen={showFiltersDrawer}
+             onClose={() => setShowFiltersDrawer(false)}
+             title="Filtros"
+           >
+             <div className="space-y-6">
+               <SidebarFilters
+                 categories={categories}
+                 colors={availableColors}
+                 sizes={["XS", "S", "M", "L", "XL"]}
+                 selectedSize={selectedSize || "S"}
+                 selectedColor={selectedColor}
+                 onSizeChange={setSelectedSize}
+                 onColorChange={setSelectedColor}
+                 onCategoryClick={handleCategoryClick}
+               />
+               <PriceRangeFilter
+                 minPrice={minPrice}
+                 maxPrice={maxPrice}
+                 value={priceRange}
+                 onChange={setPriceRange}
+               />
+             </div>
+           </Drawer>
+
           {/* Grid de Productos */}
-          <section className="flex-1">
+          <section className="flex-1 px-4 lg:px-0">
             {/* Top Bar with count, sort and view toggle */}
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 md:mb-8 gap-4">
               <div className="flex items-center gap-4">
                 <p className="text-sm text-on-surface-variant font-body">
                   Mostrando {filteredProducts.length} producto
@@ -364,24 +406,21 @@ export function ProductsListPage() {
                     ? "Ningún producto coincide con tus filtros."
                     : "Aún no hay productos disponibles."}
                 </p>
-                {(searchQuery ||
-                  selectedCategory ||
-                  selectedSize ||
-                  priceRange[0] !== minPrice ||
-                  priceRange[1] !== maxPrice) && (
-                  <button
-                    onClick={clearAllFilters}
-                    className="mt-4 font-label text-xs uppercase tracking-widest text-primary hover:underline"
-                  >
-                    Ver todos los productos
-                  </button>
-                )}
+{/* Clear filters button */}
+                    {(searchQuery || selectedCategory || selectedSize || selectedColor) && (
+                       <button
+                         onClick={clearAllFilters}
+                         className="mt-4 font-label text-sm uppercase tracking-widest text-primary hover:underline min-h-[44px]"
+                       >
+                         Ver todos los productos
+                       </button>
+                     )}
               </div>
             ) : (
               <div
                 className={
                   view === "grid"
-                    ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-16 gap-x-12"
+                    ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-3 gap-y-8 gap-x-4 md:gap-y-16 md:gap-x-12"
                     : "space-y-6"
                 }
               >

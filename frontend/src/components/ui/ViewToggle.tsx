@@ -7,7 +7,7 @@ interface ViewToggleProps {
 
 export function ViewToggle({ view, onChange }: ViewToggleProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="hidden md:flex items-center gap-2">
       <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">
         Vista:
       </span>
