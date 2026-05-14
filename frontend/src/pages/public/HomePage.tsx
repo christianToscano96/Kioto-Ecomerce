@@ -7,7 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageContainer } from "@/components/ui/Container";
-import { ProductCardGeneric } from "@/components/ui/ProductCardGeneric";
+import { ProductCardUnified } from "@/components/ui/ProductCardUnified";
 import comprandoVideo from '../../../assets/comprando.mp4';
 import fleteVideo from '../../../assets/flete.mp4';
 import kiotoVideo from '../../../assets/kioto.mp4';
@@ -196,11 +196,11 @@ export function HomePage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 stagger-children">
               {newProducts.map((product) => (
-                <ProductCardGeneric
-                  key={product._id}
-                  product={product}
-                  onQuickAdd={(_productId, options) => addToCart(product, options?.quantity || 1, options?.size)}
-                />
+<ProductCardUnified
+  key={product._id}
+  product={product}
+  onQuickAdd={(_productId, options) => addToCart(product, options?.quantity || 1, options?.size)}
+/>
               ))}
             </div>
           </section>
