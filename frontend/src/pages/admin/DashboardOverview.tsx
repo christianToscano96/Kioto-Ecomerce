@@ -24,6 +24,7 @@ import {
 } from "recharts";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import type { DashboardStats, RecentOrder } from "@/hooks/useDashboardStats";
+import { BarChart3, Package, DollarSign, Users, AlertCircle, RefreshCw } from '@/components/icons';
 
 type TimeRange = "7d" | "30d" | "90d" | "custom";
 
@@ -300,7 +301,7 @@ export function DashboardOverview() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
-                <span className="material-symbols-outlined text-warning">warning</span>
+                <AlertCircle className="text-warning" />
               </div>
               <div>
                 <h3 className="font-serif text-xl font-bold text-on-surface">
@@ -351,7 +352,7 @@ export function DashboardOverview() {
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-surface-container border border-outline-variant/30 flex items-center justify-center">
-                            <span className="material-symbols-outlined text-on-surface-variant">inventory</span>
+                            <Package className="text-on-surface-variant" />
                           </div>
                           <div>
                             <p className="font-medium text-on-surface">{product.name}</p>
@@ -417,7 +418,7 @@ export function DashboardOverview() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-surface border border-outline-variant/30 flex items-center justify-center">
-                        <span className="material-symbols-outlined text-on-surface-variant">inventory</span>
+                        <Package size={18} className="text-on-surface-variant" />
                       </div>
                       <div>
                         <p className="font-medium text-on-surface text-sm">{product.name}</p>

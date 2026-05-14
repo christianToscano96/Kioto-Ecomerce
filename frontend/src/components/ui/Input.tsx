@@ -17,19 +17,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <input
-          id={inputId}
-          ref={ref}
-          className={cn(
-            'flex h-10 w-full rounded-lg border border-outline bg-white px-3 py-2 text-sm text-on-surface',
-            'placeholder:text-on-surface-variant',
-            'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent',
-            'disabled:cursor-not-allowed disabled:opacity-50',
-            error && 'border-terracota-500 focus:ring-terracota-500',
-            className
-          )}
-          {...props}
-        />
+<input
+           id={inputId}
+           ref={ref}
+           className={cn(
+             'flex h-10 w-full rounded-lg border border-outline bg-white px-3 py-2 text-base text-on-surface',
+             'placeholder:text-on-surface-variant',
+             'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent',
+             'disabled:cursor-not-allowed disabled:opacity-50',
+             error && 'border-terracota-500 focus:ring-terracota-500',
+             className
+           )}
+           inputMode={props.type === 'number' ? 'decimal' : props.type === 'email' ? 'email' : props.type === 'tel' ? 'tel' : 'text'}
+           {...props}
+         />
         {error && <span className="text-sm text-terracota-600">{error}</span>}
       </div>
     );

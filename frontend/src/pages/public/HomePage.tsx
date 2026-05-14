@@ -12,6 +12,7 @@ import { Zap, Heart, ShoppingCart, ArrowRight, User } from '@/components/icons';
 import comprandoVideo from '../../../assets/comprando.mp4';
 import fleteVideo from '../../../assets/flete.mp4';
 import kiotoVideo from '../../../assets/kioto.mp4';
+import { CategorySection } from '@/components/home/CategorySection';
 
 export function HomePage() {
   const { products, isLoading, fetchProducts } = useProductsStore();
@@ -53,7 +54,7 @@ export function HomePage() {
                 {/* Soft Badge */}
                 <div className="inline-flex items-center gap-2 bg-primary-container/30 text-primary font-medium text-xs px-4 py-2 rounded-full mb-6 animate-fade-in">
                   <Heart size={14} className="text-primary text-sm" />
-                  Colección Primavera 2025
+                  Prendas elegidas con amor 
                 </div>
                 
                 <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-on-surface mb-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
@@ -94,44 +95,8 @@ export function HomePage() {
             </div>
           </section>
   
-          {/* Categories Section */}
-          <section className="bg-surface py-10 border-b border-outline-variant/10 animate-on-scroll">
-            <div className="text-center mb-8">
-              <h2 className="font-serif text-2xl font-bold text-on-surface mb-2">
-                Explorá por Categorías
-              </h2>
-              <p className="text-on-surface-variant text-sm">
-                Encontrá lo que buscás en nuestras colecciones
-              </p>
-            </div>
-
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide justify-center stagger-children">
-              {categories.map((category) => (
-                <Link
-                  key={category._id}
-                  to={`/products?category=${category.name}`}
-                  className="group flex flex-col items-center gap-3 p-3 rounded-xl hover:bg-surface-container-high transition-all duration-300 hover:shadow-md flex-shrink-0"
-                >
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary-container to-primary rounded-full flex items-center justify-center overflow-hidden shadow-md group-hover:scale-110 group-hover:shadow-lg transition-transform duration-300">
-                    {category.imageUrl ? (
-                      <img
-                        src={category.imageUrl}
-                        alt={category.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="material-symbols-outlined text-2xl text-on-primary">
-                        category
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs font-medium text-on-surface group-hover:text-primary transition-colors text-center max-w-[80px] truncate">
-                    {category.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
+{/* Categories Section */}
+          <CategorySection categories={categories} />
 
           {/* Sale Banner */}
           {saleProducts.length > 0 && (

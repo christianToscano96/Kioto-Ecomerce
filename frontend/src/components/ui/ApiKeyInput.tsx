@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Eye, EyeOff } from '@/components/icons';
 
 interface ApiKeyInputProps {
   label: string;
@@ -26,9 +27,7 @@ export function ApiKeyInput({ label, value, onChange, secret = false }: ApiKeyIn
           onClick={() => setShow(!show)}
           className="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
         >
-          <span className="material-symbols-outlined text-sm">
-            {show ? 'visibility_off' : 'visibility'}
-          </span>
+          {show ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>
       )}
     </div>

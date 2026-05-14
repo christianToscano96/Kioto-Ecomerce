@@ -6,6 +6,7 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { Input } from "@/components/ui/Input";
 import { useProductsStore } from "@/store/products";
 import { showToast } from "@/components/ui/Toast";
+import { Package, AlertCircle, Tags, Store } from '@/components/icons';
 
 const LoaderIcon = () => (
   <svg
@@ -349,38 +350,22 @@ try {
         <MetricCard
           label="Total de Artículos"
           value={totalItems}
-          icon={
-            <span className="material-symbols-outlined text-6xl text-primary/10">
-              inventory_2
-            </span>
-          }
+          icon={<Package size={48} className="text-primary/10" />}
         />
         <MetricCard
           label="Stock Bajo"
           value={lowStock}
-          icon={
-            <span className="material-symbols-outlined text-6xl text-terracota-600/10">
-              warning
-            </span>
-          }
+          icon={<AlertCircle size={48} className="text-terracota-600/10" />}
         />
         <MetricCard
           label="Categorías"
           value={categories}
-          icon={
-            <span className="material-symbols-outlined text-6xl text-verde-bosque-600/10">
-              category
-            </span>
-          }
+          icon={<Tags size={48} className="text-verde-bosque-600/10" />}
         />
         <MetricCard
           label="Ventas Activas"
           value={activeSales}
-          icon={
-            <span className="material-symbols-outlined text-6xl text-primary/10">
-              storefront
-            </span>
-          }
+          icon={<Store size={48} className="text-primary/10" />}
         />
       </div>
 

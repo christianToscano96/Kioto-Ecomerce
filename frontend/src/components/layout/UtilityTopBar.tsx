@@ -1,4 +1,4 @@
-import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+import { Search, User, MessageCircle } from '@/components/icons';
 
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { initNotifications, useNotificationsSocket } from "@/store/notifications";
@@ -37,7 +37,7 @@ export function UtilityTopBar({ className }: UtilityTopBarProps) {
 
           {/* Chat */}
           <button className="p-2 rounded-lg hover:bg-surface-container transition-colors">
-            <span className="material-symbols-outlined text-on-surface-variant">chat</span>
+            <MessageCircle size={20} className="text-on-surface-variant" />
           </button>
 
           {/* Profile */}

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { TrendingUp, TrendingDown, Minus } from '@/components/icons';
 
 interface MetricCardProps {
   label: string;
@@ -61,9 +62,13 @@ export function MetricCard({
             changeColors[change.type || 'stable']
           )}
         >
-          <span className="material-symbols-outlined text-xs">
-            {change.type === 'increase' ? 'trending_up' : change.type === 'decrease' ? 'trending_down' : 'remove'}
-          </span>
+          {change.type === 'increase' ? (
+            <TrendingUp size={12} />
+          ) : change.type === 'decrease' ? (
+            <TrendingDown size={12} />
+          ) : (
+            <Minus size={12} />
+          )}
           <span>{change.label}</span>
         </div>
       )}

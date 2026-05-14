@@ -20,22 +20,24 @@ const QuantitySelector = ({
   onIncrease: () => void;
   disabled?: boolean;
 }) => (
-  <div className="flex items-center gap-4 mt-1">
-<button
-              onClick={onDecrease}
-              disabled={disabled}
-              className="text-sm hover:text-primary transition-colors disabled:opacity-50"
-            >
-              <Minus size={16} />
-            </button>
-    <span className="text-on-surface font-bold">{quantity}</span>
-<button
-              onClick={onIncrease}
-              disabled={disabled}
-              className="text-sm hover:text-primary transition-colors disabled:opacity-50"
-            >
-              <Plus size={16} />
-            </button>
+  <div className="flex items-center gap-1">
+    <button
+      onClick={onDecrease}
+      disabled={disabled}
+      className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center text-xs hover:text-primary transition-colors disabled:opacity-50 rounded border border-outline-variant min-h-[44px] min-w-[44px]"
+      aria-label="Disminuir cantidad"
+    >
+      <Minus size={14} />
+    </button>
+    <span className="text-on-surface font-bold text-xs sm:text-sm min-w-[1.5ch] text-center">{quantity}</span>
+    <button
+      onClick={onIncrease}
+      disabled={disabled}
+      className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center text-xs hover:text-primary transition-colors disabled:opacity-50 rounded border border-outline-variant min-h-[44px] min-w-[44px]"
+      aria-label="Aumentar cantidad"
+    >
+      <Plus size={14} />
+    </button>
   </div>
 );
 
@@ -84,73 +86,52 @@ export function CartItemCard({ item }: CartItemCardProps) {
    const description = product?.description || "";
 
   return (
-    <div className="flex flex-col md:flex-row gap-8 pb-12 border-b border-dashed border-outline-variant/40">
+    <div className="flex flex-row md:flex-row gap-3 sm:gap-6 pb-6 sm:pb-8 border-b border-dashed border-outline-variant/40">
       {/* Product Image */}
-      <div className="w-full md:w-36 aspect-[1/1] bg-surface-container overflow-hidden rounded-xl relative group">
+      <div className="w-20 md:w-36 aspect-square bg-surface-container overflow-hidden rounded-lg relative shrink-0">
         {image ? (
           <img
             src={image}
             alt={name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover"
           />
         ) : (
-<div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant bg-gradient-to-br from-surface-container-high to-surface-container">
-              <ImageOff size={48} className="opacity-30 mb-2" />
-              <span className="text-xs uppercase tracking-wider opacity-50">
-                Sin imagen
-              </span>
-            </div>
+          <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant bg-gradient-to-br from-surface-container-high to-surface-container">
+            <ImageOff size={24} className="opacity-30" />
+          </div>
         )}
-        {/* Image overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-xl" />
       </div>
 
       {/* Product Details */}
-      <div className="flex-1 flex flex-col justify-between">
+      <div className="flex-1 flex flex-col justify-between min-w-0">
         <div>
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-2xl font-serif">{name}</h3>
-            <p className="text-xl font-serif text-primary">
+          <div className="flex justify-between items-start mb-1">
+            <h3 className="text-sm sm:text-xl font-serif leading-tight line-clamp-1">{name}</h3>
+            <p className="text-sm sm:text-xl font-serif text-primary ml-2 shrink-0">
               ${price.toFixed(2)}
             </p>
           </div>
 
-          {description && (
-            <p className="text-on-surface-variant mb-6 leading-relaxed max-w-md">
-              {description}
-            </p>
-          )}
-
-          {/* Size/Color/Quantity Row */}
-          <div className="flex gap-12 font-label text-xs uppercase tracking-widest text-on-surface-variant">
+          {/* Size/Color/Quantity Row - Horizontal on mobile */}
+          <div className="flex items-center gap-3 sm:gap-6 font-label text-[10px] sm:text-xs uppercase tracking-widest text-on-surface-variant mt-1 sm:mt-2">
             <div>
-              <span className="block mb-1 text-[10px] opacity-60">Size</span>
-              <span className="text-on-surface font-bold">
-                {(item as any).size || "M"}
-              </span>
+              <span className="block mb-0.5 opacity-60 hidden sm:block">Size</span>
+              <span className="text-on-surface font-bold">{(item as any).size || "M"}</span>
             </div>
-            <div>
-              <span className="block mb-1 text-[10px] opacity-60">Color</span>
-              <div className="flex items-center gap-2">
-                {(item as any).color && (
-                  <div
-                    className="w-4 h-4 rounded-full border border-outline-variant"
-                    style={{
-                      backgroundColor: (item as any).color.startsWith("#")
-                        ? (item as any).color
-                        : "#8B7355",
-                    }}
-                  />
-                )}
-                <span className="text-on-surface font-bold">
-                  {(item as any).color || "Natural"}
-                </span>
-              </div>
+            <div className="flex items-center gap-1">
+              {(item as any).color && (
+                <div
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-outline-variant"
+                  style={{
+                    backgroundColor: (item as any).color.startsWith("#")
+                      ? (item as any).color
+                      : "#8B7355",
+                  }}
+                />
+              )}
+              <span className="text-on-surface font-bold">{(item as any).color || "Natural"}</span>
             </div>
-            <div>
-              <span className="block mb-1 text-[10px] opacity-60">
-                Quantity
-              </span>
+            <div className="sm:ml-auto">
               <QuantitySelector
                 quantity={item.quantity}
                 onDecrease={() => handleQuantityChange(item.quantity - 1)}
@@ -161,14 +142,14 @@ export function CartItemCard({ item }: CartItemCardProps) {
           </div>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-2 sm:mt-4">
           <button
             onClick={handleRemove}
             disabled={isRemoving || isSyncing}
-            className="font-label text-xs uppercase tracking-widest text-primary border-b border-dashed border-primary/40 pb-1 hover:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="font-label text-[10px] sm:text-xs uppercase tracking-widest text-primary border-b border-dashed border-primary/40 pb-0.5 hover:border-primary transition-all disabled:opacity-50 min-h-[44px]"
           >
-            {isRemoving && <Loader2 size={12} className="animate-spin" />}
-            {isRemoving ? "Removing..." : "Remove Item"}
+            {isRemoving && <Loader2 size={10} className="animate-spin inline mr-1" />}
+            {isRemoving ? "Removing..." : "Remove"}
           </button>
         </div>
       </div>

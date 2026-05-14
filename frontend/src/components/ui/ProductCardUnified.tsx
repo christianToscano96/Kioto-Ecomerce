@@ -1,5 +1,4 @@
 import { useState, memo } from "react";
-import { Link } from "react-router-dom";
 import { useCartStore } from "../../store/cart";
 import { useToast } from "./Toast";
 import { ProductBadges } from "./ProductBadges";
@@ -15,6 +14,7 @@ interface ProductCardUnifiedProps {
 }
 
 import { Minus, Plus, Eye, ShoppingBag, ChevronLeft, ChevronRight } from '@/components/icons';
+import { Link } from "react-router-dom";
 
 function ProductCardUnifiedComponent({
   product,
@@ -83,7 +83,7 @@ function ProductCardUnifiedComponent({
       <div className="group bg-surface-container-low rounded-lg overflow-hidden border border-outline-variant/40 hover:shadow-lg transition-shadow">
         <div className="flex flex-col sm:flex-row">
           {/* Image */}
-          <Link to={`/products/${product._id}`} className="block sm:w-48 flex-shrink-0">
+          <div className="block sm:w-48 flex-shrink-0 cursor-pointer" onClick={() => window.location.href = `/products/${product._id}`}>
             <div className="aspect-[3/4] sm:aspect-square bg-surface-container rounded-lg overflow-hidden relative">
               {product.images?.[0] ? (
                 <img
@@ -108,16 +108,19 @@ function ProductCardUnifiedComponent({
                 </div>
               )}
             </div>
-          </Link>
+          </div>
 
           {/* Content */}
           <div className="flex-1 p-4 flex flex-col justify-between">
             <div className="flex-1">
-              <Link to={`/products/${product._id}`}>
+              <button
+                onClick={() => window.location.href = `/products/${product._id}`}
+                className="text-left"
+              >
                 <h3 className="font-serif text-xl font-bold text-on-surface mb-2 hover:text-primary transition-colors">
                   {product.name}
                 </h3>
-              </Link>
+              </button>
               <p className="text-on-surface-variant font-body text-sm mb-4 line-clamp-3">
                 {product.description}
               </p>
@@ -320,14 +323,15 @@ function ProductCardUnifiedComponent({
 
           {/* Quick Actions */}
           {showQuickActions && totalStock > 0 && (
-            <div className="absolute top-3 left-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Link
-                to={`/products/${product._id}`}
-                className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-surface-container transition-colors"
+            <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => window.location.href = `/products/${product._id}`}
+                className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-surface-container transition-colors min-h-[36px] min-w-[36px]"
                 title="Ver detalles"
+                aria-label="Ver detalles del producto"
               >
                 <Eye className="text-sm" />
-              </Link>
+              </button>
 
               <button
                 onClick={(e) => {
@@ -335,8 +339,9 @@ function ProductCardUnifiedComponent({
                   e.stopPropagation();
                   setShowCartPanel(!showCartPanel);
                 }}
-                className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-surface-container transition-colors"
+                className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-surface-container transition-colors min-h-[36px] min-w-[36px]"
                 title="Agregar al carrito"
+                aria-label="Agregar al carrito"
               >
                 <ShoppingBag className="text-sm" />
               </button>

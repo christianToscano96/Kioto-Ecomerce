@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from '@/components/icons';
 import Banner1 from "../../../assets/banner-1.jpeg";
 import Banner2 from "../../../assets/banner-2.jpeg";
 interface Slide {
@@ -77,7 +78,7 @@ export function HeroCarousel({ slides: propSlides }: HeroCarouselProps) {
                 {slide.title}{" "}
                 <span className="italic text-[#ffb5a0]">{slide.highlight}</span>
               </h1>
-              <button className="bg-[#e27d60] text-white px-12 py-5 rounded-lg font-bold tracking-widest uppercase text-xs hover:bg-primary transition-all duration-500 shadow-2xl active:scale-[0.98]">
+              <button className="bg-[#e27d60] text-white px-8 py-4 md:px-12 md:py-5 rounded-lg font-bold tracking-widest uppercase text-xs hover:bg-primary transition-all duration-500 shadow-2xl active:scale-[0.98] min-h-[44px]">
                 {slide.cta}
               </button>
             </div>
@@ -86,20 +87,22 @@ export function HeroCarousel({ slides: propSlides }: HeroCarouselProps) {
       </div>
 
       {/* Carousel Controls */}
-      <div className="absolute inset-y-0 left-8 md:left-12 flex items-center z-20">
+      <div className="absolute inset-y-0 left-4 md:left-6 flex items-center z-20">
         <button
           onClick={() => moveSlide(-1)}
-          className="w-12 h-12 rounded-full border border-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-primary transition-all duration-300 active:scale-90"
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-primary transition-all duration-300 active:scale-90 min-h-[44px] min-w-[44px]"
+          aria-label="Slide anterior"
         >
-          <span className="material-symbols-outlined">west</span>
+          <ChevronLeft size={20} className="md:size-6" />
         </button>
       </div>
-      <div className="absolute inset-y-0 right-8 md:right-12 flex items-center z-20">
+      <div className="absolute inset-y-0 right-4 md:right-6 flex items-center z-20">
         <button
           onClick={() => moveSlide(1)}
-          className="w-12 h-12 rounded-full border border-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-primary transition-all duration-300 active:scale-90"
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-primary transition-all duration-300 active:scale-90 min-h-[44px] min-w-[44px]"
+          aria-label="Slide siguiente"
         >
-          <span className="material-symbols-outlined">east</span>
+          <ChevronRight size={20} className="md:size-6" />
         </button>
       </div>
 

@@ -1,4 +1,4 @@
-import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+import { Eye, Plus, Grid, X, Minus, Search, User, ClipboardList, Truck, DollarSign, RefreshCw } from '@/components/icons';
 
 import { useState, useMemo, useEffect } from 'react';
 import { Badge } from '@/components/ui/Badge';
@@ -150,13 +150,13 @@ export function OrdersList() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard label="Procesando" value={orders?.filter(o => o.status === 'pending').length || 0}
-          icon={<span className="material-symbols-outlined text-6xl text-primary/10">pending_actions</span>} />
+          icon={<ClipboardList size={48} className="text-primary/10" />} />
         <MetricCard label="En Espera de Envío" value={orders?.filter(o => o.status === 'paid').length || 0}
-          icon={<span className="material-symbols-outlined text-6xl text-verde-bosque-600/10">local_shipping</span>} />
+          icon={<Truck size={48} className="text-verde-bosque-600/10" />} />
         <MetricCard label="Ingresos Totales" value={`$${orders?.reduce((sum, o) => sum + o.total, 0).toFixed(2) || '0.00'}`}
-          icon={<span className="material-symbols-outlined text-6xl text-primary/10">attach_money</span>} />
+          icon={<DollarSign size={48} className="text-primary/10" />} />
         <MetricCard label="Devoluciones" value={orders?.filter(o => o.status === 'cancelled').length || 0}
-          icon={<span className="material-symbols-outlined text-6xl text-terracota-600/10">assignment_return</span>} />
+          icon={<RefreshCw size={48} className="text-terracota-600/10" />} />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 border-b pb-4">

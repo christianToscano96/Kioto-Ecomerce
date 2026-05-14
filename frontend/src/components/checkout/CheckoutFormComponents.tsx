@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { Lock, ArrowRight } from '@/components/icons';
 
 interface StepperProps {
   steps: Array<{ number: string; label: string; active?: boolean }>;
@@ -94,7 +95,7 @@ interface SecurityBadgeProps {
 export function SecurityBadge({ message, className = '' }: SecurityBadgeProps) {
   return (
     <div className={`mt-12 flex items-center gap-3 p-4 bg-surface-container-low border-l-2 border-primary/40 italic text-sm ${className}`}>
-      <span className="material-symbols-outlined text-primary">lock</span>
+      <Lock size={18} className="text-primary" />
       <p>{message}</p>
     </div>
   );
@@ -123,7 +124,7 @@ export function PrimaryButton({
       className={`w-full md:w-auto px-12 py-5 bg-primary text-on-primary font-label uppercase tracking-[0.2em] text-sm hover:bg-primary/90 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 ${className}`}
     >
       {children}
-      <span className="material-symbols-outlined text-sm">arrow_forward</span>
+      <ArrowRight size={16} />
     </button>
   );
 }

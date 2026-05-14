@@ -279,7 +279,7 @@ export function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => navigate("/cart")}
-                    className="px-6 py-3 border border-outline-variant rounded-full hover:bg-surface-container transition-colors"
+                    className="px-6 py-3 border border-outline-variant  hover:bg-surface-container transition-colors"
                   >
                     Volver al Carrito
                   </button>
@@ -313,7 +313,7 @@ export function CheckoutPage() {
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="px-6 py-3 border border-outline-variant rounded-full hover:bg-surface-container transition-colors"
+                    className="px-6 py-3 border border-outline-variant hover:bg-surface-container transition-colors"
                   >
                     Volver
                   </button>
@@ -377,7 +377,7 @@ export function CheckoutPage() {
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="px-6 py-3 border border-outline-variant rounded-full hover:bg-surface-container transition-colors"
+                    className="px-6 py-3 border border-outline-variant  hover:bg-surface-container transition-colors"
                   >
                     Volver
                   </button>

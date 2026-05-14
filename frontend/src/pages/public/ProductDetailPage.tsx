@@ -1,4 +1,4 @@
-import { Eye, Plus, Grid, X, Minus, Search, User, Heart, Share2, ChevronDown } from '@/components/icons';
+import { Heart, Share2, Minus, Plus, ChevronDown } from '@/components/icons';
 
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -8,6 +8,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SizeSelector } from "@/components/ui/SizeSelector";
+import { QuantitySelector } from "@/components/ui/QuantitySelector";
+import { ColorSwatch } from "@/components/ui/ColorSwatch";
 import type { Product } from "../../../../shared/src/index";
 import { showToast } from "@/components/ui/Toast";
 
@@ -46,9 +48,7 @@ const AccordionSection = ({
       <span className="text-sm font-bold uppercase tracking-widest font-label">
         {title}
       </span>
-      <span className="material-symbols-outlined transition-transform group-open:rotate-180">
-        expand_more
-      </span>
+      <ChevronDown className="transition-transform group-open:rotate-180" />
     </summary>
     <div className="mt-4 text-sm text-on-surface-variant leading-relaxed space-y-2">
       {children}
@@ -59,12 +59,12 @@ const AccordionSection = ({
 // Related Product Card Component
 const RelatedProductCard = ({ product }: { product: Product }) => {
    const totalStock = product.variants && product.variants.length > 0
-     ? product.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
-     : product.stock;
+      ? product.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
+      : product.stock;
 
   return (
-    <div className="min-w-[280px] bg-surface-container-highest rounded-xl p-4 snap-start group transition-all duration-300 hover:shadow-lg">
-      <div className="aspect-[3/4] overflow-hidden mb-4 rounded-lg relative">
+    <div className="min-w-[160px] sm:min-w-[280px] bg-surface-container-highest rounded-xl p-3 sm:p-4 snap-start group transition-all duration-300 hover:shadow-lg">
+      <div className="aspect-[3/4] overflow-hidden mb-3 sm:mb-4 rounded-lg relative">
         <img
           src={
             product.images?.[0] ||
@@ -76,12 +76,12 @@ const RelatedProductCard = ({ product }: { product: Product }) => {
           }`}
         />
         {totalStock === 0 && (
-          <div className="absolute top-2 right-2 bg-error text-on-primary text-[10px] uppercase tracking-widest px-2 py-1 rounded-full font-label">
+          <div className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-error text-on-primary text-[10px] uppercase tracking-widest px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-label">
             Agotado
           </div>
         )}
       </div>
-      <h3 className="text-lg font-serif text-on-surface line-clamp-1">{product.name}</h3>
+      <h3 className="text-base sm:text-lg font-serif text-on-surface line-clamp-1">{product.name}</h3>
       <p className="text-sm mt-1 text-on-surface-variant font-serif">
         ${product.price.toFixed(2)}
       </p>
@@ -200,14 +200,14 @@ const handleAddToCart = async () => {
       ? product.images
       : ["https://placehold.co/800x1000/fdfae9/1c1c12?text=Product"];
 
-  return (
+return (
     <>
       <Header />
-      <main className="max-w-7xl mx-auto px-8 py-12 mt-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12 mt-8 sm:mt-12">
         {/* Product Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-16 items-start">
           {/* Product Image Section */}
-          <div className="lg:col-span-7 space-y-8">
+          <div className="lg:col-span-7 space-y-6 sm:space-y-8">
             {/* Main Image */}
             <div className="relative bg-surface-container-low overflow-hidden rounded-lg">
               <img
@@ -219,12 +219,12 @@ const handleAddToCart = async () => {
 
             {/* Thumbnail Grid */}
             {images.length > 1 && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {images.map((image: string, index: number) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`bg-surface-container rounded-lg overflow-hidden h-64 transition-all ${
+                    className={`bg-surface-container rounded-lg overflow-hidden h-32 sm:h-64 transition-all ${
                       selectedImageIndex === index ? "ring-2 ring-primary" : ""
                     }`}
                   >
@@ -240,27 +240,27 @@ const handleAddToCart = async () => {
           </div>
 
           {/* Product Info Section */}
-          <div className="lg:col-span-5 border-l border-dashed border-outline-variant/40 pl-8 lg:pl-16">
+          <div className="lg:col-span-5 lg:border-l lg:border-dashed lg:border-outline-variant/40 lg:pl-16">
             {/* Breadcrumbs */}
-            <nav className="mb-8">
+            <nav className="mb-6 sm:mb-8">
               <span className="text-xs uppercase tracking-[0.2em] text-on-surface-variant font-label">
                 Colecciones / Knitwear
               </span>
             </nav>
 
             {/* Product Title */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-on-surface mb-4 leading-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-on-surface mb-4 leading-tight">
               {product.name}
             </h1>
 
             {/* Price */}
-            <p className="text-3xl font-serif text-primary mb-8">
+            <p className="text-2xl sm:text-3xl font-serif text-primary mb-6 sm:mb-8">
               ${product.price.toFixed(2)}
             </p>
 
             {/* Product Description */}
-            <div className="space-y-6 mb-12">
-              <p className="text-on-surface-variant leading-relaxed text-lg">
+            <div className="space-y-4 sm:space-y-6 mb-8 sm:mb-12">
+              <p className="text-on-surface-variant leading-relaxed text-base">
                 {product.description ||
                   "Cosecha de altas montañas donde el aire es puro. Esta prenda es una conversación entre la tierra y quien la lleva."}
               </p>
@@ -270,146 +270,122 @@ const handleAddToCart = async () => {
             </div>
 
 {/* Selectors & Add to Cart */}
-             <div className="space-y-8 mb-12">
+              <div className="space-y-6 sm:space-y-8 mb-8 sm:mb-12">
 {/* Stock Indicator - only for size-based products */}
-             {sizes.length > 0 && selectedSizeStock === 0 && selectedSize && (
-               <p className="text-sm text-error font-medium mb-4">
-                 Agotado - Próximamente disponible
-               </p>
-             )}
-             {sizes.length > 0 && selectedSizeStock > 0 && selectedSizeStock <= 5 && (
-               <p className="text-sm text-verde-bosque-600 font-medium mb-4">
-                 ¡Últimas {selectedSizeStock} unidades disponibles!
-               </p>
-             )}
-             {/* Low stock for non-size products */}
-             {sizes.length === 0 && totalStock <= 5 && totalStock > 0 && (
-               <p className="text-sm text-verde-bosque-600 font-medium mb-4">
-                 ¡Últimas {totalStock} unidades disponibles!
-               </p>
-             )}
+              {sizes.length > 0 && selectedSizeStock === 0 && selectedSize && (
+                <p className="text-sm text-error font-medium mb-4">
+                  Agotado - Próximamente disponible
+                </p>
+              )}
+              {sizes.length > 0 && selectedSizeStock > 0 && selectedSizeStock <= 5 && (
+                <p className="text-sm text-verde-bosque-600 font-medium mb-4">
+                  ¡Últimas {selectedSizeStock} unidades disponibles!
+                </p>
+              )}
+              {/* Low stock for non-size products */}
+              {sizes.length === 0 && totalStock <= 5 && totalStock > 0 && (
+                <p className="text-sm text-verde-bosque-600 font-medium mb-4">
+                  ¡Últimas {totalStock} unidades disponibles!
+                </p>
+              )}
 
 {/* Size Selector - only show if product has variants */}
-              {sizes.length > 0 && (
-                <SizeSelector
-                  sizes={sizes}
-                  selectedSize={selectedSize}
-                  onSelectSize={setSelectedSize}
-                  variants={product.variants}
-                />
-              )}
+               {sizes.length > 0 && (
+                 <SizeSelector
+                   sizes={sizes}
+                   selectedSize={selectedSize}
+                   onSelectSize={setSelectedSize}
+                   variants={product.variants}
+                 />
+               )}
 
-              {/* Color Selector */}
-              {product.colors && product.colors.length > 0 && (
-                <div className="mt-8">
-                  <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-label">
-                    Seleccionar Color
-                  </span>
-                  <div className="flex gap-4 mt-4">
-                    {product.colors.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`w-12 h-12 rounded-full border-2 transition-all ${
-                          selectedColor === color
-                            ? "border-primary"
-                            : "border-outline-variant hover:border-primary"
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
+               {/* Color Selector */}
+               {product.colors && product.colors.length > 0 && (
+                 <ColorSwatch
+                   colors={product.colors}
+                   selectedColor={selectedColor}
+                   onSelectColor={setSelectedColor}
+                 />
+               )}
 
 {/* Quantity Selector */}
-               <div className="mt-8">
-                 <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-label">
-                   Cantidad
-                 </span>
-                 <div className="flex items-center gap-4 mt-4">
-                   <button
-                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                     disabled={availableStock === 0}
-                     className="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary disabled:opacity-50"
-                   >
-                     <Minus size={20} />
-                   </button>
-                   <span className="text-xl font-serif">{quantity}</span>
-                   <button
-                     onClick={() => setQuantity(Math.min(quantity + 1, availableStock))}
-                     disabled={quantity >= availableStock || availableStock === 0}
-                     className="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary disabled:opacity-50"
-                   >
-                     <Plus size={20} />
-                   </button>
-                 </div>
-               </div>
+                <div className="mt-6 sm:mt-8">
+                  <span className="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-label">
+                    Cantidad
+                  </span>
+                  <QuantitySelector
+                    quantity={quantity}
+                    maxStock={availableStock}
+                    onDecrement={() => setQuantity(Math.max(1, quantity - 1))}
+                    onIncrement={() => setQuantity(Math.min(quantity + 1, availableStock))}
+                    disabled={availableStock === 0}
+                  />
+                </div>
 
 {/* Add to Cart Button */}
-                <button
-                  onClick={handleAddToCart}
-                  disabled={(sizes.length > 0 && !selectedSize) || isSyncing || isAddingToCart || availableStock === 0}
-                  className="w-full bg-primary-container text-on-primary-container py-5 rounded-lg font-bold uppercase tracking-widest font-label hover:bg-primary transition-all duration-300 shadow-md disabled:opacity-50 mt-8"
-              >
-                {availableStock === 0
-                  ? "Agotado"
-                  : isSyncing || isAddingToCart
-                  ? "Añadiendo..."
-                  : "Añadir al Carrito"}
-              </button>
+                 <button
+                   onClick={handleAddToCart}
+                   disabled={(sizes.length > 0 && !selectedSize) || isSyncing || isAddingToCart || availableStock === 0}
+                   className="w-full bg-primary-container text-on-primary-container py-4 sm:py-5 rounded-lg font-bold uppercase tracking-widest font-label hover:bg-primary transition-all duration-300 shadow-md disabled:opacity-50 mt-6 sm:mt-8 min-h-[44px]"
+               >
+                 {availableStock === 0
+                   ? "Agotado"
+                   : isSyncing || isAddingToCart
+                   ? "Añadiendo..."
+                   : "Añadir al Carrito"}
+               </button>
+              </div>
+
+             {/* Social & Wishlist */}
+             <div className="flex items-center gap-6 pt-6 sm:pt-8 border-t border-dashed border-outline-variant/40">
+               <button className="flex items-center gap-2 text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors min-h-[44px]">
+                 <Heart size={16} />
+                 Guardar en favoritos
+               </button>
+               <button className="flex items-center gap-2 text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors min-h-[44px]">
+                 <Share2 size={16} />
+                 Compartir
+               </button>
              </div>
 
-            {/* Social & Wishlist */}
-            <div className="flex items-center gap-6 pt-8 border-t border-dashed border-outline-variant/40">
-              <button className="flex items-center gap-2 text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors">
-                <Heart size={16} />
-                Guardar en favoritos
-              </button>
-              <button className="flex items-center gap-2 text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors">
-                <Share2 size={16} />
-                Compartir
-              </button>
-            </div>
+             {/* Accordions */}
+             <div className="space-y-0 border-t border-dashed border-outline-variant/40 pt-6 sm:pt-8">
+               <AccordionSection title="Material & Cuidado">
+                 <p>
+                   {product.materials ||
+                     "100% Wool orgánico. Lavar a mano con agua fría y jabón neutro. Secar a la sombra."}
+                 </p>
+               </AccordionSection>
 
-            {/* Accordions */}
-            <div className="space-y-0 border-t border-dashed border-outline-variant/40 pt-8">
-              <AccordionSection title="Material & Cuidado">
-                <p>
-                  {product.materials ||
-                    "100% Wool orgánico. Lavar a mano con agua fría y jabón neutro. Secar a la sombra."}
-                </p>
-              </AccordionSection>
+               <AccordionSection title="Información de Envío">
+                 <p>
+                   Entrega estándar en 5-7 días hábiles. Nuestro embalaje es 100%
+                   libre de plástico.
+                 </p>
+               </AccordionSection>
+             </div>
+           </div>
+         </div>
 
-              <AccordionSection title="Información de Envío">
-                <p>
-                  Entrega estándar en 5-7 días hábiles. Nuestro embalaje es 100%
-                  libre de plástico.
-                </p>
-              </AccordionSection>
-            </div>
-          </div>
-        </div>
-
-        {/* Complete the Look Section */}
-        {allProducts && allProducts.length > 1 && (
-          <section className="mt-32">
-            <h2 className="text-3xl font-serif mb-12 italic">
-              Completa el Look
-            </h2>
-            <div className="bg-surface-container-low p-8 rounded-xl overflow-x-auto flex gap-8 snap-x">
-              {allProducts.slice(0, 3).map((relatedProduct) => (
-                <RelatedProductCard
-                  key={relatedProduct._id}
-                  product={relatedProduct}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-      </main>
-      <Footer />
-      <BottomNav />
-    </>
-  );
+         {/* Complete the Look Section */}
+         {allProducts && allProducts.length > 1 && (
+           <section className="mt-24 sm:mt-32">
+             <h2 className="text-2xl sm:text-3xl font-serif mb-8 sm:mb-12 italic">
+               Completa el Look
+             </h2>
+             <div className="bg-surface-container-low p-4 sm:p-8 rounded-xl overflow-x-auto flex gap-4 sm:gap-8 snap-x">
+               {allProducts.slice(0, 3).map((relatedProduct) => (
+                 <RelatedProductCard
+                   key={relatedProduct._id}
+                   product={relatedProduct}
+                 />
+               ))}
+             </div>
+           </section>
+         )}
+       </main>
+       <Footer />
+       <BottomNav />
+     </>
+   );
 }

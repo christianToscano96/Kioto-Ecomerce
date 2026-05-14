@@ -1,4 +1,4 @@
-import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+import { Eye, Plus, Grid, X, Minus, Search, User, ChevronLeft, ChevronRight, Heart } from '@/components/icons';
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -149,13 +149,13 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
               onClick={prevImage}
               className="absolute left-2 top-1/2 -translate-y-1/2 bg-surface/80 backdrop-blur-md p-1 rounded-full text-on-surface hover:text-primary z-10 opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <span className="material-symbols-outlined text-sm">chevron_left</span>
+              <ChevronLeft size={16} />
             </button>
             <button
               onClick={nextImage}
               className="absolute right-2 top-1/2 -translate-y-1/2 bg-surface/80 backdrop-blur-md p-1 rounded-full text-on-surface hover:text-primary z-10 opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <span className="material-symbols-outlined text-sm">chevron_right</span>
+              <ChevronRight size={16} />
             </button>
             
             {/* Image indicators */}
@@ -192,7 +192,7 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
             className="bg-surface/80 backdrop-blur-md p-2 rounded-full text-on-surface hover:text-primary transition-colors"
             onClick={(e) => e.preventDefault()}
           >
-            <span className="material-symbols-outlined text-sm">favorite</span>
+            <Heart size={16} />
           </button>
         </div>
         
