@@ -40,17 +40,17 @@ export function Header() {
     <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-dashed border-outline-variant/40">
       <div className="flex justify-between items-center max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         {/* Left: Brand + Nav */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4 sm:gap-8">
           <NavLink
             to="/"
             className="flex items-center"
           >
-            <div className="h-10 overflow-hidden flex items-center pt-5">
+            <div className="h-10 overflow-hidden flex items-center pt-2 sm:pt-5">
             <img 
               src={storeLogo || logoK} 
               alt="Store Logo" 
-              className="h-40 w-auto -mt-2 object-contain "
-              style={{marginLeft: '-30px'}}
+              className="h-8 sm:h-10 w-auto object-contain"
+              style={{marginLeft: '-10px'}}
             />
           </div>
           </NavLink>
@@ -83,7 +83,7 @@ export function Header() {
         </div>
 
         {/* Right: Search + Cart */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Search Bar */}
           <form
             onSubmit={handleSearch}
@@ -102,11 +102,12 @@ export function Header() {
           {/* Cart */}
           <NavLink
             to="/cart"
-            className="text-primary relative scale-95 active:opacity-80 transition-transform"
+            className="text-primary relative active:opacity-80 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label="Carrito de compras"
           >
             <ShoppingCart size={24} />
             {cartItemCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-on-primary text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-primary text-on-primary text-[10px] min-w-[16px] h-4 rounded-full flex items-center justify-center px-1" aria-label={`${cartItemCount} items`}>
                 {cartItemCount}
               </span>
             )}
