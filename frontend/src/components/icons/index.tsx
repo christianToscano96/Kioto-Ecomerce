@@ -10,6 +10,7 @@ export {
   Zap,
   Share2,
   ChevronDown,
+  ImageOff,
   ChevronLeft,
   ChevronRight,
   ChevronUp,
