@@ -49,12 +49,12 @@ export function Header() {
             <img 
               src={storeLogo || logoK} 
               alt="Store Logo" 
-              className="h-8 sm:h-10 w-auto object-contain"
-              style={{marginLeft: '-10px'}}
+              className="h-8 sm:h-56 w-auto object-contain"
+              style={{marginLeft: '-35px', marginBottom: '10px'}}
             />
           </div>
           </NavLink>
-          <div className="hidden md:flex items-center gap-8 font-serif text-lg tracking-tight">
+          <div className="hidden md:flex items-center gap-8 font-serif text-lg tracking-tight" style={{marginLeft: '-60px'}}>
             {navItems.map((item) => (
               <div
                 key={item.to}

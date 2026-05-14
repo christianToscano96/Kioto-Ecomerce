@@ -201,7 +201,7 @@ return (
                  </div>
 
                  <Link to="/checkout">
-                   <button className="w-full bg-primary text-on-primary py-4 sm:py-5 rounded-lg font-label text-xs uppercase tracking-[0.2em] font-bold hover:bg-primary-container transition-colors shadow-sm min-h-[44px]">
+                   <button className="w-full bg-primary text-on-primary py-4 sm:py-5  font-label text-xs uppercase tracking-[0.2em] font-bold hover:bg-primary-container transition-colors shadow-sm min-h-[44px]">
                      Ir a pagar
                    </button>
                  </Link>
