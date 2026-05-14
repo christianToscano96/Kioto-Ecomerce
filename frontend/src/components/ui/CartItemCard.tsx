@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useCartStore } from "@/store/cart";
-import type { CartItem } from "../../../../shared/src/index";
+import type { CartItem } from "@shared/index";
 import { showToast } from "@/components/ui/Toast";
+import { Plus, Minus, ImageOff, Loader2 } from '@/components/icons';
 
 interface CartItemCardProps {
   item: CartItem;
@@ -20,21 +21,21 @@ const QuantitySelector = ({
   disabled?: boolean;
 }) => (
   <div className="flex items-center gap-4 mt-1">
-    <button
-      onClick={onDecrease}
-      disabled={disabled}
-      className="material-symbols-outlined text-sm hover:text-primary transition-colors disabled:opacity-50"
-    >
-      remove
-    </button>
+<button
+              onClick={onDecrease}
+              disabled={disabled}
+              className="text-sm hover:text-primary transition-colors disabled:opacity-50"
+            >
+              <Minus size={16} />
+            </button>
     <span className="text-on-surface font-bold">{quantity}</span>
-    <button
-      onClick={onIncrease}
-      disabled={disabled}
-      className="material-symbols-outlined text-sm hover:text-primary transition-colors disabled:opacity-50"
-    >
-      add
-    </button>
+<button
+              onClick={onIncrease}
+              disabled={disabled}
+              className="text-sm hover:text-primary transition-colors disabled:opacity-50"
+            >
+              <Plus size={16} />
+            </button>
   </div>
 );
 
@@ -93,14 +94,12 @@ export function CartItemCard({ item }: CartItemCardProps) {
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant bg-gradient-to-br from-surface-container-high to-surface-container">
-            <span className="material-symbols-outlined text-5xl opacity-30 mb-2">
-              image_not_supported
-            </span>
-            <span className="text-xs uppercase tracking-wider opacity-50">
-              Sin imagen
-            </span>
-          </div>
+<div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant bg-gradient-to-br from-surface-container-high to-surface-container">
+              <ImageOff size={48} className="opacity-30 mb-2" />
+              <span className="text-xs uppercase tracking-wider opacity-50">
+                Sin imagen
+              </span>
+            </div>
         )}
         {/* Image overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-xl" />
@@ -168,24 +167,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
             disabled={isRemoving || isSyncing}
             className="font-label text-xs uppercase tracking-widest text-primary border-b border-dashed border-primary/40 pb-1 hover:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {isRemoving && (
-              <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-            )}
+            {isRemoving && <Loader2 size={12} className="animate-spin" />}
             {isRemoving ? "Removing..." : "Remove Item"}
           </button>
         </div>

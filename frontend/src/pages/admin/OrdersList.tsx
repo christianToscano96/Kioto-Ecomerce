@@ -1,3 +1,5 @@
+import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+
 import { useState, useMemo, useEffect } from 'react';
 import { Badge } from '@/components/ui/Badge';
 import { DataTable } from '@/components/ui/DataTable';
@@ -205,7 +207,7 @@ export function OrdersList() {
             a.click();
           }}>Exportar CSV</Button>
           <Button onClick={() => setShowManualModal(true)}>
-            <span className="material-symbols-outlined mr-2">add</span>Crear Pedido Manual
+            <Plus size={20} />Crear Pedido Manual
           </Button>
         </div>
       </div>

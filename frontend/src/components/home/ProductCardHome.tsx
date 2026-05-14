@@ -1,3 +1,5 @@
+import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../../../../shared/src/index';
@@ -180,7 +182,7 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
         {/* Overlay with view icon on hover */}
         <Link to={`/products/${product._id}`} className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
           <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-transform">
-            <span className="material-symbols-outlined text-on-surface">visibility</span>
+            <Eye size={20} />
           </div>
         </Link>
         

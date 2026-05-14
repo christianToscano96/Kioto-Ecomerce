@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrdersStore } from '@/store/orders';
 import { showToast } from '@/components/ui/Toast';
-import type { Order } from '../../../../shared/src';
+import type { Order } from '@shared/index';
+import { MoreVertical, Eye, Printer, CreditCard, RefreshCw, Mail, ArrowRight, X } from '@/components/icons';
 
 interface OrderActionsProps {
   orderId: string;
@@ -134,7 +135,7 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
         className="text-on-surface-variant hover:text-primary transition-colors p-1"
         aria-label={`Acciones para pedido ${orderId.slice(-8)}`}
       >
-        <span className="material-symbols-outlined">more_vert</span>
+        <MoreVertical size={20} />
       </button>
 
       {open && (
@@ -143,7 +144,7 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
             onClick={handleView}
             className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors flex items-center gap-2"
           >
-            <span className="material-symbols-outlined text-sm">visibility</span>
+            <Eye size={16} />
             Ver Detalle
           </button>
           
@@ -152,7 +153,7 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
               onClick={() => { onPrintLabel(orderId); setOpen(false); }}
               className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors flex items-center gap-2"
             >
-              <span className="material-symbols-outlined text-sm">print</span>
+              <Printer size={16} />
               Imprimir Etiqueta
             </button>
           )}
@@ -165,7 +166,7 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
                 disabled={checkingPayment}
                 className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors flex items-center gap-2"
               >
-                <span className="material-symbols-outlined text-sm">credit_card</span>
+                <CreditCard size={16} />
                 {checkingPayment ? 'Verificando...' : 'Verificar Pago'}
               </button>
               
@@ -175,7 +176,7 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
                   disabled={refunding}
                   className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors text-terracota-600 flex items-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-sm">undo</span>
+                  <RefreshCw size={16} />
                   {refunding ? 'Reembolsando...' : 'Reembolsar'}
                 </button>
               )}
@@ -191,7 +192,7 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
             disabled={resending}
             className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors flex items-center gap-2"
           >
-            <span className="material-symbols-outlined text-sm">mail</span>
+            <Mail size={16} />
             {resending ? 'Enviando...' : 'Reenviar Email'}
           </button>
           
@@ -200,7 +201,7 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
               onClick={() => handleChangeStatus(nextStatus()!)}
               className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors flex items-center gap-2"
             >
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              <ArrowRight size={16} />
               Marcar como {STATUS_LABELS[nextStatus()!]}
             </button>
           )}
@@ -210,7 +211,7 @@ export function OrderActions({ orderId, status, galioPaymentId, onPrintLabel }: 
               onClick={() => handleChangeStatus('cancelled')}
               className="w-full text-left px-4 py-2 text-sm hover:bg-surface-container transition-colors text-terracota-600 flex items-center gap-2"
             >
-              <span className="material-symbols-outlined text-sm">cancel</span>
+              <X size={16} />
               Cancelar Pedido
             </button>
           )}

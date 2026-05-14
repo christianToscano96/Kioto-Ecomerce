@@ -5,8 +5,7 @@ import { useCategoriesStore } from "@/store/categories";
 import { productsApi } from "@/lib/api";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Footer } from "@/components/layout/Footer";
-import { ProductCardGeneric } from "@/components/ui/ProductCardGeneric";
-import { ProductCardList } from "@/components/ui/ProductCardList";
+import { ProductCardUnified } from "@/components/ui/ProductCardUnified";
 import { SidebarFilters } from "@/components/public/SidebarFilters";
 import { useCartStore } from "@/store/cart";
 import { PageContainer } from "@/components/ui/Container";
@@ -387,24 +386,17 @@ export function ProductsListPage() {
                 }
               >
                 {visibleProducts.map((product, index) => (
-                  view === "list" ? (
-                    <ProductCardList
-                      key={product._id}
+                  <div
+                    key={product._id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <ProductCardUnified
                       product={product}
+                      variant={view === "list" ? "list" : "grid"}
                       onQuickAdd={handleQuickAdd}
                     />
-                  ) : (
-                    <div
-                      key={product._id}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <ProductCardGeneric
-                        product={product}
-                        onQuickAdd={handleQuickAdd}
-                      />
-                    </div>
-                  )
+                  </div>
                 ))}
               </div>
             )}

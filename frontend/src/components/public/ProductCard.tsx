@@ -1,3 +1,5 @@
+import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+
 import { Link } from 'react-router-dom';
 import type { Product } from '../../../../shared/src/index';
 import { ProductBadges } from '@/components/ui/ProductBadges';
@@ -89,7 +91,7 @@ export function ProductCard({ product, onQuickAdd, view = 'grid' }: ProductCardP
           onClick={handleQuickAdd}
           className="w-full bg-primary text-on-primary font-label text-sm uppercase tracking-widest py-3 rounded-lg hover:bg-primary-container transition-all flex items-center justify-center gap-2"
         >
-          <span className="material-symbols-outlined text-base">add</span>
+          <Plus size={20} />
           Agregar
         </button>
       </Link>

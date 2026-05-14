@@ -7,13 +7,11 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageContainer } from "@/components/ui/Container";
-import { ProductCardGeneric } from "@/components/ui/ProductCardGeneric";
+import { ProductCardUnified } from "@/components/ui/ProductCardUnified";
+import { Zap, Heart, ShoppingCart, ArrowRight, User } from '@/components/icons';
 import comprandoVideo from '../../../assets/comprando.mp4';
 import fleteVideo from '../../../assets/flete.mp4';
 import kiotoVideo from '../../../assets/kioto.mp4';
-const FlashIcon = () => (
-  <span className="material-symbols-outlined text-lg">bolt</span>
-);
 
 export function HomePage() {
   const { products, isLoading, fetchProducts } = useProductsStore();
@@ -54,7 +52,7 @@ export function HomePage() {
               <div className="flex-1 max-w-xl">
                 {/* Soft Badge */}
                 <div className="inline-flex items-center gap-2 bg-primary-container/30 text-primary font-medium text-xs px-4 py-2 rounded-full mb-6 animate-fade-in">
-                  <span className="material-symbols-outlined text-primary text-sm">favorite</span>
+                  <Heart size={14} className="text-primary text-sm" />
                   Colección Primavera 2025
                 </div>
                 
@@ -196,11 +194,11 @@ export function HomePage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 stagger-children">
               {newProducts.map((product) => (
-                <ProductCardGeneric
-                  key={product._id}
-                  product={product}
-                  onQuickAdd={(_productId, options) => addToCart(product, options?.quantity || 1, options?.size)}
-                />
+<ProductCardUnified
+  key={product._id}
+  product={product}
+  onQuickAdd={(_productId, options) => addToCart(product, options?.quantity || 1, options?.size)}
+/>
               ))}
             </div>
           </section>
@@ -244,7 +242,7 @@ export function HomePage() {
           <PageContainer>
             <div className="flex items-center justify-center gap-4 text-sm font-medium">
               <div className="flex items-center gap-2 animate-pulse">
-                <FlashIcon />
+                <Zap size={18} />
                 <span>Oferta Flash: 50% OFF en productos seleccionados</span>
               </div>
               <span className="hidden sm:inline">|</span>

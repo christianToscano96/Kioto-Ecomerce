@@ -1,3 +1,5 @@
+import { Eye, Plus, Grid, X, Minus, Search, User, Heart, Share2, ChevronDown } from '@/components/icons';
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useCartIsSyncing, useCartStore } from "@/store/cart";
@@ -331,7 +333,7 @@ const handleAddToCart = async () => {
                      disabled={availableStock === 0}
                      className="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary disabled:opacity-50"
                    >
-                     <span className="material-symbols-outlined text-sm">remove</span>
+                     <Minus size={20} />
                    </button>
                    <span className="text-xl font-serif">{quantity}</span>
                    <button
@@ -339,7 +341,7 @@ const handleAddToCart = async () => {
                      disabled={quantity >= availableStock || availableStock === 0}
                      className="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary disabled:opacity-50"
                    >
-                     <span className="material-symbols-outlined text-sm">add</span>
+                     <Plus size={20} />
                    </button>
                  </div>
                </div>
@@ -361,11 +363,11 @@ const handleAddToCart = async () => {
             {/* Social & Wishlist */}
             <div className="flex items-center gap-6 pt-8 border-t border-dashed border-outline-variant/40">
               <button className="flex items-center gap-2 text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors">
-                <span className="material-symbols-outlined text-base">favorite_border</span>
+                <Heart size={16} />
                 Guardar en favoritos
               </button>
               <button className="flex items-center gap-2 text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors">
-                <span className="material-symbols-outlined text-base">share</span>
+                <Share2 size={16} />
                 Compartir
               </button>
             </div>

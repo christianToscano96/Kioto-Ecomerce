@@ -1,3 +1,5 @@
+import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+
 interface ViewToggleProps {
   view: 'grid' | 'list';
   onChange: (view: 'grid' | 'list') => void;
@@ -19,7 +21,7 @@ export function ViewToggle({ view, onChange }: ViewToggleProps) {
           }`}
           aria-label="Vista de cuadrícula"
         >
-          <span className="material-symbols-outlined text-sm">grid_view</span>
+          <Grid size={20} />
         </button>
         <button
           onClick={() => onChange('list')}

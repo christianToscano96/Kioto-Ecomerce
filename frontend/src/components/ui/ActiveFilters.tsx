@@ -1,3 +1,5 @@
+import { X } from '@/components/icons';
+
 export interface ActiveFilter {
   id: string;
   label: string;
@@ -32,7 +34,7 @@ export function ActiveFilters({ filters, onRemove, onClearAll }: ActiveFiltersPr
               className="text-on-surface-variant hover:text-primary transition-colors"
               aria-label={`Quitar filtro ${filter.label}`}
             >
-              <span className="material-symbols-outlined text-sm">close</span>
+              <X size={16} />
             </button>
           </span>
         ))}
