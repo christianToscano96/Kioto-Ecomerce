@@ -1,4 +1,4 @@
-import { Eye, Plus, Grid, X, Minus, Search, User } from '@/components/icons';
+import { Plus } from '@/components/icons';
 
 import { Link } from 'react-router-dom';
 import type { Product } from '../../../../shared/src/index';

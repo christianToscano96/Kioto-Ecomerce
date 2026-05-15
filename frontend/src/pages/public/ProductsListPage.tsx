@@ -54,6 +54,7 @@ export function ProductsListPage() {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 640 : false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 60000]);
   const [visibleCount, setVisibleCount] = useState(12);
   const [availableColors, setAvailableColors] = useState<string[]>([]);
@@ -70,6 +71,15 @@ export function ProductsListPage() {
     fetchCategories();
     productsApi.getColors().then(setAvailableColors).catch(console.error);
   }, [fetchCategories]);
+
+  // Detectar cambios de tamaño de ventana para forzar vista lista en móvil
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Fetch categories on mount
   useEffect(() => {
@@ -305,6 +315,9 @@ export function ProductsListPage() {
     );
   }
 
+  // Determinar variant: en móvil forzar "list", en desktop respetar el estado de vista
+  const effectiveVariant = isMobile ? "list" : view;
+
   return (
     <>
       <PublicHeader />
@@ -420,10 +433,11 @@ export function ProductsListPage() {
               <div
                 className={
                   view === "grid"
-                    ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-3 gap-y-8 gap-x-4 md:gap-y-16 md:gap-x-12"
+                    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-8 gap-x-4 md:gap-y-16 md:gap-x-12"
                     : "space-y-6"
                 }
               >
+
                 {visibleProducts.map((product, index) => (
                   <div
                     key={product._id}
@@ -432,7 +446,7 @@ export function ProductsListPage() {
                   >
                     <ProductCardUnified
                       product={product}
-                      variant={view === "list" ? "list" : "grid"}
+                      variant={effectiveVariant}
                       onQuickAdd={handleQuickAdd}
                     />
                   </div>

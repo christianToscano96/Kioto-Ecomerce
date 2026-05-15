@@ -1,5 +1,4 @@
-import { Eye, Plus, Grid, X, Minus, Search, User, ChevronLeft, ChevronRight, Heart } from '@/components/icons';
-
+import { Eye, ChevronLeft, ChevronRight, Heart } from '@/components/icons';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../../../../shared/src/index';
@@ -187,7 +186,7 @@ export function ProductCard({ product, onQuickAdd }: ProductCardProps) {
         </Link>
         
         {/* Top right buttons */}
-        <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
           <button 
             className="bg-surface/80 backdrop-blur-md p-2 rounded-full text-on-surface hover:text-primary transition-colors"
             onClick={(e) => e.preventDefault()}

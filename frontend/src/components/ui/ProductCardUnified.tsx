@@ -323,12 +323,11 @@ function ProductCardUnifiedComponent({
 
           {/* Quick Actions */}
           {showQuickActions && totalStock > 0 && (
-            <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-3 left-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => window.location.href = `/products/${product._id}`}
-                className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-surface-container transition-colors min-h-[36px] min-w-[36px]"
+                className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-surface-container transition-colors"
                 title="Ver detalles"
-                aria-label="Ver detalles del producto"
               >
                 <Eye className="text-sm" />
               </button>
@@ -339,9 +338,8 @@ function ProductCardUnifiedComponent({
                   e.stopPropagation();
                   setShowCartPanel(!showCartPanel);
                 }}
-                className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-surface-container transition-colors min-h-[36px] min-w-[36px]"
+                className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-surface-container transition-colors"
                 title="Agregar al carrito"
-                aria-label="Agregar al carrito"
               >
                 <ShoppingBag className="text-sm" />
               </button>
