@@ -98,7 +98,6 @@ function ProductCardUnifiedComponent({
                   Sin imagen
                 </div>
               )}
-              <ProductBadges isNew={false} stock={totalStock} />
               {/* Sold Out Overlay */}
               {totalStock === 0 && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">

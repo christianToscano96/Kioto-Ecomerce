@@ -19,6 +19,7 @@ import { SortDropdown, type SortOption } from "@/components/ui/SortDropdown";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { PriceRangeFilter } from "@/components/ui/PriceRangeFilter";
 import { Filter, ArrowLeft } from "@/components/icons";
+import { BackButton } from "@/components/ui/BackButton";
 
 const LoaderIcon = () => (
   <svg
@@ -315,7 +316,6 @@ export function ProductsListPage() {
     );
   }
 
-  // Determinar variant: en móvil forzar "list", en desktop respetar el estado de vista
   const effectiveVariant = isMobile ? "list" : view;
 
   return (
@@ -323,21 +323,13 @@ export function ProductsListPage() {
       <PublicHeader />
 
       <PageContainer>
-        {/* Encabezado Narrativo */}
-<header className="mb-8 md:mb-16 mt-8 md:mt-16">
-           <div className="flex items-center gap-3 mb-4">
-             <button
-               onClick={() => window.history.back()}
-               className="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container min-h-[44px] min-w-[44px]"
-               aria-label="Volver atrás"
-             >
-               <ArrowLeft size={20} />
-             </button>
-           </div>
-           <span className="font-label text-xs uppercase tracking-[0.2em] text-primary font-bold">
-             Selección de Temporada
-           </span>
-         </header>
+      
+        <header className="mb-2 md:mb-16 mt-2 md:mt-16">
+            <div className="text-center mt-2">
+                <BackButton label="Volver" showLabelOnMobile={true} />
+            </div>
+         
+        </header>
 
         {/* Active Filters */}
         <ActiveFilters
@@ -347,7 +339,7 @@ export function ProductsListPage() {
         />
 
 <div className="flex flex-col lg:flex-row gap-8 md:gap-16">
-{/* Mobile Filter Button */}
+        {/* Mobile Filter Button */}
           <div className="lg:hidden px-4">
             <button
               onClick={() => setShowFiltersDrawer(true)}
@@ -358,7 +350,7 @@ export function ProductsListPage() {
             </button>
           </div>
 
-{/* Filtros Laterales */}
+            {/* Filtros Laterales */}
             <div className="hidden lg:block">
             <SidebarFilters
               categories={categories}
@@ -419,7 +411,7 @@ export function ProductsListPage() {
                     ? "Ningún producto coincide con tus filtros."
                     : "Aún no hay productos disponibles."}
                 </p>
-{/* Clear filters button */}
+                {/* Clear filters button */}
                     {(searchQuery || selectedCategory || selectedSize || selectedColor) && (
                        <button
                          onClick={clearAllFilters}

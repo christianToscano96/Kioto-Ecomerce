@@ -71,7 +71,7 @@ export function CartPage() {
             Error al cargar el carrito. Por favor, intenta de nuevo.
           </div>
           <div className="text-center mt-6">
-            <BackButton fallbackTo="/products" label="Volver" showLabelOnMobile={true} />
+            <BackButton label="Volver" showLabelOnMobile={true} />
           </div>
         </div>
       </>
@@ -90,7 +90,6 @@ if (items.length === 0) {
               </h1>
               <div className="flex items-center gap-2 sm:gap-4">
                 <BackButton 
-                  fallbackTo="/products" 
                   label="Volver" 
                   showLabelOnMobile={true}
                 />
@@ -138,7 +137,7 @@ return (
                Canasta
              </h1>
              <div className="flex items-center gap-4">
-               <BackButton fallbackTo="/" className="hidden sm:flex" />
+                <BackButton className="hidden sm:flex" />
                
              </div>
            </div>

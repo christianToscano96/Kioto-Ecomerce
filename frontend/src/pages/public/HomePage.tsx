@@ -52,7 +52,7 @@ export function HomePage() {
               {/* Left Content */}
               <div className="flex-1 max-w-xl">
                 {/* Soft Badge */}
-                <div className="inline-flex items-center gap-2 bg-primary-container/30 text-primary font-medium text-xs px-4 py-2 rounded-full mb-6 animate-fade-in">
+                <div className="inline-flex items-center gap-2 bg-primary-container/30 text-primary font-medium text-xs px-4 py-2 rounded-md mb-6 animate-fade-in">
                   <Heart size={14} className="text-primary text-sm" />
                   Prendas elegidas con amor 
                 </div>
@@ -69,7 +69,7 @@ export function HomePage() {
                 <div className="flex flex-col sm:flex-row gap-3 animate-fade-in" style={{ animationDelay: '300ms' }}>
                   <Link
                     to="/products"
-                    className="inline-flex items-center justify-center gap-2 bg-primary text-on-primary font-medium text-sm px-8 py-3.5 rounded-full hover:bg-primary-hover transition-all shadow-md hover:shadow-lg"
+                    className="inline-flex items-center justify-center gap-2 bg-primary text-on-primary font-medium text-sm px-8 py-3.5 rounded-md hover:bg-primary-hover transition-all shadow-md hover:shadow-lg"
                   >
                     Ver Catálogo
                   </Link>
@@ -77,7 +77,7 @@ export function HomePage() {
               </div>
               
               {/* Right Video */}
-<div className="flex-1 relative w-full max-w-lg animate-fade-in" style={{ animationDelay: '400ms' }}>
+              <div className="flex-1 relative w-full max-w-lg animate-fade-in" style={{ animationDelay: '400ms' }}>
                   <div className="relative rounded-2xl overflow-hidden max-w-lg">
                     <div className="aspect-video">
                       <video
@@ -115,7 +115,7 @@ export function HomePage() {
                   <Link
                     key={product._id}
                     to={`/products/${product._id}`}
-                    className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center hover:bg-white/20 transition-colors"
+                    className="bg-white/10 backdrop-blur-sm rounded-md p-3 text-center hover:bg-white/20 transition-colors"
                   >
                     <div className="aspect-square bg-white/20 rounded mb-2 overflow-hidden">
                       {product.images?.[0] && (
@@ -172,7 +172,7 @@ export function HomePage() {
           <section className="py-8 animate-on-scroll">
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Video */}
-              <div className="flex-1 rounded-xl overflow-hidden aspect-video">
+              <div className="flex-1 rounded-md overflow-hidden aspect-video">
                 <video
                   src={comprandoVideo}
                   autoPlay
@@ -184,7 +184,7 @@ export function HomePage() {
                 />
               </div>
               {/* Text Content */}
-              <div className="flex-1 bg-surface-container rounded-xl p-6 flex items-center">
+              <div className="flex-1 bg-surface-container rounded-md p-6 flex items-center">
                 <div className="max-w-md">
                   <h2 className="font-serif text-2xl font-bold text-on-surface mb-3">
                     La magia de encontrar el detalle ideal
@@ -194,7 +194,7 @@ export function HomePage() {
                   </p>
                   <Link
                     to="/products"
-                    className="inline-block bg-primary text-on-primary font-label uppercase tracking-widest text-xs px-4 py-2 rounded-lg hover:bg-primary-hover transition-colors"
+                    className="inline-block bg-primary text-on-primary font-label uppercase tracking-widest text-xs px-4 py-2 rounded-md hover:bg-primary-hover transition-colors"
                   >
                     Ver Catálogo
                   </Link>
@@ -221,9 +221,9 @@ export function HomePage() {
           <section className="py-8 animate-on-scroll">
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Text Content */}
-              <div className="flex-1 bg-surface-container rounded-xl p-6 flex items-center">
+              <div className="flex-1 bg-surface-container rounded-md p-6 flex items-center">
                 <div className="max-w-md">
-                  <div className="inline-flex items-center gap-2 bg-primary-container/20 rounded-full px-3 py-1 mb-3">
+                  <div className="inline-flex items-center gap-2 bg-primary-container/20 rounded-md px-3 py-1 mb-3">
                     <span className="material-symbols-outlined text-base text-primary">
                       local_shipping
                     </span>
@@ -257,18 +257,17 @@ export function HomePage() {
                   </div>
                 </div>
               </div>
-{/* Video */}
-               <div className="flex-1 rounded-xl overflow-hidden aspect-video">
-                 <video
-                   src={fleteVideo}
-                   autoPlay
-                   muted
-                   loop
-                   playsInline
-                   className="w-full h-full object-cover"
-                   preload="none"
-                 />
-               </div>
+              <div className="flex-1 rounded-md overflow-hidden aspect-video">
+                <video
+                  src={fleteVideo}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover"
+                  preload="none"
+                />
+              </div>
             </div>
           </section>
         </PageContainer>
