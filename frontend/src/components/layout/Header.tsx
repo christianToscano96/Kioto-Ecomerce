@@ -4,7 +4,7 @@ import { useCartItemCount } from "@/store/cart";
 import { useCategoriesStore } from "@/store/categories";
 import { useSettings } from "@/lib/queries";
 import { Search, ShoppingCart, ChevronDown } from '@/components/icons';
-import logoK from '../../../assets/logo.jpg';
+import logoK from '../../../assets/logo.png';
 
 const navItems = [
   { to: "/products", label: "Catálogo" },

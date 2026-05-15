@@ -2,10 +2,12 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useProductsStore } from "@/store/products";
 import { useCategoriesStore } from "@/store/categories";
+import { useUiStore } from "@/store/ui";
 import { productsApi } from "@/lib/api";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCardUnified } from "@/components/ui/ProductCardUnified";
+import { BottomSheet } from "@/components/ui/BottomSheet";
 import { SidebarFilters } from "@/components/public/SidebarFilters";
 import { Drawer } from "@/components/ui/Drawer";
 import { useCartStore } from "@/store/cart";
@@ -18,8 +20,9 @@ import { useToast } from "@/components/ui/Toast";
 import { SortDropdown, type SortOption } from "@/components/ui/SortDropdown";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { PriceRangeFilter } from "@/components/ui/PriceRangeFilter";
-import { Filter, ArrowLeft } from "@/components/icons";
+import { Filter, ArrowLeft, Minus, Plus } from "@/components/icons";
 import { BackButton } from "@/components/ui/BackButton";
+import type { Product } from "../../../../shared/src";
 
 const LoaderIcon = () => (
   <svg
@@ -51,8 +54,9 @@ export function ProductsListPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     initialCategory || null,
   );
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  // Filtros de la lista de productos (independientes del Quick Add panel)
+  const [filterSize, setFilterSize] = useState<string | null>(null);
+  const [filterColor, setFilterColor] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 640 : false);
@@ -64,8 +68,17 @@ export function ProductsListPage() {
   const { products, isLoading, error } = useProductsStore();
   const fetchProducts = useProductsStore.getState().fetchProducts;
   const addToCart = useCartStore.getState().addToCart;
-  const { categories: allCategories, fetchCategories } = useCategoriesStore();
+  const {
+    quickAddPanel,
+    openQuickAdd,
+    closeQuickAdd,
+    setQuickAddSize,
+    setQuickAddColor,
+    setQuickAddQuantity,
+    resetQuickAdd,
+  } = useUiStore();
   const { addToast } = useToast();
+  const { categories: allCategories, fetchCategories } = useCategoriesStore();
 
   // Fetch categories and colors on mount
   useEffect(() => {
@@ -166,14 +179,14 @@ export function ProductsListPage() {
       );
     }
 
-    // Size filter (assuming we have size info in product)
-    if (selectedSize) {
-      filtered = filtered.filter((p) => p.sizes?.includes(selectedSize));
+    // Size filter
+    if (filterSize) {
+      filtered = filtered.filter((p) => p.sizes?.includes(filterSize));
     }
 
     // Color filter
-    if (selectedColor) {
-      filtered = filtered.filter((p) => p.colors?.includes(selectedColor));
+    if (filterColor) {
+      filtered = filtered.filter((p) => p.colors?.includes(filterColor));
     }
 
     // Price filter
@@ -205,8 +218,8 @@ export function ProductsListPage() {
     products,
     selectedCategory,
     searchQuery,
-    selectedSize,
-    selectedColor,
+    filterSize,
+    filterColor,
     sortBy,
     priceRange,
   ]);
@@ -239,46 +252,62 @@ export function ProductsListPage() {
     return () => observer.disconnect();
   }, [filteredProducts.length, visibleCount]);
 
-  const handleQuickAdd = async (productId: string) => {
-    const product = products?.find((p) => p._id === productId);
-    if (product) {
-      try {
-        await addToCart(product, 1);
-        // Show toast
-        addToast({
-          type: 'success',
-          title: '¡Agregado!',
-          message: `${product.name} fue agregado al carrito`,
-        });
-      } catch (error) {
-        console.error("Error al agregar al carrito:", error);
-      }
+  const handleQuickAdd = (productId: string) => {
+    openQuickAdd(productId);
+  };
+
+  // Agregar al carrito desde el BottomSheet
+  const handleQuickAddSubmit = async () => {
+    if (!quickAddPanel.productId) return;
+    const product = products?.find((p) => p._id === quickAddPanel.productId);
+    if (!product) return;
+
+    try {
+      await addToCart(
+        product,
+        quickAddPanel.quantity,
+        quickAddPanel.selectedSize || undefined,
+        quickAddPanel.selectedColor || undefined,
+      );
+      addToast({
+        type: 'success',
+        title: '¡Agregado!',
+        message: `${product.name} fue agregado al carrito`,
+      });
+      resetQuickAdd();
+    } catch (error) {
+      console.error("Error al agregar al carrito:", error);
+      addToast({
+        type: 'error',
+        title: 'Error',
+        message: 'No se pudo agregar al carrito',
+      });
     }
   };
 
-  // Active filters for display
+   // Active filters for display
   const activeFilters: ActiveFilter[] = [
     ...(selectedCategory
       ? [{ id: "category", label: "Categoría", value: selectedCategory }]
       : []),
-    ...(selectedSize
-      ? [{ id: "size", label: "Talla", value: selectedSize }]
+    ...(filterSize
+      ? [{ id: "size", label: "Talla", value: filterSize }]
       : []),
-    ...(selectedColor
-      ? [{ id: "color", label: "Color", value: selectedColor }]
+    ...(filterColor
+      ? [{ id: "color", label: "Color", value: filterColor }]
       : []),
   ];
 
   const removeFilter = (id: string) => {
     if (id === "category") setSelectedCategory(null);
-    if (id === "size") setSelectedSize(null);
-    if (id === "color") setSelectedColor(null);
+    if (id === "size") setFilterSize(null);
+    if (id === "color") setFilterColor(null);
   };
 
   const clearAllFilters = () => {
     setSelectedCategory(null);
-    setSelectedSize(null);
-    setSelectedColor(null);
+    setFilterSize(null);
+    setFilterColor(null);
     setSearchQuery("");
   };
 
@@ -316,7 +345,7 @@ export function ProductsListPage() {
     );
   }
 
-  const effectiveVariant = isMobile ? "list" : view;
+  const effectiveVariant = view;
 
   return (
     <>
@@ -324,12 +353,9 @@ export function ProductsListPage() {
 
       <PageContainer>
       
-        <header className="mb-2 md:mb-16 mt-2 md:mt-16">
-            <div className="text-center mt-2">
+            <div className="text-center mt-8">
                 <BackButton label="Volver" showLabelOnMobile={true} />
             </div>
-         
-        </header>
 
         {/* Active Filters */}
         <ActiveFilters
@@ -338,7 +364,7 @@ export function ProductsListPage() {
           onClearAll={activeFilters.length > 1 ? clearAllFilters : undefined}
         />
 
-<div className="flex flex-col lg:flex-row gap-8 md:gap-16">
+      <div className="flex flex-col lg:flex-row gap-8 md:gap-16">
         {/* Mobile Filter Button */}
           <div className="lg:hidden px-4">
             <button
@@ -356,10 +382,10 @@ export function ProductsListPage() {
               categories={categories}
               colors={availableColors}
               sizes={["XS", "S", "M", "L", "XL"]}
-              selectedSize={selectedSize || "S"}
-              selectedColor={selectedColor}
-              onSizeChange={setSelectedSize}
-              onColorChange={setSelectedColor}
+              selectedSize={filterSize || undefined}
+              selectedColor={filterColor}
+              onSizeChange={(size) => setFilterSize(size || null)}
+              onColorChange={setFilterColor}
               onCategoryClick={handleCategoryClick}
             />
             </div>
@@ -371,16 +397,16 @@ export function ProductsListPage() {
              title="Filtros"
            >
              <div className="space-y-6">
-               <SidebarFilters
-                 categories={categories}
-                 colors={availableColors}
-                 sizes={["XS", "S", "M", "L", "XL"]}
-                 selectedSize={selectedSize || "S"}
-                 selectedColor={selectedColor}
-                 onSizeChange={setSelectedSize}
-                 onColorChange={setSelectedColor}
-                 onCategoryClick={handleCategoryClick}
-               />
+                <SidebarFilters
+                  categories={categories}
+                  colors={availableColors}
+                  sizes={["XS", "S", "M", "L", "XL"]}
+                  selectedSize={filterSize || undefined}
+                  selectedColor={filterColor}
+                  onSizeChange={(size) => setFilterSize(size || null)}
+                  onColorChange={setFilterColor}
+                  onCategoryClick={handleCategoryClick}
+                />
                <PriceRangeFilter
                  minPrice={minPrice}
                  maxPrice={maxPrice}
@@ -412,7 +438,7 @@ export function ProductsListPage() {
                     : "Aún no hay productos disponibles."}
                 </p>
                 {/* Clear filters button */}
-                    {(searchQuery || selectedCategory || selectedSize || selectedColor) && (
+                     {(searchQuery || selectedCategory || filterSize || filterColor) && (
                        <button
                          onClick={clearAllFilters}
                          className="mt-4 font-label text-sm uppercase tracking-widest text-primary hover:underline min-h-[44px]"
@@ -425,8 +451,8 @@ export function ProductsListPage() {
               <div
                 className={
                   view === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-8 gap-x-4 md:gap-y-16 md:gap-x-12"
-                    : "space-y-6"
+                      ? "grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8 md:gap-y-12 stagger-children"
+                      : "flex flex-col gap-5"
                 }
               >
 
@@ -440,6 +466,8 @@ export function ProductsListPage() {
                       product={product}
                       variant={effectiveVariant}
                       onQuickAdd={handleQuickAdd}
+                      isMobile={isMobile}
+                      onOpenQuickAdd={() => openQuickAdd(product._id)}
                     />
                   </div>
                 ))}
@@ -453,6 +481,108 @@ export function ProductsListPage() {
           </section>
         </div>
       </PageContainer>
+
+      {/* ══ BottomSheet de Quick Add (mobile, fuera de la card) ══ */}
+      {quickAddPanel.productId && (() => {
+        const product = products?.find((p) => p._id === quickAddPanel.productId);
+        if (!product) return null;
+        return (
+          <BottomSheet
+            isOpen={true}
+            onClose={resetQuickAdd}
+            title={`${product.name} — $${product.price.toFixed(2)}`}
+            maxHeight="90%"
+            closable
+          >
+            <div className="space-y-4 py-2">
+              {/* Talla */}
+              {((product.variants?.map(v => v.size) || product.sizes || []).length > 0) && (
+                <div>
+                  <p className="font-label text-[10px] uppercase tracking-wider text-on-surface-variant mb-2">
+                    Talla
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {(product.variants?.map(v => v.size) || product.sizes || []).map((size) => {
+                      const sizeStock = product.variants?.find(v => v.size === size)?.stock ?? 0;
+                      const isOut = sizeStock === 0;
+                      return (
+                        <button
+                          key={size}
+                          onClick={() => { if (!isOut) setQuickAddSize(size); }}
+                          disabled={isOut}
+                          className={`min-w-[36px] h-8 px-2 text-xs rounded-[4px] border transition-all font-medium ${
+                            quickAddPanel.selectedSize === size
+                              ? "bg-primary text-on-primary border-primary"
+                              : isOut
+                              ? "border-outline-variant/30 text-on-surface-variant/50 cursor-not-allowed opacity-50"
+                              : "border-outline-variant active:scale-95"
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Color */}
+              {(product.colors?.length ?? 0) > 0 && (
+                <div>
+                  <p className="font-label text-[10px] uppercase tracking-wider text-on-surface-variant mb-2">
+                    Color
+                  </p>
+                  <div className="flex gap-2">
+                    {product.colors?.map((color, idx) => (
+                      <button
+                        key={color}
+                        onClick={() => setQuickAddColor(color)}
+                        className={`w-8 h-8 rounded-full border transition-all active:scale-90 ${
+                          quickAddPanel.selectedColor === color || (!quickAddPanel.selectedColor && idx === 0)
+                            ? "border-primary ring-2 ring-primary/30"
+                            : "border-outline-variant"
+                        }`}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Cantidad + Botón */}
+              <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setQuickAddQuantity(Math.max(1, quickAddPanel.quantity - 1))}
+                    disabled={quickAddPanel.quantity <= 1}
+                    className="w-9 h-9 rounded-[4px] border border-outline-variant flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm font-bold w-6 text-center tabular-nums">
+                    {quickAddPanel.quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuickAddQuantity(Math.min(product.totalStock || product.stock || 99, quickAddPanel.quantity + 1))}
+                    disabled={quickAddPanel.quantity >= (product.totalStock || product.stock || 99)}
+                    className="w-9 h-9 rounded-[4px] border border-outline-variant flex items-center justify-center disabled:opacity-40 active:scale-95 transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <button
+                  onClick={handleQuickAddSubmit}
+                  disabled={(product.variants?.length ?? 0) > 0 && !quickAddPanel.selectedSize}
+                  className="bg-primary text-on-primary font-label text-xs uppercase tracking-wider px-5 py-2.5 rounded-[4px] disabled:opacity-40 active:scale-95 transition-all"
+                >
+                  Agregar al carrito
+                </button>
+              </div>
+            </div>
+          </BottomSheet>
+        );
+      })()}
 
       <Footer />
     </>

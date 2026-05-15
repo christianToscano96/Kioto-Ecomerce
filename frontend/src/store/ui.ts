@@ -6,10 +6,19 @@ interface Notification {
   type: 'success' | 'error' | 'warning' | 'info';
 }
 
+interface QuickAddPanel {
+  /** ID del producto que se está agregando al carrito */
+  productId: string | null;
+  selectedSize: string;
+  selectedColor: string;
+  quantity: number;
+}
+
 interface UiState {
   isMobileMenuOpen: boolean;
   isSearchOpen: boolean;
   notifications: Notification[];
+  quickAddPanel: QuickAddPanel;
 }
 
 interface UiActions {
@@ -20,6 +29,13 @@ interface UiActions {
   addNotification: (notification: Omit<Notification, 'id'>) => void;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
+  // Quick Add Panel
+  openQuickAdd: (productId: string) => void;
+  closeQuickAdd: () => void;
+  setQuickAddSize: (size: string) => void;
+  setQuickAddColor: (color: string) => void;
+  setQuickAddQuantity: (qty: number) => void;
+  resetQuickAdd: () => void;
 }
 
 type UiStore = UiState & UiActions;
@@ -29,6 +45,12 @@ export const useUiStore = create<UiStore>((set) => ({
   isMobileMenuOpen: false,
   isSearchOpen: false,
   notifications: [],
+  quickAddPanel: {
+    productId: null,
+    selectedSize: "",
+    selectedColor: "",
+    quantity: 1,
+  },
 
   // Mobile menu
   setMobileMenuOpen: (open) => set({ isMobileMenuOpen: open }),
@@ -53,9 +75,48 @@ export const useUiStore = create<UiStore>((set) => ({
       notifications: state.notifications.filter((n) => n.id !== id),
     })),
   clearNotifications: () => set({ notifications: [] }),
+
+  // Quick Add Panel
+  openQuickAdd: (productId) =>
+    set({
+      quickAddPanel: {
+        productId,
+        selectedSize: "",
+        selectedColor: "",
+        quantity: 1,
+      },
+    }),
+  closeQuickAdd: () =>
+    set((state) => ({
+      quickAddPanel: { ...state.quickAddPanel, productId: null },
+    })),
+  setQuickAddSize: (size) =>
+    set((state) => ({
+      quickAddPanel: { ...state.quickAddPanel, selectedSize: size },
+    })),
+  setQuickAddColor: (color) =>
+    set((state) => ({
+      quickAddPanel: { ...state.quickAddPanel, selectedColor: color },
+    })),
+  setQuickAddQuantity: (qty) =>
+    set((state) => ({
+      quickAddPanel: { ...state.quickAddPanel, quantity: Math.max(1, qty) },
+    })),
+  resetQuickAdd: () =>
+    set({
+      quickAddPanel: {
+        productId: null,
+        selectedSize: "",
+        selectedColor: "",
+        quantity: 1,
+      },
+    }),
 }));
 
 // Selectors
 export const useIsMobileMenuOpen = () => useUiStore((state) => state.isMobileMenuOpen);
 export const useIsSearchOpen = () => useUiStore((state) => state.isSearchOpen);
 export const useNotifications = () => useUiStore((state) => state.notifications);
+export const useQuickAddPanel = () => useUiStore((state) => state.quickAddPanel);
+export const useOpenQuickAdd = () => useUiStore((state) => state.openQuickAdd);
+export const useCloseQuickAdd = () => useUiStore((state) => state.closeQuickAdd);

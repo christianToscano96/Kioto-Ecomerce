@@ -5,7 +5,6 @@ import { useCategoriesStore } from "@/store/categories";
 import { useCartStore } from "@/store/cart";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { PageContainer } from "@/components/ui/Container";
 import { ProductCardUnified } from "@/components/ui/ProductCardUnified";
 import { Heart } from '@/components/icons';
@@ -84,7 +83,7 @@ export function HomePage() {
           </PageContainer>
         </main>
         <Footer />
-        <BottomNav />
+        {/* <BottomNav /> */}
       </>
     );
   }
@@ -147,7 +146,7 @@ export function HomePage() {
             </div>
           </section>
   
-{/* Categories Section */}
+          {/* Categories Section */}
           <CategorySection categories={categories} />
 
           {/* Sale Banner */}
@@ -211,18 +210,17 @@ export function HomePage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 stagger-children">
               {newProducts.map((product) => (
-<ProductCardUnified
-  key={product._id}
-  product={product}
-  onQuickAdd={(_productId, options) => addToCart(product, options?.quantity || 1, options?.size)}
-/>
+                <ProductCardUnified
+                  key={product._id}
+                  product={product}
+                  onQuickAdd={(_productId, options) => addToCart(product, options?.quantity || 1, options?.size)}
+                />
               ))}
             </div>
           </section>
 
           {/* Promotional Banner */}
-          <section className="py-8 animate-on-scroll">
-            <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-4 animate-on-scroll">
               {/* Video */}
               <div className="flex-1 rounded-md overflow-hidden aspect-video">
                 <video
@@ -254,13 +252,8 @@ export function HomePage() {
                 </div>
               </div>
             </div>
-          </section>
-        </PageContainer>
-
-        {/* Shipping Banner - Todo el País */}
-        <section className="py-8 animate-on-scroll">
-          <PageContainer>
-            <div className="flex flex-col lg:flex-row gap-4">
+          {/* Shipping Banner - Todo el País */}
+            <div className="flex flex-col lg:flex-row gap-4 mt-2 animate-on-scroll">
               {/* Text Content */}
               <div className="flex-1 bg-surface-container rounded-md p-6 flex items-center">
                 <div className="max-w-md">
@@ -310,12 +303,13 @@ export function HomePage() {
                 />
               </div>
             </div>
-          </PageContainer>
-        </section>
+        </PageContainer>
+
+        
 
       </main>
       <Footer />
-      <BottomNav />
+      {/* <BottomNav /> */}
     </>
   );
 }
