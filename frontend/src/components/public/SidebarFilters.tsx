@@ -49,7 +49,7 @@ export function SidebarFilters({
         {/* Color Filter */}
         {colors.length > 0 && (
           <div className="border-t border-dashed border-outline-variant/40 pt-10">
-            <h3 className="font-serif text-xl mb-6 text-on-surface italic">Colores</h3>
+            <h3 className="font-serif text-xl mb-6 text-on-surface italic"></h3>
             <div className="grid grid-cols-5 gap-3">
               {colors.map((color, index) => (
                 <button

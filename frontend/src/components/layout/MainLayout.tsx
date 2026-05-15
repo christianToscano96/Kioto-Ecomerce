@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
-import { BottomNav } from './BottomNav';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -15,7 +14,9 @@ export function MainLayout({ children }: MainLayoutProps) {
         {children}
       </main>
       <Footer />
-      <BottomNav />
+      {/*  
+            <BottomNav />
+      */}
     </>
   );
 }

@@ -14,7 +14,6 @@ import { useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { CartItemCard } from "@/components/ui/CartItemCard";
 import { Footer } from "@/components/layout/Footer";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { showToast } from "@/components/ui/Toast";
 
 const LoaderIcon = () => (
@@ -86,13 +85,13 @@ if (items.length === 0) {
           <header className="mb-8 sm:mb-12">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight mt-8 sm:mt-10">
-                Canasta
+                Canastas
               </h1>
               <div className="flex items-center gap-2 sm:gap-4">
-                <BackButton 
-                  label="Volver" 
-                  showLabelOnMobile={true}
-                />
+                  <BackButton 
+                    label="Volver" 
+                    showLabelOnMobile={true}
+                  />
                 <Link 
                   to="/" 
                   className="text-xs sm:text-sm uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors font-label flex items-center gap-1 min-h-[44px] rounded-lg hover:bg-surface-container px-2"
@@ -119,7 +118,7 @@ if (items.length === 0) {
           </div>
         </main>
         <Footer />
-        <BottomNav />
+        {/* <BottomNav /> */}
       </>
     );
   }
@@ -130,21 +129,19 @@ return (
       <main className="max-w-7xl mx-auto px-4 sm:px-8 pb-32 overflow-visible">
         {/* Spacer for fixed header */}
         <div className="h-16 lg:h-20"></div>
-       
-<header className="mb-8 sm:mb-12 mt-5">
-           <div className="flex items-center justify-between mb-3 sm:mb-4">
-             <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight animate-fade-in">
-               Canasta
-             </h1>
-             <div className="flex items-center gap-4">
-                <BackButton className="hidden sm:flex" />
-               
-             </div>
-           </div>
-           <p className="font-label text-xs uppercase tracking-[0.2em] text-on-surface-variant animate-fade-in" style={{ animationDelay: '100ms' }}>
-             {cartItemCount} {cartItemCount === 1 ? "artículo" : "artículos"} en
-             tu carrito
-           </p>
+        <div className="text-center mt-6">
+            <BackButton label="Volver" showLabelOnMobile={true} page='cart' />
+          </div>
+        <header className="mb-8 sm:mb-12 mt-5">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight animate-fade-in">
+              Canastas
+            </h1>
+          </div>
+          <p className="font-label text-xs uppercase tracking-[0.2em] text-on-surface-variant animate-fade-in" style={{ animationDelay: '100ms' }}>
+            {cartItemCount} {cartItemCount === 1 ? "artículo" : "artículos"} en
+            tu carrito
+          </p>
          </header>
 
 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
@@ -268,7 +265,7 @@ return (
          </div>
        </main>
        <Footer />
-       <BottomNav />
+       {/* <BottomNav /> */}
      </>
    );
 }

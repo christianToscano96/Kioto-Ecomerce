@@ -20,6 +20,7 @@ import {
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { api } from "@/lib/api";
 import { showToast } from "@/components/ui/Toast";
+import { BackButton } from '@/components/ui/BackButton';
 
 const LoaderIcon = () => (
   <svg
@@ -216,6 +217,9 @@ export function CheckoutPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         {/* Checkout Process Indicator */}
         <div className="mb-16 mt-8 animate-fade-in">
+            <div className="text-center mt-6">
+              <BackButton label="Volver" showLabelOnMobile={true} page='checkout' />
+            </div>
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight mb-12">
             Finalizar Compra
           </h1>

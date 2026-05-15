@@ -6,12 +6,12 @@ import { useCartIsSyncing, useCartStore } from "@/store/cart";
 import { useProductsStore, useProductsError } from "@/store/products";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { SizeSelector } from "@/components/ui/SizeSelector";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
 import { ColorSwatch } from "@/components/ui/ColorSwatch";
 import type { Product } from "../../../../shared/src/index";
 import { showToast } from "@/components/ui/Toast";
+import { BackButton } from '@/components/ui/BackButton';
 
 const LoaderIcon = () => (
   <svg
@@ -64,6 +64,7 @@ const RelatedProductCard = ({ product }: { product: Product }) => {
 
   return (
     <div className="min-w-[160px] sm:min-w-[280px] bg-surface-container-highest rounded-xl p-3 sm:p-4 snap-start group transition-all duration-300 hover:shadow-lg">
+     
       <div className="aspect-[3/4] overflow-hidden mb-3 sm:mb-4 rounded-lg relative">
         <img
           src={
@@ -204,7 +205,9 @@ return (
     <>
       <Header />
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12 mt-8 sm:mt-12">
-        {/* Product Grid */}
+      <div className="text-center mt-6">
+        <BackButton label="Volver" showLabelOnMobile={true} page='product-detail' />
+      </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-16 items-start">
           {/* Product Image Section */}
           <div className="lg:col-span-7 space-y-6 sm:space-y-8">
@@ -385,7 +388,7 @@ return (
          )}
        </main>
        <Footer />
-       <BottomNav />
+       {/* <BottomNav /> */}
      </>
    );
 }
