@@ -18,7 +18,6 @@ export function Header() {
   const { categories, fetchCategories } = useCategoriesStore();
   const navigate = useNavigate();
   
-  // React Query for settings (avoids duplicate API calls)
   const { data: settings } = useSettings();
   const storeLogo = settings?.store?.logo;
 
@@ -39,18 +38,16 @@ export function Header() {
   return (
     <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-dashed border-outline-variant/40">
       <div className="flex justify-between items-center max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-        {/* Left: Brand + Nav */}
         <div className="flex items-center gap-4 sm:gap-8">
           <NavLink
             to="/"
             className="flex items-center"
           >
-            <div className="h-10 overflow-hidden flex items-center pt-2 sm:pt-5">
+            <div className="h-12 overflow-hidden flex items-center pt-2 sm:pt-5">
             <img 
               src={storeLogo || logoK} 
               alt="Store Logo" 
-              className="h-8 sm:h-56 w-auto object-contain"
-              style={{marginLeft: '-35px', marginBottom: '10px'}}
+              className="h-36 sm:h-56 w-auto object-contain -ml-[25px] sm:-ml-[35px] mb-[3px]"
             />
           </div>
           </NavLink>
@@ -89,7 +86,9 @@ export function Header() {
             onSubmit={handleSearch}
             className="hidden md:flex items-center bg-surface-container px-3 py-1.5 rounded-lg border border-transparent focus-within:border-outline transition-all"
           >
-            <Search size={16} className="text-on-surface-variant" />
+            {/* Search Bar 
+              <Search size={16} className="text-on-surface-variant" />
+            */}
             <input
               type="text"
               placeholder="Buscar..."
