@@ -4,7 +4,7 @@ import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Footer } from "@/components/layout/Footer";
 import { useCartStore } from "@/store/cart";
 import { ShoppingBag } from '@/components/icons';
-import successVideo from '../../../assets/success.mp4';
+import successVideo from '../../../assets/success.webm';
 
 export function CheckoutSuccessPage() {
   const [searchParams] = useSearchParams();

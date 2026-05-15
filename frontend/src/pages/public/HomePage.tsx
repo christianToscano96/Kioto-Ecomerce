@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useProductsStore } from "@/store/products";
 import { useCategoriesStore } from "@/store/categories";
 import { useCartStore } from "@/store/cart";
@@ -8,10 +8,15 @@ import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageContainer } from "@/components/ui/Container";
 import { ProductCardUnified } from "@/components/ui/ProductCardUnified";
-import { Zap, Heart, ShoppingCart, ArrowRight, User } from '@/components/icons';
-import comprandoVideo from '../../../assets/comprando.mp4';
-import fleteVideo from '../../../assets/flete.mp4';
-import kiotoVideo from '../../../assets/kioto.mp4';
+import { Heart } from '@/components/icons';
+import { 
+  Skeleton, 
+  ProductSkeleton,
+  CategorySkeleton 
+} from '@/components/ui/ProductSkeleton';
+import comprandoVideo from '../../../assets/comprando.webm';
+import fleteVideo from '../../../assets/flete.webm';
+import kiotoVideo from '../../../assets/kioto.webm';
 import { CategorySection } from '@/components/home/CategorySection';
 
 export function HomePage() {
@@ -24,16 +29,62 @@ export function HomePage() {
     fetchCategories();
   }, [fetchProducts, fetchCategories]);
 
-  const newProducts = products?.slice(0, 10) || [];
-  const saleProducts = products?.filter((p) => p.price < 50).slice(0, 6) || [];
+  const newProducts = useMemo(
+    () => products?.slice(0, 10) || [],
+    [products]
+  );
+
+  const saleProducts = useMemo(
+    () => products?.filter((p) => p.price < 50).slice(0, 6) || [],
+    [products]
+  );
 
   if (isLoading) {
     return (
       <>
         <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin h-10 w-10 border-3 border-primary border-t-transparent rounded-full" />
-        </div>
+        <main>
+          <PageContainer>
+            {/* Hero Banner Skeleton */}
+            <section className="py-16 border-b border-outline-variant/10">
+              <div className="flex flex-col lg:flex-row gap-12 items-center">
+                <div className="flex-1 max-w-xl space-y-4">
+                  <Skeleton className="h-10 w-36 rounded-full mb-6" />
+                  <Skeleton className="h-12 w-full rounded mb-4" />
+                  <Skeleton className="h-8 w-full rounded mb-4" />
+                  <Skeleton className="h-8 w-3/4 rounded mb-8" />
+                  <Skeleton className="h-12 w-40 rounded-full" />
+                </div>
+                <div className="flex-1 w-full">
+                  <Skeleton className="aspect-video w-full max-w-lg rounded-2xl" />
+                </div>
+              </div>
+            </section>
+
+            {/* Categories Skeleton */}
+            <section className="py-8">
+              <div className="flex gap-4 overflow-hidden">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <CategorySkeleton key={i} />
+                ))}
+              </div>
+            </section>
+
+            {/* New Arrivals Skeleton */}
+            <section className="py-12">
+              <div className="flex items-center justify-between mb-6">
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-48 rounded" />
+                  <Skeleton className="h-4 w-32 rounded" />
+                </div>
+                <Skeleton className="h-4 w-16 rounded" />
+              </div>
+              <ProductSkeleton count={10} />
+            </section>
+          </PageContainer>
+        </main>
+        <Footer />
+        <BottomNav />
       </>
     );
   }
@@ -86,8 +137,9 @@ export function HomePage() {
                         muted
                         loop
                         playsInline
-                        className="w-full h-full object-cover"
+                        disablePictureInPicture
                         preload="none"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                   </div>
@@ -179,8 +231,9 @@ export function HomePage() {
                   muted
                   loop
                   playsInline
-                  className="w-full h-full object-cover"
+                  disablePictureInPicture
                   preload="none"
+                  className="w-full h-full object-cover"
                 />
               </div>
               {/* Text Content */}
@@ -202,23 +255,11 @@ export function HomePage() {
               </div>
             </div>
           </section>
-        {/* Flash Sale Banner - Shein Style */}
-        <section className="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 overflow-hidden">
+        </PageContainer>
+
+        {/* Shipping Banner - Todo el País */}
+        <section className="py-8 animate-on-scroll">
           <PageContainer>
-            <div className="flex items-center justify-center gap-4 text-sm font-medium">
-              <div className="flex items-center gap-2 animate-pulse">
-                <Zap size={18} />
-                <span>Oferta Flash: 50% OFF en productos seleccionados</span>
-              </div>
-              <span className="hidden sm:inline">|</span>
-              <span>Envío gratis en pedidos +$60.000</span>
-              <span className="hidden sm:inline">|</span>
-              <span>Promos Imperdibles</span>
-            </div>
-          </PageContainer>
-        </section>
-          {/* Shipping Banner - Todo el País */}
-          <section className="py-8 animate-on-scroll">
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Text Content */}
               <div className="flex-1 bg-surface-container rounded-xl p-6 flex items-center">
@@ -257,23 +298,24 @@ export function HomePage() {
                   </div>
                 </div>
               </div>
-{/* Video */}
-               <div className="flex-1 rounded-xl overflow-hidden aspect-video">
-                 <video
-                   src={fleteVideo}
-                   autoPlay
-                   muted
-                   loop
-                   playsInline
-                   className="w-full h-full object-cover"
-                   preload="none"
-                 />
-               </div>
+              {/* Video */}
+              <div className="flex-1 rounded-xl overflow-hidden aspect-video">
+                <video
+                  src={fleteVideo}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  disablePictureInPicture
+                  preload="none"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
-          </section>
-        </PageContainer>
-      </main>
+          </PageContainer>
+        </section>
 
+      </main>
       <Footer />
       <BottomNav />
     </>
