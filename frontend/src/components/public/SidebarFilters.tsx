@@ -21,7 +21,7 @@ export function SidebarFilters({
 }: SidebarFiltersProps) {
 
   return (
-    <aside className="w-full lg:w-64 flex-shrink-0">
+    <aside className="w-full lg:w-34 flex-shrink-0">
       <div className="space-y-12 sticky top-32">
         {/* Categories */}
         {categories.length > 0 && (

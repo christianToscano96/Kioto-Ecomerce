@@ -1,5 +1,6 @@
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { Trash2 } from '@/components/icons';
 import { formatPrice } from '@/lib/utils';
 import type { CartItem as CartItemType } from '../../../../shared/src/index';
 
@@ -8,12 +9,6 @@ interface CartItemProps {
   onQuantityChange: (itemId: string, quantity: number) => void;
   onRemove: (itemId: string) => void;
 }
-
-const TrashIcon = () => (
-  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-  </svg>
-);
 
 export function CartItem({ item, onQuantityChange, onRemove }: CartItemProps) {
   const productName = item.product?.name || 'Product';
@@ -66,7 +61,7 @@ export function CartItem({ item, onQuantityChange, onRemove }: CartItemProps) {
           className="text-chocolate-400 hover:text-terracota-600"
           aria-label="Remove item"
         >
-          <TrashIcon />
+          <Trash2 />
         </Button>
       </td>
     </tr>

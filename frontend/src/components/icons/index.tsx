@@ -13,7 +13,6 @@ export {
   ImageOff,
   ChevronLeft,
   ChevronRight,
-  ChevronUp,
   Plus,
   Minus,
   Trash2,
@@ -45,6 +44,7 @@ export {
   Loader2,
   AlertCircle,
   CheckCircle,
+  Check,
   XCircle,
   Info,
   HelpCircle,
@@ -76,7 +76,12 @@ export {
   MessageCircle,
   TrendingUp,
   TrendingDown,
-  BookOpen,Palette,Shield,Store,Tags
+  BookOpen,
+  Palette,
+  Shield,
+  Store,
+  Tags,
+  ChevronUp,
 } from 'lucide-react';
 
 // Import type separately

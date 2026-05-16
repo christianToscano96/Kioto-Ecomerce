@@ -6,38 +6,7 @@ import { ImageUpload } from "@/components/ui/ImageUpload";
 import { useCategoriesStore } from "@/store/categories";
 import type { Category } from "../../../../shared/src";
 import { showToast } from "@/components/ui/Toast";
-
-const SaveIcon = () => (
-  <svg
-    className="h-4 w-4 mr-2"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M5 13l4 4L19 7"
-    />
-  </svg>
-);
-
-const XIcon = () => (
-  <svg
-    className="h-4 w-4 mr-2"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M6 18L18 6M6 6l12 12"
-    />
-  </svg>
-);
+import { Check, X } from '@/components/icons';
 
 export function CategoryForm() {
   const navigate = useNavigate();
@@ -111,7 +80,7 @@ export function CategoryForm() {
           {isEdit ? "Editar Categoría" : "Nueva Categoría"}
         </h1>
         <Button variant="ghost" onClick={() => navigate("/admin/categories")}>
-          <XIcon />
+          <X />
           Cancelar
         </Button>
       </div>
@@ -147,7 +116,7 @@ export function CategoryForm() {
 
         <div className="flex gap-4">
           <Button type="submit" disabled={isLoading}>
-            <SaveIcon />
+            <Check />
             {isEdit ? "Actualizar Categoría" : "Crear Categoría"}
           </Button>
           <Button variant="ghost" onClick={() => navigate("/admin/categories")}>

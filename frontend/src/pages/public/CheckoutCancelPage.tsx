@@ -1,18 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
-
-const XIcon = () => (
-  <svg className="h-16 w-16 text-terracota-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
+import { X } from '@/components/icons';
 
 export function CheckoutCancelPage() {
   return (
     <div className="min-h-screen bg-crema-50 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full text-center">
         <div className="mb-6 flex justify-center">
-          <XIcon />
+          <X className="h-16 w-16 text-terracota-600" />
         </div>
         <h1 className="text-3xl font-serif font-bold text-chocolate-900 mb-4">
           Payment Cancelled
