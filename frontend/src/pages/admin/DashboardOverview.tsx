@@ -3,7 +3,6 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DataTable, StatusBadge } from "@/components/ui/DataTable";
 import { formatPrice } from "@/lib/utils";
-import type { Order } from "@shared/index";
 import {
   AreaChart,
   Area,
@@ -23,8 +22,7 @@ import {
   LabelList,
 } from "recharts";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
-import type { DashboardStats, RecentOrder } from "@/hooks/useDashboardStats";
-import { BarChart3, Package, DollarSign, Users, AlertCircle, RefreshCw } from '@/components/icons';
+import { Package,  AlertCircle,  } from '@/components/icons';
 
 type TimeRange = "7d" | "30d" | "90d" | "custom";
 

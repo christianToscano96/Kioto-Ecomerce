@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button';
+import { ChevronLeft, ChevronRight } from '@/components/icons';
 
 interface PaginationProps {
   currentPage: number;
@@ -34,9 +35,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         disabled={currentPage === 1}
         aria-label="Previous page"
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeft className="h-4 w-4" />
       </Button>
 
       {startPage > 1 && (
@@ -76,9 +75,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         disabled={currentPage === totalPages}
         aria-label="Next page"
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+        <ChevronRight className="h-4 w-4" />
       </Button>
     </nav>
   );
